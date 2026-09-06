@@ -67,6 +67,7 @@
             gap: 15px;
             width: 100%;
             max-width: 300px;
+            z-index: 10;
         }
         input[type="text"] {
             width: 100%;
@@ -113,8 +114,8 @@
 <body>
 
     <div class="lang-switch">
-        <button id="btn-nl" class="lang-btn active" onclick="wisselTaal('nl')">NL 🇳🇱</button>
-        <button id="btn-en" class="lang-btn" onclick="wisselTaal('en')">EN 🇬🇧</button>
+        <button id="btn-nl" class="lang-btn active">NL 🇳🇱</button>
+        <button id="btn-en" class="lang-btn">EN 🇬🇧</button>
     </div>
 
     <div id="status-text">Voer een kamer-code in om samen te spelen.</div>
@@ -123,12 +124,17 @@
     <div class="setup-container" id="setup-area">
         <input type="text" id="naam-input" placeholder="Jouw Naam">
         <input type="text" id="room-input" placeholder="Kamer Code (bijv. 1234)">
-        <button id="main-btn" class="btn" onclick="verbindMetLobby()">VERBIND</button>
+        <button id="main-btn" class="btn">VERBIND</button>
     </div>
 
     <div id="debug-log">Status: Startklaar.</div>
 
     <script>
+        // Dwing HTTPS af voor Apple apparaten
+        if (location.protocol !== 'https:' && !location.host.includes('localhost')) {
+            location.replace(`https:${location.href.substring(location.protocol.length)}`);
+        }
+
         const SUPABASE_URL = "https://supabase.co";
         const SUPABASE_KEY = "sb_publishable_21H7n0QC-K_Q3oVO9o52hQ_a-wOchMh"; 
 
@@ -182,6 +188,11 @@
             }
         };
 
+        // Knoppen activeren via moderne EventListeners (omzeilt Apple blokkades)
+        document.getElementById('btn-nl').addEventListener('click', () => wisselTaal('nl'));
+        document.getElementById('btn-en').addEventListener('click', () => wisselTaal('en'));
+        document.getElementById('main-btn').addEventListener('click', verbindMetLobby);
+
         function wisselTaal(taal) {
             huidigeTaal = taal;
             document.getElementById('btn-nl').classList.remove('active');
@@ -209,11 +220,22 @@
 
         async function vraagIoSToestemming() {
             if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-                try { await DeviceMotionEvent.requestPermission(); } catch (e) {}
+                try { 
+                    const res = await DeviceMotionEvent.requestPermission(); 
+                    logDebug("iPhone Sensor: " + res);
+                } catch (e) {
+                    logDebug("Sensor-fout: " + e.message);
+                }
             }
         }
 
         async function verbindMetLobby() {
+            // Als we al verbonden zijn, werkt deze knop als startknop
+            if (mijnNaam && kamerCode) {
+                activeerMultiplayerSessie();
+                return;
+            }
+
             mijnNaam = document.getElementById('naam-input').value.trim();
             kamerCode = document.getElementById('room-input').value.trim();
 
@@ -229,33 +251,11 @@
             
             const btn = document.getElementById('main-btn');
             btn.innerText = vertalingen[huidigeTaal].btnStart;
-            btn.onclick = activeerMultiplayerSessie;
 
             document.getElementById('status-text').innerText = vertalingen[huidigeTaal].statusVerbonden.replace('{code}', kamerCode);
 
             if(supabase) {
-                logDebug(`Kamer ${kamerCode} aan het opzetten...`);
+                logDebug(`Kamer ${kamerCode} laden...`);
                 roomChannel = supabase.channel(`room-${kamerCode}`);
                 roomChannel
-                    .on('broadcast', { event: 'start-game' }, () => { lokaleSessieStarten(); })
-                    .on('broadcast', { event: 'game-over' }, (payload) => { iemandIsAfgegaan(payload.payload.verliezer); })
-                    .subscribe((status) => {
-                        logDebug("Netwerkstatus: " + status);
-                    });
-            }
-        }
-
-        function activeerMultiplayerSessie() {
-            if(roomChannel) {
-                roomChannel.send({ type: 'broadcast', event: 'start-game', payload: {} });
-            }
-            lokaleSessieStarten();
-        }
-
-        function lokaleSessieStarten() {
-            if (sessieActief) return;
-            document.getElementById('straf-text').style.display = 'none';
-            document.getElementById('status-text').innerText = vertalingen[huidigeTaal].statusAftellen;
-            document.getElementById('setup-area').style.display = 'none';
-
-            setTimeout(() => {document.getElementById('status-text').innerText = vertalingen[huidigeTaal].statusActief;sessieActief = true;startX = 0; startY = 0; startZ = 0;if (window.DeviceMotionEvent) {window.addEventListener('devicemotion', checkBeweging);}}, 3000);}function checkBeweging(event) {if (!sessieActief) return;const acc = event.accelerationIncludingGravity;if (!acc) return;if (startX === 0 && startY === 0 && startZ === 0) {startX = acc.x; startY = acc.y; startZ = acc.z;return;}let diffX = Math.abs(acc.x - startX);let diffY = Math.abs(acc.y - startY);let diffZ = Math.abs(acc.z - startZ);if (diffX > drempelwaarde || diffY > drempelwaarde || diffZ > drempelwaarde) {sessieActief = false;window.removeEventListener('devicemotion', checkBeweging);if(roomChannel) {roomChannel.send({ type: 'broadcast', event: 'game-over', payload: { verliezer: mijnNaam } });}iemandIsAfgegaan(mijnNaam);}}function iemandIsAfgegaan(naamVerliezer) {sessieActief = false;window.removeEventListener('devicemotion', checkBeweging);document.body.classList.add('alarm');if (naamVerliezer === mijnNaam) {document.getElementById('status-text').innerText = vertalingen[huidigeTaal].alarmJij;} else {document.getElementById('status-text').innerText = vertalingen[huidigeTaal].alarmAnder.replace('{naam}', naamVerliezer.toUpperCase());}const lijstStraffen = vertalingen[huidigeTaal].straffen;const willekeurigeStraf = lijstStraffen[Math.floor(Math.random() * lijstStraffen.length)];const strafElement = document.getElementById('straf-text');strafElement.innerText = ${naamVerliezer} ${willekeurigeStraf};strafElement.style.display = 'block';document.getElementById('setup-area').style.display = 'flex';const btn = document.getElementById('main-btn');btn.innerText = vertalingen[huidigeTaal].btnReset;btn.onclick = () => location.reload();}
+                    .on('broadcast', { event: 'start-game' }, () => { lokaleSessieStarten(); }).on('broadcast', { event: 'game-over' }, (payload) => { iemandIsAfgegaan(payload.payload.verliezer); }).subscribe((status) => {logDebug("Netwerkstatus: " + status);});}}function activeerMultiplayerSessie() {if(roomChannel) {roomChannel.send({ type: 'broadcast', event: 'start-game', payload: {} });}lokaleSessieStarten();}function lokaleSessieStarten() {if (sessieActief) return;document.getElementById('straf-text').style.display = 'none';document.getElementById('status-text').innerText = vertalingen[huidigeTaal].statusAftellen;document.getElementById('setup-area').style.display = 'none';setTimeout(() => {document.getElementById('status-text').innerText = vertalingen[huidigeTaal].statusActief;sessieActief = true;startX = 0; startY = 0; startZ = 0;if (window.DeviceMotionEvent) {window.addEventListener('devicemotion', checkBeweging);}}, 3000);}function checkBeweging(event) {if (!sessieActief) return;const acc = event.accelerationIncludingGravity;if (!acc) return;if (startX === 0 && startY === 0 && startZ === 0) {startX = acc.x; startY = acc.y; startZ = acc.z;return;}let diffX = Math.abs(acc.x - startX);let diffY = Math.abs(acc.y - startY);let diffZ = Math.abs(acc.z - startZ);if (diffX > drempelwaarde || diffY > drempelwaarde || diffZ > drempelwaarde) {sessieActief = false;window.removeEventListener('devicemotion', checkBeweging);if(roomChannel) {roomChannel.send({ type: 'broadcast', event: 'game-over', payload: { verliezer: mijnNaam } });}iemandIsAfgegaan(mijnNaam);}}function iemandIsAfgegaan(naamVerliezer) {sessieActief = false;window.removeEventListener('devicemotion', checkBeweging);document.body.classList.add('alarm');if (naamVerliezer === mijnNaam) {document.getElementById('status-text').innerText = vertalingen[huidigeTaal].alarmJij;} else {document.getElementById('status-text').innerText = vertalingen[huidigeTaal].alarmAnder.replace('{naam}', naamVerliezer.toUpperCase());}const lijstStraffen = vertalingen[huidigeTaal].straffen;const willekeurigeStraf = lijstStraffen[Math.floor(Math.random() * lijstStraffen.length)];const strafElement = document.getElementById('straf-text');strafElement.innerText = ${naamVerliezer} ${willekeurigeStraf};strafElement.style.display = 'block';document.getElementById('setup-area').style.display = 'flex';const btn = document.getElementById('main-btn');btn.innerText = vertalingen[huidigeTaal].btnReset;btn.onclick = () => location.reload();}
