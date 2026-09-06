@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Silent Disconet Multiplayer</title>
+    <script src="https://cloudflare.com"></script>
+    <style>
+        body {
+            margin: 0;
+            background-color: #000000;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.3s;
+            user-select: none;
+        }
+        .lang-switch {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 10px;
+            z-index: 9999;
+        }
+        .lang-btn {
+            background: #222;
+            border: 1px solid #444;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        .lang-btn.active {
+            border-color: #00FF00;
+            background: #111;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
+        #status-text {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            font-weight: bold;
+            padding: 0 20px;
+        }
+        #straf-text {
+            font-size: 1.4rem;
+            color: #ffcccc;
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 0 30px;
+            font-style: italic;
+            display: none;
+            font-weight: bold;
+        }
+        .setup-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            width: 100%;
+            max-width: 300px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: 25px;
+            border: 2px solid #333;
+            background-color: #111;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        .btn {
+            background-color: #00FF00;
+            color: #000000;
+            border: none;
+            padding: 1.2rem 3rem;
+            font-size: 1.3rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.4);
+            width: 100%;
+        }
+        #debug-log {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
+            background: rgba(0,255,0,0.1);
+            color: #66ff66;
+            font-size: 0.8rem;
+            padding: 5px;
+            border-radius: 5px;
+            text-align: center;
+            font-family: monospace;
+        }
+        .alarm {
+            background-color: #FF0033 !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="lang-switch">
+        <button id="btn-nl" class="lang-btn active" onclick="wisselTaal('nl')">NL 🇳🇱</button>
+        <button id="btn-en" class="lang-btn" onclick="wisselTaal('en')">EN 🇬🇧</button>
+    </div>
+
+    <div id="status-text">Voer een kamer-code in om samen te spelen.</div>
+    <div id="straf-text"></div>
+
+    <div class="setup-container" id="setup-area">
+        <input type="text" id="naam-input" placeholder="Jouw Naam">
+        <input type="text" id="room-input" placeholder="Kamer Code (bijv. 1234)">
+        <button id="main-btn" class="btn" onclick="verbindMetLobby()">VERBIND</button>
+    </div>
+
+    <div id="debug-log">Status: Startklaar.</div>
+
+    <script>
+        const SUPABASE_URL = "https://supabase.co";
+        const SUPABASE_KEY = "sb_publishable_21H7n0QC-K_Q3oVO9o52hQ_a-wOchMh"; 
+
+        let supabase = null;
+        let mijnNaam = "";
+        let kamerCode = "";
+        let roomChannel = null;
+        let sessieActief = false;
+        let startX = 0, startY = 0, startZ = 0;
+        const drempelwaarde = 1.8;
+        let huidigeTaal = 'nl';
+
+        const vertalingen = {
+            nl: {
+                statusStart: "Voer een kamer-code in om samen te spelen.",
+                placeholderNaam: "Jouw Naam",
+                placeholderKamer: "Kamer Code (bijv. 1234)",
+                btnVerbind: "VERBIND",
+                alertVulIn: "Vul aub je naam en een kamer-code in!",
+                btnStart: "START SESSIE VOOR IEDEREEN",
+                statusVerbonden: "Verbonden met kamer: {code}. Wacht op de rest...",
+                statusAftellen: "Sessie start over 3 seconden... LEG NEER!",
+                statusActief: "🔒 Sessie is actief. NIET AANRAKEN!",
+                alarmJij: "🚨 JIJ HEBT BEWOGEN! 🚨",
+                alarmAnder: "🚨 {naam} HEEFT BEWOGEN! 🚨",
+                btnReset: "RESET GAME",
+                straffen: [
+                    "JIJ BETAALT DE VOLGENDE RONDE DRANKJES! 🍻",
+                    "Geef de ober/barman een high-five en roep 'TSJAKKA!' ✋",
+                    "Laat de oudste foto uit je fotorol zien aan de tafel. 📸"
+                ]
+            },
+            en: {
+                statusStart: "Enter a room code to play together.",
+                placeholderNaam: "Your Name",
+                placeholderKamer: "Room Code (e.g. 1234)",
+                btnVerbind: "CONNECT",
+                alertVulIn: "Please enter your name and a room code!",
+                btnStart: "START SESSION FOR EVERYONE",
+                statusVerbonden: "Connected to room: {code}. Waiting for others...",
+                statusAftellen: "Session starts in 3 seconds... PLACE DOWN!",
+                statusActief: "🔒 Session is active. DO NOT TOUCH!",
+                alarmJij: "🚨 YOU MOVED! 🚨",
+                alarmAnder: "🚨 {naam} MOVED! 🚨",
+                btnReset: "RESET GAME",
+                straffen: [
+                    "YOU PAY FOR THE NEXT ROUND OF DRINKS! 🍻",
+                    "Give the bartender a high-five and shout 'TSJAKKA!' ✋",
+                    "Show the oldest photo on your camera roll to the table. 📸"
+                ]
+            }
+        };
+
+        function wisselTaal(taal) {
+            huidigeTaal = taal;
+            document.getElementById('btn-nl').classList.remove('active');
+            document.getElementById('btn-en').classList.remove('active');
+            document.getElementById('btn-' + taal).classList.add('active');
+            
+            if(!mijnNaam) {
+                document.getElementById('status-text').innerText = vertalingen[taal].statusStart;
+                document.getElementById('naam-input').placeholder = vertalingen[taal].placeholderNaam;
+                document.getElementById('room-input').placeholder = vertalingen[taal].placeholderKamer;
+                document.getElementById('main-btn').innerText = vertalingen[taal].btnVerbind;
+            }
+        }
+
+        function logDebug(tekst) {
+            document.getElementById('debug-log').innerText = "Status: " + tekst;
+        }
+
+        try {
+            if (window.supabase) {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                logDebug("Database succesvol geladen.");
+            }
+        } catch(e) { logDebug("Opstartfout: " + e.message); }
+
+        async function vraagIoSToestemming() {
+            if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+                try { await DeviceMotionEvent.requestPermission(); } catch (e) {}
+            }
+        }
+
+        async function verbindMetLobby() {
+            mijnNaam = document.getElementById('naam-input').value.trim();
+            kamerCode = document.getElementById('room-input').value.trim();
+
+            if (!mijnNaam || !kamerCode) {
+                alert(vertalingen[huidigeTaal].alertVulIn);
+                return;
+            }
+
+            await vraagIoSToestemming();
+
+            document.getElementById('naam-input').style.display = 'none';
+            document.getElementById('room-input').style.display = 'none';
+            
+            const btn = document.getElementById('main-btn');
+            btn.innerText = vertalingen[huidigeTaal].btnStart;
+            btn.onclick = activeerMultiplayerSessie;
+
+            document.getElementById('status-text').innerText = vertalingen[huidigeTaal].statusVerbonden.replace('{code}', kamerCode);
+
+            if(supabase) {
+                logDebug(`Kamer ${kamerCode} aan het opzetten...`);
+                roomChannel = supabase.channel(`room-${kamerCode}`);
+                roomChannel
+                    .on('broadcast', { event: 'start-game' }, () => { lokaleSessieStarten(); })
+                    .on('broadcast', { event: 'game-over' }, (payload) => { iemandIsAfgegaan(payload.payload.verliezer); })
+                    .subscribe((status) => {
+                        logDebug("Netwerkstatus: " + status);
+                    });
+            }
+        }
+
+        function activeerMultiplayerSessie() {
+            if(roomChannel) {
+                roomChannel.send({ type: 'broadcast', event: 'start-game', payload: {} });
+            }
+            lokaleSessieStarten();
+        }
+
+        function lokaleSessieStarten() {
+            if (sessieActief) return;
+            document.getElementById('straf-text').style.display = 'none';
+            document.getElementById('status-text').innerText = vertalingen[huidigeTaal].statusAftellen;
+            document.getElementById('setup-area').style.display = 'none';
+
+            setTimeout(() => {document.getElementById('status-text').innerText = vertalingen[huidigeTaal].statusActief;sessieActief = true;startX = 0; startY = 0; startZ = 0;if (window.DeviceMotionEvent) {window.addEventListener('devicemotion', checkBeweging);}}, 3000);}function checkBeweging(event) {if (!sessieActief) return;const acc = event.accelerationIncludingGravity;if (!acc) return;if (startX === 0 && startY === 0 && startZ === 0) {startX = acc.x; startY = acc.y; startZ = acc.z;return;}let diffX = Math.abs(acc.x - startX);let diffY = Math.abs(acc.y - startY);let diffZ = Math.abs(acc.z - startZ);if (diffX > drempelwaarde || diffY > drempelwaarde || diffZ > drempelwaarde) {sessieActief = false;window.removeEventListener('devicemotion', checkBeweging);if(roomChannel) {roomChannel.send({ type: 'broadcast', event: 'game-over', payload: { verliezer: mijnNaam } });}iemandIsAfgegaan(mijnNaam);}}function iemandIsAfgegaan(naamVerliezer) {sessieActief = false;window.removeEventListener('devicemotion', checkBeweging);document.body.classList.add('alarm');if (naamVerliezer === mijnNaam) {document.getElementById('status-text').innerText = vertalingen[huidigeTaal].alarmJij;} else {document.getElementById('status-text').innerText = vertalingen[huidigeTaal].alarmAnder.replace('{naam}', naamVerliezer.toUpperCase());}const lijstStraffen = vertalingen[huidigeTaal].straffen;const willekeurigeStraf = lijstStraffen[Math.floor(Math.random() * lijstStraffen.length)];const strafElement = document.getElementById('straf-text');strafElement.innerText = ${naamVerliezer} ${willekeurigeStraf};strafElement.style.display = 'block';document.getElementById('setup-area').style.display = 'flex';const btn = document.getElementById('main-btn');btn.innerText = vertalingen[huidigeTaal].btnReset;btn.onclick = () => location.reload();}
