@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Silent Disconet</title>
+    <title>Silent Disconet Multiplayer</title>
+    <!-- We laden het ultra-stabiele PubNub netwerk voor de échte Wordfeud-verbinding -->
+    <script src="https://pubnub.com"></script>
     <style>
         body {
             margin: 0;
@@ -24,6 +26,7 @@
             right: 15px;
             display: flex;
             gap: 10px;
+            z-index: 9999;
         }
         .lang-btn {
             background: #222;
@@ -38,6 +41,7 @@
         .lang-btn.active {
             border-color: #00FF00;
             background: #111;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
         }
         #status-text {
             font-size: 1.5rem;
@@ -64,6 +68,7 @@
             gap: 15px;
             width: 100%;
             max-width: 300px;
+            z-index: 10;
         }
         input[type="text"] {
             width: 100%;
@@ -76,6 +81,9 @@
             outline: none;
             text-align: center;
             box-sizing: border-box;
+        }
+        input[type="text"]:focus {
+            border-color: #00FF00;
         }
         .btn {
             background-color: #00FF00;
@@ -101,39 +109,53 @@
         <button id="btn-en" class="lang-btn" onclick="wisselTaal('en')">EN 🇬🇧</button>
     </div>
 
-    <div id="status-text">Voer de namen in van de spelers:</div>
+    <div id="status-text">Voer een kamer-code in om samen te spelen.</div>
     <div id="straf-text"></div>
 
     <div class="setup-container" id="setup-area">
-        <input type="text" id="namen-input" placeholder="bijv. Tom, Lisa, Sam">
-        <button id="main-btn" class="btn" onclick="startSpel()">START GAME</button>
+        <input type="text" id="naam-input" placeholder="Jouw Naam">
+        <input type="text" id="room-input" placeholder="Kamer Code (bijv. 1234)">
+        <button id="main-btn" class="btn" onclick="verbindMetLobby()">VERBIND</button>
     </div>
 
     <script>
-        let huidigeTaal = 'nl';
+        let mijnNaam = "";
+        let kamerCode = "";
         let sessieActief = false;
         let startX = 0, startY = 0, startZ = 0;
-        let spelersLijst = [];
+        const drempelwaarde = 1.8;
+        let huidigeTaal = 'nl';
+        let pubnub = null;
 
         const vertalingen = {
             nl: {
-                start: "Voer de namen in van de spelers (gescheiden door een komma):",
-                placeholder: "bijv. Tom, Lisa, Sam",
-                btn: "START GAME",
-                alertFields: "Vul aub minstens één naam in!",
-                aftellen: "Sessie start over 3 seconden...\nLEG DE TELEFOON MIDDEN OP TAFEL!",
-                actief: "🔒 SSSHHH... De tafel is live!\nRaak de tafel of de telefoon NIET aan!",
-                afgegaan: "🚨 ER IS BEWOGEN! 🚨",
+                start: "Voer een kamer-code in om samen te spelen.",
+                namePlaceholder: "Jouw Naam",
+                roomPlaceholder: "Kamer Code (bijv. 1234)",
+                btnConnect: "VERBIND",
+                btnStart: "START SESSIE VOOR IEDEREEN",
+                alertFields: "Vul aub je naam en een kamer-code in!",
+                connected: "Verbonden met kamer: {code}.\nLeg je telefoon neer en klik op START.",
+                aftellen: "Sessie start over 3 seconden... LEG NEER!",
+                actief: "🔒 Sessie is actief. NIET AANRAKEN!",
+                alarmJij: "🚨 JIJ HEBT BEWOGEN! 🚨",
+                alarmAnder: "🚨 {naam} HEEFT BEWOGEN! 🚨",
+                btnReset: "RESET GAME",
                 straf: "moet de volgende ronde drankjes betalen! 🍻"
             },
             en: {
-                start: "Enter the names of the players (separated by a comma):",
-                placeholder: "e.g. Tom, Lisa, Sam",
-                btn: "START GAME",
-                alertFields: "Please enter at least one name!",
-                aftellen: "Session starts in 3 seconds...\nPLACE THE PHONE IN THE MIDDLE OF THE TABLE!",
-                actief: "🔒 SSSHHH... The table is live!\nDO NOT touch the table or the phone!",
-                afgegaan: "🚨 MOVEMENT DETECTED! 🚨",
+                start: "Enter a room code to play together.",
+                namePlaceholder: "Your Name",
+                roomPlaceholder: "Room Code (e.g. 1234)",
+                btnConnect: "CONNECT",
+                btnStart: "START SESSION FOR EVERYONE",
+                alertFields: "Please enter your name and a room code!",
+                connected: "Connected to room: {code}.\nPlace your phone down and click START.",
+                aftellen: "Session starts in 3 seconds... PLACE DOWN!",
+                actief: "🔒 Session is active. DO NOT TOUCH!",
+                alarmJij: "🚨 YOU MOVED! 🚨",
+                alarmAnder: "🚨 {naam} MOVED! 🚨",
+                btnReset: "RESET GAME",
                 straf: "has to buy the next round of drinks! 🍻"
             }
         };
@@ -144,27 +166,88 @@
             document.getElementById('btn-en').classList.remove('active');
             document.getElementById('btn-' + taal).classList.add('active');
             
-            document.getElementById('status-text').innerText = vertalingen[taal].start;
-            document.getElementById('namen-input').placeholder = vertalingen[taal].placeholder;
-            document.getElementById('main-btn').innerText = vertalingen[taal].btn;
+            if (!sessieActief && !mijnNaam) {
+                document.getElementById('status-text').innerText = vertalingen[taal].start;
+                document.getElementById('naam-input').placeholder = vertalingen[taal].namePlaceholder;
+                document.getElementById('room-input').placeholder = vertalingen[taal].roomPlaceholder;
+                document.getElementById('main-btn').innerText = vertalingen[taal].btnConnect;
+            }
         }
 
-        async function startSpel() {
-            const input = document.getElementById('namen-input').value.trim();
-            if (!input) {
+        async function vraagIoSToestemming() {
+            if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+                try { await DeviceMotionEvent.requestPermission(); } catch (e) {}
+            }
+        }
+
+        async function verbindMetLobby() {
+            // Als de speler al verbonden is, fungeert de knop als startknop
+            if (mijnNaam && kamerCode) {
+                activeerMultiplayerSessie();
+                return;
+            }
+
+            mijnNaam = document.getElementById('naam-input').value.trim();
+            kamerCode = document.getElementById('room-input').value.trim();
+
+            if (!mijnNaam || !kamerCode) {
                 alert(vertalingen[huidigeTaal].alertFields);
                 return;
             }
 
-            spelersLijst = input.split(',').map(n => n.trim()).filter(n => n.length > 0);
+            await vraagIoSToestemming();
 
-            // iOS Sensor toestemming dwingen
-            if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-                try { await DeviceMotionEvent.requestPermission(); } catch (e) {}
+            document.getElementById('naam-input').style.display = 'none';
+            document.getElementById('room-input').style.display = 'none';
+            
+            // Toon de kamer-code rotsvast op het scherm
+            document.getElementById('status-text').innerText = vertalingen[huidigeTaal].connected.replace('{code}', kamerCode);
+            
+            const btn = document.getElementById('main-btn');
+            btn.innerText = vertalingen[huidigeTaal].btnStart;
+
+            // Verbind direct met de stabiele PubNub server-lijn
+            koppelLiveNetwerk();
+        }
+
+        function koppelLiveNetwerk() {
+            pubnub = new PubNub({
+                publishKey: 'pub-c-469b82fd-7b75-4089-a2a3-f0fa80721245',
+                subscribeKey: 'sub-c-11ef84f6-86d1-447b-8774-70678ebef53d',
+                userId: "user_" + Math.random().toString(36).substring(2, 9)
+            });
+
+            // Luister naar signalen van andere telefoons in dit kamernummer
+            pubnub.addListener({
+                message: function(event) {
+                    const data = event.message;
+                    if (data.action === 'start-game') {
+                        lokaleSessieStarten();
+                    } else if (data.action === 'game-over') {
+                        iemandIsAfgegaan(data.verliezer);
+                    }
+                }
+            });
+
+            pubnub.subscribe({
+                channels: ['silentdisco_room_' + kamerCode]
+            });
+        }
+
+        function activeerMultiplayerSessie() {
+            if (pubnub) {
+                pubnub.publish({
+                    channel: 'silentdisco_room_' + kamerCode,
+                    message: { action: 'start-game' }
+                });
             }
+        }
 
-            document.getElementById('setup-area').style.display = 'none';
+        function lokaleSessieStarten() {
+            if (sessieActief) return;
+            document.getElementById('straf-text').style.display = 'none';
             document.getElementById('status-text').innerText = vertalingen[huidigeTaal].aftellen;
+            document.getElementById('setup-area').style.display = 'none';
 
             setTimeout(() => {
                 document.getElementById('status-text').innerText = vertalingen[huidigeTaal].actief;
@@ -180,34 +263,5 @@
             if (!acc) return;
 
             if (startX === 0 && startY === 0 && startZ === 0) {
-                startX = acc.x; startY = acc.y; startZ = acc.z;
-                return;
-            }
-
-            let diffX = Math.abs(acc.x - startX);
-            let diffY = Math.abs(acc.y - startY);
-            let diffZ = Math.abs(acc.z - startZ);
-
-            if (diffX > 1.5 || diffY > 1.5 || diffZ > 1.5) {
-                sessieActief = false;
-                window.removeEventListener('devicemotion', checkBeweging);
-                
-                document.body.classList.add('alarm');
-                document.getElementById('status-text').innerText = vertalingen[huidigeTaal].afgegaan;
-
-                const verliezer = spelersLijst[Math.floor(Math.random() * spelersLijst.length)];
-                
-                const strafElement = document.getElementById('straf-text');
-                strafElement.innerText = `${verliezer.toUpperCase()} ${vertalingen[huidigeTaal].straf}`;
-                strafElement.style.display = 'block';
-
-                document.getElementById('setup-area').style.display = 'flex';
-                document.getElementById('namen-input').style.display = 'none';
-                const btn = document.getElementById('main-btn');
-                btn.innerText = huidigeTaal === 'nl' ? "VOLGENDE RONDE" : "NEXT ROUND";
-                btn.onclick = () => window.location.reload();
-            }
-        }
-    </script>
-</body>
-</html>
+                startX = acc.x; startY = acc.y; startZ = acc.z;return;}let diffX = Math.abs(acc.x - startX);let diffY = Math.abs(acc.y - startY);let diffZ = Math.abs(acc.z - startZ);if (diffX > drempelwaarde || diffY > drempelwaarde || diffZ > drempelwaarde) {sessieActief = false;window.removeEventListener('devicemotion', checkBeweging);// Meld direct over internet aan de andere telefoon dat jij af bent gegaan!if (pubnub) {pubnub.publish({channel: 'silentdisco_room_' + kamerCode,message: { action: 'game-over', verliezer: mijnNaam }});}}}function iemandIsAfgegaan(naamVerliezer) {sessieActief = false;window.removeEventListener('devicemotion', checkBeweging);document.body.classList.add('alarm');if (naamVerliezer === mijnNaam) {document.getElementById('status-text').innerText = vertalingen[huidigeTaal].alarmJij;} else {document.getElementById('status-text').innerText = vertalingen[huidigeTaal].alarmAnder.replace('{naam}', naamVerliezer.toUpperCase());}const strafElement = document.getElementById('straf-text');strafElement.innerText = naamVerliezer + " " + vertalingen[huidigeTaal].straf;strafElement.style.display = 'block';document.getElementById('setup-area').style.display = 'flex';const btn = document.getElementById('main-btn');btn.innerText = vertalingen[huidigeTaal].btnReset;btn.onclick = () => window.location.reload();}
+    
