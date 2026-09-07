@@ -103,8 +103,8 @@
 <body>
 
     <div class="lang-switch">
-        <button id="btn-nl" class="lang-btn active" onclick="wisselTaal('nl')">NL 🇳🇱</button>
-        <button id="btn-en" class="lang-btn" onclick="wisselTaal('en')">EN 🇬🇧</button>
+        <button id="btn-nl" class="lang-btn active">NL 🇳🇱</button>
+        <button id="btn-en" class="lang-btn">EN 🇬🇧</button>
     </div>
 
     <div id="status-text">Voer een kamer-code in om samen te spelen.</div>
@@ -113,10 +113,11 @@
     <div class="setup-container" id="setup-area">
         <input type="text" id="naam-input" placeholder="Jouw Naam">
         <input type="text" id="room-input" placeholder="Kamer Code (bijv. 1234)">
-        <button id="main-btn" class="btn" onclick="verbindMetLobby()">VERBIND</button>
+        <button id="main-btn" class="btn">VERBIND</button>
     </div>
 
     <script>
+        // GLOBALE VARIABELEN
         let mijnNaam = "";
         let kamerCode = "";
         let sessieActief = false;
@@ -158,6 +159,13 @@
             }
         };
 
+        // KOPPEL DE LUBSTERAARS DIRECT VOLGENS DE STRENGSTE RICHTLIJNEN
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById('btn-nl').addEventListener('click', function() { wisselTaal('nl'); });
+            document.getElementById('btn-en').addEventListener('click', function() { wisselTaal('en'); });
+            document.getElementById('main-btn').addEventListener('click', function() { verbindMetLobby(); });
+        });
+
         function wisselTaal(taal) {
             huidigeTaal = taal;
             document.getElementById('btn-nl').classList.remove('active');
@@ -179,8 +187,8 @@
         }
 
         async function verbindMetLobby() {
-            // Als de speler al verbonden is met de kamer, start de knop de multiplayer
-            if (mijnNaam && kamerCode) {
+            // Als de speler al verbonden is, activeert deze knop de start
+            if (mijnNaam !== "" && kamerCode !== "") {
                 activeerMultiplayerSessie();
                 return;
             }
@@ -193,54 +201,50 @@
                 return;
             }
 
-            // iOS sensor toestemming forceren bij de klik
             await vraagIoSToestemming();
 
             document.getElementById('naam-input').style.display = 'none';
             document.getElementById('room-input').style.display = 'none';
             
-            // Toon de kamer-code rotsvast op het scherm
             document.getElementById('status-text').innerText = vertalingen[huidigeTaal].connected.replace('{code}', kamerCode);
             
             const btn = document.getElementById('main-btn');
             btn.innerText = vertalingen[huidigeTaal].btnStart;
 
-            // Start de onzichtbare internet-postbode die elke seconde updates checkt via een gratis open cloud-sleutel
             startLivePoller();
         }
 
         function startLivePoller() {
-            // We ruimen eerst een eventuele oude database-sessie op voor deze kamer
             stuurNetwerkSignaal('wachten');
 
             netwerkInterval = setInterval(async () => {
                 try {
-                    // We gebruiken een gratis, stabiele HTTP-opslag die gegarandeerd overal inlaadt
-                    const res = await fetch(`https://kvdb.io{kamerCode}`);
+                    // Stabiele, openbare internet-relay opslag die door geen enkele browser geblokkeerd wordt
+                    const res = await fetch(`https://npoint.io{kamerCode}`);
                     if (res.ok) {
-                        const tekst = await res.text();
-                        if (tekst === 'start') {
+                        const data = await res.json();
+                        if (data.actie === 'start') {
                             lokaleSessieStarten();
-                        } else if (tekst.indexOf('afgegaan:') === 0) {
-                            const verliezer = tekst.replace('afgegaan:', '');
-                            iemandIsAfgegaan(verliezer);
+                        } else if (data.actie === 'game-over') {
+                            iemandIsAfgegaan(data.verliezer);
                         }
                     }
                 } catch (e) {}
             }, 1000);
         }
 
-        async function stuurNetwerkSignaal(berichtTekst) {
+        async function stuurNetwerkSignaal(actieNaam, verliezerNaam = '') {
             try {
-                await fetch(`https://kvdb.io{kamerCode}`, {
+                await fetch(`https://npoint.io{kamerCode}`, {
                     method: 'POST',
-                    body: berichtTekst
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ actie: actieNaam, verliezer: verliezerNaam })
                 });
             } catch (e) {}
         }
 
         function activeerMultiplayerSessie() {
-            stuurNetwerkSignaal('start');
+            stuurSignaal('start');
             lokaleSessieStarten();
         }
 
@@ -251,13 +255,7 @@
             document.getElementById('setup-area').style.display = 'none';
 
             setTimeout(() => {
-                document.getElementById('status-text').innerText = vertalingen[huidigeTaal].statusActief;
+                document.getElementById('status-text').innerText = vertalingen[huidigeTaal].actief;
                 sessieActief = true;
                 startX = 0; startY = 0; startZ = 0;
-                if (window.DeviceMotionEvent) {
-                    window.addEventListener('devicemotion', checkBeweging);
-                }
-            }, 3000);
-        }
-
-        function checkBeweging(event) {if (!sessieActief) return;const acc = event.accelerationIncludingGravity;if (!acc) return;if (startX === 0 && startY === 0 && startZ === 0) {startX = acc.x; startY = acc.y; startZ = acc.z;return;}let diffX = Math.abs(acc.x - startX);let diffY = Math.abs(acc.y - startY);let diffZ = Math.abs(acc.z - startZ);if (diffX > drempelwaarde || diffY > drempelwaarde || diffZ > drempelwaarde) {sessieActief = false;window.removeEventListener('devicemotion', checkBeweging);// Meld direct over internet aan de andere telefoon wie er af is gegaan!stuurNetwerkSignaal(afgegaan:${mijnNaam});iemandIsAfgegaan(mijnNaam);}}function iemandIsAfgegaan(naamVerliezer) {sessieActief = false;clearInterval(netwerkInterval);window.removeEventListener('devicemotion', checkBeweging);document.body.classList.add('alarm');if (naamVerliezer === mijnNaam) {document.getElementById('status-text').innerText = vertalingen[huidigeTaal].alarmJij;} else {document.getElementById('status-text').innerText = vertalingen[huidigeTaal].alarmAnder.replace('{naam}', naamVerliezer.toUpperCase());}const strafElement = document.getElementById('straf-text');strafElement.innerText = naamVerliezer + " " + vertalingen[huidigeTaal].straf;strafElement.style.display = 'block';document.getElementById('setup-area').style.display = 'flex';const btn = document.getElementById('main-btn');btn.innerText = vertalingen[huidigeTaal].btnReset;btn.onclick = () => window.location.reload();}
+                if (window.DeviceMotionEvent) {window.addEventListener('devicemotion', checkBeweging);}}, 3000);}function checkBeweging(event) {if (!sessieActief) return;const acc = event.accelerationIncludingGravity;if (!acc) return;if (startX === 0 && startY === 0 && startZ === 0) {startX = acc.x; startY = acc.y; startZ = acc.z;return;}let diffX = Math.abs(acc.x - startX);let diffY = Math.abs(acc.y - startY);let diffZ = Math.abs(acc.z - startZ);if (diffX > drempelwaarde || diffY > drempelwaarde || diffZ > drempelwaarde) {sessieActief = false;window.removeEventListener('devicemotion', checkBeweging);stuurNetwerkSignaal('game-over', mijnNaam);iemandIsAfgegaan(mijnNaam);}}function iemandIsAfgegaan(naamVerliezer) {sessieActief = false;clearInterval(netwerkInterval);window.removeEventListener('devicemotion', checkBeweging);document.body.classList.add('alarm');if (naamVerliezer === mijnNaam) {document.getElementById('status-text').innerText = vertalingen[huidigeTaal].alarmJij;} else {document.getElementById('status-text').innerText = vertalingen[huidigeTaal].alarmAnder.replace('{naam}', naamVerliezer.toUpperCase());}const strafElement = document.getElementById('straf-text');strafElement.innerText = naamVerliezer + " " + vertalingen[huidigeTaal].straf;strafElement.style.display = 'block';document.getElementById('setup-area').style.display = 'flex';const btn = document.getElementById('main-btn');btn.innerText = vertalingen[huidigeTaal].btnReset;btn.onclick = () => window.location.reload();}
