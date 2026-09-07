@@ -1,188 +1,94 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="nl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Silent Disco Multiplayer V3</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Silent Disco Multiplayer V4</title>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{width:100%;height:100%;margin:0}
-body{background:radial-gradient(circle at top,#151515 0,#050505 45%,#000 100%);color:#fff;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;display:flex;align-items:center;justify-content:center;overflow:hidden;user-select:none;transition:background .18s ease}
-.lang-switch{position:fixed;top:16px;right:16px;display:flex;gap:8px;z-index:20}
-.lang-btn{border:1px solid #343434;background:#121212;color:#aaa;border-radius:999px;padding:9px 13px;font-weight:800;cursor:pointer}
-.lang-btn.active{color:#fff;border-color:#4dff88;box-shadow:0 0 18px rgba(77,255,136,.25)}
-.app{width:min(92vw,430px);text-align:center;padding:28px}
-.brand{margin-bottom:34px}
-.logo{font-size:2.25rem;font-weight:950;letter-spacing:.08em}.logo span{color:#4dff88}.subtitle{color:#8c8c8c;margin-top:7px;font-size:.9rem;letter-spacing:.05em}
-.card{background:rgba(18,18,18,.84);border:1px solid #272727;border-radius:28px;padding:24px;box-shadow:0 25px 70px rgba(0,0,0,.45)}
-#status-text{font-size:1.35rem;line-height:1.35;font-weight:850;margin:0 0 20px}
-.setup-container{display:flex;flex-direction:column;gap:11px}
-input{width:100%;padding:15px 18px;border-radius:16px;border:1px solid #363636;background:#0b0b0b;color:#fff;font-size:1rem;text-align:center;outline:none}input:focus{border-color:#4dff88}
-.btn{width:100%;border:0;border-radius:16px;padding:16px 20px;background:#4dff88;color:#041007;font-size:1.05rem;font-weight:950;cursor:pointer;box-shadow:0 0 25px rgba(77,255,136,.22)}.btn:active{transform:scale(.98)}.btn:disabled{opacity:.45;box-shadow:none}
-.small-text{color:#737373;font-size:.8rem;line-height:1.4;margin-top:14px}
-#lobby,#countdown,#active-screen{display:none}.room-code{font-size:2.7rem;font-weight:950;letter-spacing:.2em;margin:16px 0}.players{margin:18px 0;text-align:left}.player{display:flex;justify-content:space-between;align-items:center;background:#0c0c0c;border:1px solid #252525;border-radius:14px;padding:12px 14px;margin-bottom:8px}.player-you{font-size:.72rem;font-weight:900;color:#4dff88}
-#countdown{font-size:8rem;font-weight:950;line-height:1}.silence{font-size:5rem}.active-title{font-size:2rem;font-weight:950;margin-top:10px}.active-subtitle{color:#999;margin-top:12px}
-.hidden{display:none!important}
-body.alarm{background:#ff163f}.alarm-icon{font-size:5rem}.loser-name{font-size:2.7rem;font-weight:950;text-transform:uppercase;margin:14px 0}#straf-text{font-size:1.15rem;line-height:1.45;margin:0 0 22px}
-.status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#666;margin-right:7px}.status-dot.online{background:#4dff88;box-shadow:0 0 10px rgba(77,255,136,.7)}
+body{background:#050505;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;display:flex;align-items:center;justify-content:center;overflow:hidden;user-select:none;transition:background .15s}
+.app{width:100%;max-width:430px;padding:24px;text-align:center}
+.lang{position:fixed;top:15px;right:15px;display:flex;gap:8px}
+.lang button{background:#171717;border:1px solid #444;color:#fff;padding:8px 12px;border-radius:10px;font-weight:800}
+.lang button.active{border-color:#00ff66;box-shadow:0 0 14px rgba(0,255,102,.25)}
+.logo{font-size:2.1rem;font-weight:900;letter-spacing:2px}.subtitle{color:#888;margin:8px 0 28px}
+section{display:none}.show{display:block}
+h1{font-size:1.45rem;margin:0 0 18px}
+.stack{display:flex;flex-direction:column;gap:12px}
+input{width:100%;padding:16px;border-radius:28px;border:2px solid #303030;background:#111;color:#fff;font-size:1rem;text-align:center;outline:none}
+input:focus{border-color:#00ff66}
+.btn{width:100%;border:0;border-radius:28px;padding:16px 18px;background:#00ff66;color:#000;font-weight:900;font-size:1rem;cursor:pointer;box-shadow:0 0 18px rgba(0,255,102,.25)}
+.btn.secondary{background:#181818;color:#fff;border:1px solid #333;box-shadow:none}
+.small{color:#777;font-size:.82rem;line-height:1.4;margin-top:14px}
+.players{margin:18px 0;text-align:left}.player{background:#111;border:1px solid #222;padding:12px 15px;margin-bottom:8px;border-radius:13px}
+#countdown{font-size:8rem;font-weight:900}.silence,.alarm-icon{font-size:5rem}.active-title{font-size:2rem;font-weight:900;margin-top:8px}.active-subtitle{color:#999;margin-top:12px}
+body.alarm{background:#ff0033}.loser{font-size:2.5rem;font-weight:900;text-transform:uppercase;margin:15px 0}.invite{background:#0d0d0d;border:1px solid #242424;border-radius:18px;padding:16px;margin:15px 0}
 </style>
 </head>
 <body>
-<div class="lang-switch">
-  <button id="btn-nl" class="lang-btn active" type="button">NL</button>
-  <button id="btn-en" class="lang-btn" type="button">EN</button>
-</div>
+<div class="lang"><button id="nl" class="active">NL 🇳🇱</button><button id="en">EN 🇬🇧</button></div>
 <main class="app">
-  <div class="brand"><div class="logo">SILENT <span>DISCO</span></div><div class="subtitle">MULTIPLAYER PARTY GAME</div></div>
-  <div class="card">
-    <section id="setup-area">
-      <div id="status-text">Voer een kamer-code in om samen te spelen.</div>
-      <div class="setup-container">
-        <input id="naam-input" type="text" maxlength="20" autocomplete="off" placeholder="Jouw naam">
-        <input id="room-input" type="text" maxlength="10" inputmode="numeric" autocomplete="off" placeholder="Kamer-code (bijv. 1234)">
-        <button id="main-btn" class="btn" type="button">VERBIND</button>
-      </div>
-      <div class="small-text" id="setup-help">Gebruik op alle telefoons dezelfde kamer-code.</div>
-    </section>
+<div class="logo">SILENT DISCO</div><div class="subtitle">Multiplayer Party Game</div>
 
-    <section id="lobby">
-      <div id="lobby-status"><span id="network-dot" class="status-dot"></span><span id="lobby-status-text">Verbinden...</span></div>
-      <div class="room-code" id="room-code-display">0000</div>
-      <div class="players" id="players-list"></div>
-      <button id="start-btn" class="btn" type="button">START</button>
-      <div class="small-text" id="host-help">Iedere speler kan de ronde starten.</div>
-    </section>
+<section id="home" class="show">
+<h1 id="homeTitle"></h1><div class="stack"><button id="newGame" class="btn"></button></div><div id="homeHelp" class="small"></div>
+</section>
 
-    <section id="countdown">3</section>
+<section id="creator">
+<h1 id="creatorTitle"></h1><div class="stack"><input id="creatorName" maxlength="20"><button id="create" class="btn"></button></div>
+</section>
 
-    <section id="active-screen">
-      <div class="silence">🤫</div>
-      <div class="active-title" id="active-title">NIET BEWEGEN</div>
-      <div class="active-subtitle" id="active-subtitle">Leg je telefoon plat neer. Raak hem niet aan.</div>
-    </section>
+<section id="join">
+<h1 id="joinTitle"></h1><div class="stack"><input id="joinName" maxlength="20"><button id="joinGame" class="btn"></button></div><div id="joinHelp" class="small"></div>
+</section>
 
-    <section id="game-over" class="hidden">
-      <div class="alarm-icon">🚨</div>
-      <div id="alarm-title">IEMAND HEEFT BEWOGEN!</div>
-      <div class="loser-name" id="loser-name">TOM</div>
-      <div id="straf-text"></div>
-      <button id="reset-btn" class="btn" type="button">NIEUWE RONDE</button>
-    </section>
-  </div>
+<section id="lobby">
+<h1 id="lobbyTitle"></h1><div id="players" class="players"></div>
+<div id="invite" class="invite" style="display:none"><button id="share" class="btn"></button><div id="shareHelp" class="small"></div></div>
+<button id="start" class="btn"></button>
+</section>
+
+<section id="countdown">3</section>
+<section id="active"><div class="silence">🤫</div><div id="activeTitle" class="active-title"></div><div id="activeSub" class="active-subtitle"></div></section>
+<section id="over"><div class="alarm-icon">🚨</div><div id="alarmTitle"></div><div id="loser" class="loser"></div><div id="penalty" style="margin:15px 0 24px"></div><button id="reset" class="btn"></button></section>
 </main>
 <script>
-const NTFY_BASE_URL = "https://ntfy.sh";
-const DREMPELWAARDE = 1.8;
-const MINIMALE_BEWEGING_INTERVAL = 450;
-
-let mijnNaam = "";
-let kamerCode = "";
-let spelerId = "";
-let huidigeTaal = "nl";
-let eventSource = null;
-let heartbeatInterval = null;
-let sessieActief = false;
-let gameBezig = false;
-let vorigeX = null, vorigeY = null, vorigeZ = null;
-let laatsteBeweging = 0;
-const spelers = {};
-
-const t = {
-  nl:{start:"Voer een kamer-code in om samen te spelen.",name:"Jouw naam",room:"Kamer-code (bijv. 1234)",connect:"VERBIND",help:"Gebruik op alle telefoons dezelfde kamer-code.",online:"Verbonden met kamer",starting:"Leg je telefoon neer...",active:"NIET BEWEGEN",activeSub:"Leg je telefoon plat neer. Raak hem niet aan.",fields:"Vul je naam en kamer-code in.",permission:"Bewegingstoestemming is nodig om het spel te spelen.",startBtn:"START",newRound:"NIEUWE RONDE",canStart:"Iedere speler kan de ronde starten.",you:"JIJ",movedYou:"🚨 JIJ HEBT BEWOGEN! 🚨",movedOther:"🚨 {name} HEEFT BEWOGEN! 🚨",penalty:"moet de volgende ronde drankjes betalen! 🍻"},
-  en:{start:"Enter a room code to play together.",name:"Your name",room:"Room code (e.g. 1234)",connect:"CONNECT",help:"Use the same room code on every phone.",online:"Connected to room",starting:"Place your phone down...",active:"DO NOT MOVE",activeSub:"Place your phone flat. Do not touch it.",fields:"Enter your name and room code.",permission:"Motion permission is required to play.",startBtn:"START",newRound:"NEW ROUND",canStart:"Any player can start the round.",you:"YOU",movedYou:"🚨 YOU MOVED! 🚨",movedOther:"🚨 {name} MOVED! 🚨",penalty:"has to buy the next round of drinks! 🍻"}
+const NTFY="https://ntfy.sh", THRESHOLD=1.8;
+let language="nl",name="",room="",playerId="",creator=false,source=null,heartbeat=null,active=false,busy=false;
+let px=null,py=null,pz=null,lastMove=0; const playerMap={};
+const T={
+nl:{home:"Klaar om te spelen?",newGame:"NIEUW SPEL",homeHelp:"Maak een spel en nodig je vrienden uit met één link.",creator:"Wie maakt het spel?",name:"Jouw naam",create:"GA VERDER",joinTitle:"Je bent uitgenodigd!",join:"SPEEL MEE",joinHelp:"Vul alleen je naam in.",lobby:"Wachten op spelers...",share:"DEEL UITNODIGING",shareHelp:"Stuur de uitnodiging via WhatsApp, sms, Messenger…",start:"START",active:"NIET BEWEGEN",activeSub:"Leg je telefoon plat neer. Raak hem niet aan.",you:"🚨 JIJ HEBT BEWOGEN! 🚨",other:"🚨 {name} HEEFT BEWOGEN! 🚨",penalty:"moet de volgende ronde drankjes betalen! 🍻",reset:"NIEUWE RONDE",needName:"Vul je naam in.",motion:"Bewegingstoestemming is nodig om te spelen.",shareText:"Speel Silent Disco met mij!",copied:"Uitnodigingslink gekopieerd!"},
+en:{home:"Ready to play?",newGame:"NEW GAME",homeHelp:"Create a game and invite your friends with one link.",creator:"Who is creating the game?",name:"Your name",create:"CONTINUE",joinTitle:"You're invited!",join:"JOIN GAME",joinHelp:"Just enter your name.",lobby:"Waiting for players...",share:"SHARE INVITE",shareHelp:"Send the invite via WhatsApp, text, Messenger…",start:"START",active:"DO NOT MOVE",activeSub:"Place your phone flat. Do not touch it.",you:"🚨 YOU MOVED! 🚨",other:"🚨 {name} MOVED! 🚨",penalty:"has to buy the next round of drinks! 🍻",reset:"NEW ROUND",needName:"Enter your name.",motion:"Motion permission is required to play.",shareText:"Play Silent Disco with me!",copied:"Invite link copied!"}
 };
-
-const $ = id => document.getElementById(id);
-const btnNL=$("btn-nl"), btnEN=$("btn-en"), statusText=$("status-text"), naamInput=$("naam-input"), roomInput=$("room-input"), mainBtn=$("main-btn"), setupArea=$("setup-area"), lobby=$("lobby"), lobbyStatusText=$("lobby-status-text"), networkDot=$("network-dot"), roomCodeDisplay=$("room-code-display"), playersList=$("players-list"), startBtn=$("start-btn"), hostHelp=$("host-help"), countdown=$("countdown"), activeScreen=$("active-screen"), activeTitle=$("active-title"), activeSubtitle=$("active-subtitle"), gameOver=$("game-over"), alarmTitle=$("alarm-title"), loserName=$("loser-name"), strafText=$("straf-text"), resetBtn=$("reset-btn"), setupHelp=$("setup-help");
-
-btnNL.addEventListener("click",()=>wisselTaal("nl"));
-btnEN.addEventListener("click",()=>wisselTaal("en"));
-mainBtn.addEventListener("click",verbindMetLobby);
-startBtn.addEventListener("click",startMultiplayerGame);
-resetBtn.addEventListener("click",startNieuweRonde);
-
-function wisselTaal(taal){huidigeTaal=taal;btnNL.classList.toggle("active",taal==="nl");btnEN.classList.toggle("active",taal==="en");updateLanguageUI();}
-function updateLanguageUI(){const x=t[huidigeTaal];if(!mijnNaam){statusText.textContent=x.start;naamInput.placeholder=x.name;roomInput.placeholder=x.room;mainBtn.textContent=x.connect;setupHelp.textContent=x.help;}startBtn.textContent=x.startBtn;hostHelp.textContent=x.canStart;activeTitle.textContent=x.active;activeSubtitle.textContent=x.activeSub;resetBtn.textContent=x.newRound;if(kamerCode)lobbyStatusText.textContent=x.online+" "+kamerCode;tekenSpelers();}
-function genereerSpelerId(){return Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,10);}
-
-async function vraagMotionToestemming(){if(typeof DeviceMotionEvent!=="undefined"&&typeof DeviceMotionEvent.requestPermission==="function"){try{const p=await DeviceMotionEvent.requestPermission();if(p!=="granted"){alert(t[huidigeTaal].permission);return false;}}catch(e){console.error(e);alert(t[huidigeTaal].permission);return false;}}return true;}
-
-async function verbindMetLobby(){
-  const naam=naamInput.value.trim().slice(0,20);
-  const code=roomInput.value.trim().replace(/\s/g,"");
-  if(!naam||!code){alert(t[huidigeTaal].fields);return;}
-  mainBtn.disabled=true;
-  const motionOK=await vraagMotionToestemming();
-  if(!motionOK){mainBtn.disabled=false;return;}
-  mijnNaam=naam;kamerCode=code;spelerId=genereerSpelerId();
-  setupArea.style.display="none";lobby.style.display="block";roomCodeDisplay.textContent=kamerCode;
-  spelers[spelerId]={id:spelerId,name:mijnNaam,lastSeen:Date.now()};
-  tekenSpelers();luisterNaarNetwerk();startHeartbeat();
-  await stuurNetwerkSignaal({type:"player-join",id:spelerId,name:mijnNaam});
-}
-
-function topicUrl(){return "silentdisco_bizzy_"+encodeURIComponent(kamerCode);}
-function luisterNaarNetwerk(){
-  if(eventSource)eventSource.close();
-  eventSource=new EventSource(NTFY_BASE_URL+"/"+topicUrl()+"/sse");
-  eventSource.onopen=()=>{networkDot.classList.add("online");lobbyStatusText.textContent=t[huidigeTaal].online+" "+kamerCode;};
-  eventSource.onerror=()=>{networkDot.classList.remove("online");lobbyStatusText.textContent="Verbinding herstellen...";};
-  eventSource.onmessage=e=>verwerkNetwerkBericht(e.data);
-}
-
-function verwerkNetwerkBericht(raw){
-  try{
-    const envelope=JSON.parse(raw);
-    if(!envelope.message)return;
-    const b=JSON.parse(envelope.message);
-    if(b.type==="player-join"||b.type==="player-heartbeat")voegSpelerToe(b);
-    if(b.type==="start-game"&&b.startAt)ontvangStartSignaal(b.startAt);
-    if(b.type==="game-over"&&b.loserName)iemandIsAfgegaan(b.loserName);
-    if(b.type==="new-round")resetLokaleRonde();
-  }catch(e){console.warn("Ongeldig netwerkbericht",e);}
-}
-
-async function stuurNetwerkSignaal(bericht){
-  try{
-    const r=await fetch(NTFY_BASE_URL+"/"+topicUrl(),{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify(bericht)});
-    if(!r.ok)throw new Error("HTTP "+r.status);
-    return true;
-  }catch(e){console.error("Netwerkfout",e);alert("Netwerkverbinding mislukt. Probeer opnieuw.");return false;}
-}
-
-async function startMultiplayerGame(){
-  if(gameBezig)return;
-  const startAt=Date.now()+3500;
-  const ok=await stuurNetwerkSignaal({type:"start-game",startAt});
-  if(ok)ontvangStartSignaal(startAt);
-}
-
-function ontvangStartSignaal(startAt){
-  if(gameBezig)return;
-  gameBezig=true;sessieActief=false;lobby.style.display="none";activeScreen.style.display="none";gameOver.classList.add("hidden");document.body.classList.remove("alarm");
-  countdown.style.display="block";
-  const timer=setInterval(()=>{const rest=startAt-Date.now();if(rest<=0){clearInterval(timer);countdown.style.display="none";startActieveSessie();return;}countdown.textContent=Math.max(1,Math.ceil(rest/1000));},50);
-}
-
-function startActieveSessie(){sessieActief=true;vorigeX=vorigeY=vorigeZ=null;activeScreen.style.display="block";window.addEventListener("devicemotion",checkBeweging,true);}
-function checkBeweging(e){
-  if(!sessieActief)return;const a=e.accelerationIncludingGravity;if(!a||a.x==null||a.y==null||a.z==null)return;
-  if(vorigeX===null){vorigeX=a.x;vorigeY=a.y;vorigeZ=a.z;return;}
-  const beweging=Math.abs(a.x-vorigeX)>DREMPELWAARDE||Math.abs(a.y-vorigeY)>DREMPELWAARDE||Math.abs(a.z-vorigeZ)>DREMPELWAARDE;
-  vorigeX=vorigeX*.9+a.x*.1;vorigeY=vorigeY*.9+a.y*.1;vorigeZ=vorigeZ*.9+a.z*.1;
-  if(!beweging)return;const nu=Date.now();if(nu-laatsteBeweging<MINIMALE_BEWEGING_INTERVAL)return;laatsteBeweging=nu;registreerEigenBeweging();
-}
-function registreerEigenBeweging(){if(!sessieActief)return;sessieActief=false;window.removeEventListener("devicemotion",checkBeweging,true);stuurNetwerkSignaal({type:"game-over",loserId:spelerId,loserName:mijnNaam});iemandIsAfgegaan(mijnNaam);}
-function iemandIsAfgegaan(naam){if(!naam)return;sessieActief=false;gameBezig=false;window.removeEventListener("devicemotion",checkBeweging,true);activeScreen.style.display="none";countdown.style.display="none";lobby.style.display="none";gameOver.classList.remove("hidden");document.body.classList.add("alarm");const x=t[huidigeTaal];alarmTitle.textContent=naam.toLowerCase()===mijnNaam.toLowerCase()?x.movedYou:x.movedOther.replace("{name}",naam.toUpperCase());loserName.textContent=naam.toUpperCase();strafText.textContent=naam+" "+x.penalty;}
-async function startNieuweRonde(){const ok=await stuurNetwerkSignaal({type:"new-round"});if(ok)resetLokaleRonde();}
-function resetLokaleRonde(){sessieActief=false;gameBezig=false;window.removeEventListener("devicemotion",checkBeweging,true);gameOver.classList.add("hidden");document.body.classList.remove("alarm");activeScreen.style.display="none";countdown.style.display="none";lobby.style.display="block";}
-
-function startHeartbeat(){if(heartbeatInterval)clearInterval(heartbeatInterval);heartbeatInterval=setInterval(()=>{if(kamerCode)stuurNetwerkSignaal({type:"player-heartbeat",id:spelerId,name:mijnNaam});},4000);}
-function voegSpelerToe(s){if(!s||!s.id||!s.name)return;spelers[s.id]={id:s.id,name:s.name,lastSeen:Date.now()};tekenSpelers();}
-function tekenSpelers(){if(!playersList)return;playersList.innerHTML="";Object.values(spelers).sort((a,b)=>a.name.localeCompare(b.name)).forEach(s=>{const row=document.createElement("div");row.className="player";const n=document.createElement("span");n.textContent=s.name;row.appendChild(n);if(s.id===spelerId){const y=document.createElement("span");y.className="player-you";y.textContent=t[huidigeTaal].you;row.appendChild(y);}playersList.appendChild(row);});}
-setInterval(()=>{const nu=Date.now();Object.keys(spelers).forEach(id=>{if(id!==spelerId&&nu-spelers[id].lastSeen>12000)delete spelers[id];});tekenSpelers();},4000);
-window.addEventListener("beforeunload",()=>{if(eventSource)eventSource.close();if(heartbeatInterval)clearInterval(heartbeatInterval);window.removeEventListener("devicemotion",checkBeweging,true);});
-updateLanguageUI();
+const $=id=>document.getElementById(id);
+function show(id){document.querySelectorAll("main section").forEach(s=>s.classList.remove("show"));$(id).classList.add("show")}
+function paint(){const t=T[language];$("nl").classList.toggle("active",language==="nl");$("en").classList.toggle("active",language==="en");$("homeTitle").textContent=t.home;$("newGame").textContent=t.newGame;$("homeHelp").textContent=t.homeHelp;$("creatorTitle").textContent=t.creator;$("creatorName").placeholder=t.name;$("create").textContent=t.create;$("joinTitle").textContent=t.joinTitle;$("joinName").placeholder=t.name;$("joinGame").textContent=t.join;$("joinHelp").textContent=t.joinHelp;$("lobbyTitle").textContent=t.lobby;$("share").textContent=t.share;$("shareHelp").textContent=t.shareHelp;$("start").textContent=t.start;$("activeTitle").textContent=t.active;$("activeSub").textContent=t.activeSub;$("reset").textContent=t.reset;draw()}
+$("nl").onclick=()=>{language="nl";paint()};$("en").onclick=()=>{language="en";paint()};
+function uid(){return Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,10)}
+function makeRoom(){const a=new Uint32Array(2);crypto.getRandomValues(a);return (a[0].toString(36)+a[1].toString(36)).slice(0,12)}
+$("newGame").onclick=()=>show("creator");
+$("create").onclick=async()=>{name=$("creatorName").value.trim().slice(0,20);if(!name)return alert(T[language].needName);room=makeRoom();creator=true;if(await connect()){history.replaceState(null,"",location.pathname+"?room="+encodeURIComponent(room));$("invite").style.display="block"}};
+$("joinGame").onclick=async()=>{name=$("joinName").value.trim().slice(0,20);if(!name)return alert(T[language].needName);await connect()};
+async function motionOK(){if(typeof DeviceMotionEvent!=="undefined"&&typeof DeviceMotionEvent.requestPermission==="function"){try{return await DeviceMotionEvent.requestPermission()==="granted"}catch(e){return false}}return true}
+async function connect(){playerId=uid();if(!(await motionOK())){alert(T[language].motion);return false}listen();add({id:playerId,name});show("lobby");await send({type:"player-join",id:playerId,name});clearInterval(heartbeat);heartbeat=setInterval(()=>send({type:"player-heartbeat",id:playerId,name}),5000);return true}
+function topic(){return "silentdisco_bizzy_"+encodeURIComponent(room)}
+function listen(){if(source)source.close();source=new EventSource(NTFY+"/"+topic()+"/sse");source.onmessage=e=>{try{const outer=JSON.parse(e.data);if(!outer.message)return;const m=JSON.parse(outer.message);if(m.type==="player-join"||m.type==="player-heartbeat")add(m);else if(m.type==="start-game"&&m.startAt)receiveStart(m.startAt);else if(m.type==="game-over"&&m.loserName)gameOver(m.loserName);else if(m.type==="new-round")resetLocal()}catch(err){console.warn(err)}}}
+async function send(m){try{await fetch(NTFY+"/"+topic(),{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify(m)})}catch(e){console.error(e)}}
+function add(p){if(!p.id||!p.name)return;playerMap[p.id]={id:p.id,name:p.name,lastSeen:Date.now()};draw()}
+function draw(){const box=$("players");if(!box)return;box.innerHTML="";Object.values(playerMap).forEach(p=>{const d=document.createElement("div");d.className="player";d.textContent=p.name;box.appendChild(d)})}
+$("share").onclick=async()=>{const url=location.origin+location.pathname+"?room="+encodeURIComponent(room);try{if(navigator.share)await navigator.share({title:"Silent Disco",text:T[language].shareText,url});else{await navigator.clipboard.writeText(url);alert(T[language].copied)}}catch(e){}};
+$("start").onclick=async()=>{if(busy)return;const startAt=Date.now()+3500;await send({type:"start-game",startAt});receiveStart(startAt)};
+function receiveStart(startAt){if(busy)return;busy=true;active=false;show("countdown");const timer=setInterval(()=>{const left=startAt-Date.now();if(left<=0){clearInterval(timer);startActive();return}$("countdown").textContent=Math.max(1,Math.ceil(left/1000))},50)}
+function startActive(){active=true;px=py=pz=null;show("active");window.addEventListener("devicemotion",checkMove,true)}
+function checkMove(e){if(!active)return;const a=e.accelerationIncludingGravity;if(!a||a.x==null||a.y==null||a.z==null)return;const x=a.x,y=a.y,z=a.z;if(px===null){px=x;py=y;pz=z;return}const moved=Math.abs(x-px)>THRESHOLD||Math.abs(y-py)>THRESHOLD||Math.abs(z-pz)>THRESHOLD;px=px*.9+x*.1;py=py*.9+y*.1;pz=pz*.9+z*.1;if(!moved)return;const now=Date.now();if(now-lastMove<300)return;lastMove=now;ownMove()}
+function ownMove(){if(!active)return;active=false;window.removeEventListener("devicemotion",checkMove,true);send({type:"game-over",loserId:playerId,loserName:name});gameOver(name)}
+function gameOver(loserName){active=false;busy=false;window.removeEventListener("devicemotion",checkMove,true);show("over");document.body.classList.add("alarm");const t=T[language];$("alarmTitle").textContent=loserName.toLowerCase()===name.toLowerCase()?t.you:t.other.replace("{name}",loserName.toUpperCase());$("loser").textContent=loserName.toUpperCase();$("penalty").textContent=loserName+" "+t.penalty}
+$("reset").onclick=async()=>{await send({type:"new-round"});resetLocal()};
+function resetLocal(){active=false;busy=false;window.removeEventListener("devicemotion",checkMove,true);document.body.classList.remove("alarm");show("lobby");if(creator)$("invite").style.display="block"}
+setInterval(()=>{const now=Date.now();Object.keys(playerMap).forEach(k=>{if(now-playerMap[k].lastSeen>15000)delete playerMap[k]});draw()},5000);
+window.addEventListener("beforeunload",()=>{if(source)source.close();clearInterval(heartbeat);window.removeEventListener("devicemotion",checkMove,true)});
+(function(){paint();const q=new URLSearchParams(location.search),r=q.get("room");if(r){room=r.replace(/[^a-zA-Z0-9_-]/g,"").slice(0,40);if(room)show("join")}})();
 </script>
 </body>
 </html>
