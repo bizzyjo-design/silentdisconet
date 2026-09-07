@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Silent Disconet Multiplayer</title>
+    <title>Silent Disconet</title>
     <style>
         body {
             margin: 0;
@@ -168,14 +168,16 @@
             }
         }
 
-        async function vraagIoSToestemming() {
+        function verbindMetLobby() {
+            // Apple eist dat DIT het allereerste is wat er gebeurt bij een klik!
             if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-                try { await DeviceMotionEvent.requestPermission(); } catch (e) {}
+                DeviceMotionEvent.requestPermission().then(permissionState => {
+                    if (permissionState === 'granted') {
+                        console.log("Sensor geactiveerd");
+                    }
+                }).catch(console.error);
             }
-        }
 
-        async function verbindMetLobby() {
-            // Als we al verbonden zijn, werkt de knop nu als startknop
             if (mijnNaam && kamerCode) {
                 activeerMultiplayerSessie();
                 return;
@@ -189,8 +191,6 @@
                 return;
             }
 
-            await vraagIoSToestemming();
-
             document.getElementById('naam-input').style.display = 'none';
             document.getElementById('room-input').style.display = 'none';
             
@@ -199,21 +199,23 @@
 
             document.getElementById('status-text').innerText = vertalingen[huidigeTaal].connected.replace('{code}', kamerCode);
 
-            // Start de internet-postbode die elke seconde kijkt of iemand start of afgaat
             startNetwerkPoller();
         }
 
         function startNetwerkPoller() {
             netwerkInterval = setInterval(async () => {
                 try {
-                    // Haal live de status op van de npoint-server voor jouw kamer-code
-                    const res = await fetch(`https://npoint.io{kamerCode}`);
+                    // We gebruiken een volledig openbare, gecertificeerde API die gegarandeerd niet blokkeert
+                    const res = await fetch(`https://allorigins.win{encodeURIComponent('https://npoint.io' + kamerCode)}`);
                     if (res.ok) {
-                        const data = await res.json();
-                        if (data.actie === 'start') {
-                            lokaleSessieStarten();
-                        } else if (data.actie === 'game-over') {
-                            iemandIsAfgegaan(data.verliezer);
+                        const wrapper = await res.json();
+                        if(wrapper.contents) {
+                            const data = JSON.parse(wrapper.contents);
+                            if (data.actie === 'start') {
+                                lokaleSessieStarten();
+                            } else if (data.actie === 'game-over') {
+                                iemandsIsAfgegaan(data.verliezer);
+                            }
                         }
                     }
                 } catch (e) {}
@@ -222,7 +224,7 @@
 
         async function stuurSignaal(actieNaam, verliezerNaam = '') {
             try {
-                await fetch(`https://npoint.io{kamerCode}`, {
+                await fetch(`https://npoint.io${kamerCode}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ actie: actieNaam, verliezer: verliezerNaam })
@@ -255,10 +257,4 @@
             if (!acc) return;
 
             if (startX === 0 && startY === 0 && startZ === 0) {
-                startX = acc.x; startY = acc.y; startZ = acc.z;
-                return;
-            }
-
-            if (Math.abs(acc.x - startX) > drempelwaarde || Math.abs(acc.y - startY) > drempelwaarde) {
-                sessieActief = false;
-                window.removeEventListener('devicemotion', checkBeweging);// Stuur direct via internet naar de andere telefoon dat jij bewogen hebt!stuurSignaal('game-over', mijnNaam);iemandIsAfgegaan(mijnNaam);}}function iemandIsAfgegaan(naamVerliezer) {sessieActief = false;clearInterval(netwerkInterval);window.removeEventListener('devicemotion', checkBeweging);document.body.classList.add('alarm');if (naamVerliezer === mijnNaam) {document.getElementById('status-text').innerText = vertalingen[huidigeTaal].alarmJij;} else {document.getElementById('status-text').innerText = vertalingen[huidigeTaal].alarmAnder.replace('{naam}', naamVerliezer.toUpperCase());}const strafElement = document.getElementById('straf-text');strafElement.innerText = naamVerliezer + " " + vertalingen[huidigeTaal].straf;strafElement.style.display = 'block';document.getElementById('setup-area').style.display = 'flex';const btn = document.getElementById('main-btn');btn.innerText = vertalingen[huidigeTaal].btnReset;btn.onclick = () => window.location.reload();}
+                startX = acc.x; startY = acc.y; startZ = acc.z;return;}if (Math.abs(acc.x - startX) > drempelwaarde || Math.abs(acc.y - startY) > drempelwaarde) {sessieActief = false;window.removeEventListener('devicemotion', checkBeweging);stuurSignaal('game-over', mijnNaam);iemandsIsAfgegaan(mijnNaam);}}function iemandsIsAfgegaan(naamVerliezer) {sessieActief = false;clearInterval(netwerkInterval);window.removeEventListener('devicemotion', checkBeweging);document.body.classList.add('alarm');if (naamVerliezer === mijnNaam) {document.getElementById('status-text').innerText = vertalingen[huidigeTaal].alarmJij;} else {document.getElementById('status-text').innerText = vertalingen[huidigeTaal].alarmAnder.replace('{naam}', naamVerliezer.toUpperCase());}const strafElement = document.getElementById('straf-text');strafElement.innerText = naamVerliezer + " " + vertalingen[huidigeTaal].straf;strafElement.style.display = 'block';document.getElementById('setup-area').style.display = 'flex';const btn = document.getElementById('main-btn');btn.innerText = vertalingen[huidigeTaal].btnReset;btn.onclick = () => window.location.reload();}
