@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Silent Disconet Multiplayer</title>
-    <!-- We laden het ultra-stabiele PubNub netwerk voor de échte Wordfeud-verbinding -->
-    <script src="https://pubnub.com"></script>
     <style>
         body {
             margin: 0;
@@ -125,7 +123,7 @@
         let startX = 0, startY = 0, startZ = 0;
         const drempelwaarde = 1.8;
         let huidigeTaal = 'nl';
-        let pubnub = null;
+        let netwerkInterval = null;
 
         const vertalingen = {
             nl: {
@@ -181,7 +179,7 @@
         }
 
         async function verbindMetLobby() {
-            // Als de speler al verbonden is, fungeert de knop als startknop
+            // Als de speler al verbonden is met de kamer, start de knop de multiplayer
             if (mijnNaam && kamerCode) {
                 activeerMultiplayerSessie();
                 return;
@@ -195,6 +193,7 @@
                 return;
             }
 
+            // iOS sensor toestemming forceren bij de klik
             await vraagIoSToestemming();
 
             document.getElementById('naam-input').style.display = 'none';
@@ -206,62 +205,59 @@
             const btn = document.getElementById('main-btn');
             btn.innerText = vertalingen[huidigeTaal].btnStart;
 
-            // Verbind direct met de stabiele PubNub server-lijn
-            koppelLiveNetwerk();
+            // Start de onzichtbare internet-postbode die elke seconde updates checkt via een gratis open cloud-sleutel
+            startLivePoller();
         }
 
-        function koppelLiveNetwerk() {
-            pubnub = new PubNub({
-                publishKey: 'pub-c-469b82fd-7b75-4089-a2a3-f0fa80721245',
-                subscribeKey: 'sub-c-11ef84f6-86d1-447b-8774-70678ebef53d',
-                userId: "user_" + Math.random().toString(36).substring(2, 9)
-            });
+        function startLivePoller() {
+            // We ruimen eerst een eventuele oude database-sessie op voor deze kamer
+            stuurNetwerkSignaal('wachten');
 
-            // Luister naar signalen van andere telefoons in dit kamernummer
-            pubnub.addListener({
-                message: function(event) {
-                    const data = event.message;
-                    if (data.action === 'start-game') {
-                        lokaleSessieStarten();
-                    } else if (data.action === 'game-over') {
-                        iemandIsAfgegaan(data.verliezer);
+            netwerkInterval = setInterval(async () => {
+                try {
+                    // We gebruiken een gratis, stabiele HTTP-opslag die gegarandeerd overal inlaadt
+                    const res = await fetch(`https://kvdb.io{kamerCode}`);
+                    if (res.ok) {
+                        const tekst = await res.text();
+                        if (tekst === 'start') {
+                            lokaleSessieStarten();
+                        } else if (tekst.indexOf('afgegaan:') === 0) {
+                            const verliezer = tekst.replace('afgegaan:', '');
+                            iemandIsAfgegaan(verliezer);
+                        }
                     }
-                }
-            });
+                } catch (e) {}
+            }, 1000);
+        }
 
-            pubnub.subscribe({
-                channels: ['silentdisco_room_' + kamerCode]
-            });
+        async function stuurNetwerkSignaal(berichtTekst) {
+            try {
+                await fetch(`https://kvdb.io{kamerCode}`, {
+                    method: 'POST',
+                    body: berichtTekst
+                });
+            } catch (e) {}
         }
 
         function activeerMultiplayerSessie() {
-            if (pubnub) {
-                pubnub.publish({
-                    channel: 'silentdisco_room_' + kamerCode,
-                    message: { action: 'start-game' }
-                });
-            }
+            stuurNetwerkSignaal('start');
+            lokaleSessieStarten();
         }
 
         function lokaleSessieStarten() {
             if (sessieActief) return;
             document.getElementById('straf-text').style.display = 'none';
-            document.getElementById('status-text').innerText = vertalingen[huidigeTaal].aftellen;
+            document.getElementById('status-text').innerText = vertalingen[huidigeTaal].statusAftellen;
             document.getElementById('setup-area').style.display = 'none';
 
             setTimeout(() => {
-                document.getElementById('status-text').innerText = vertalingen[huidigeTaal].actief;
+                document.getElementById('status-text').innerText = vertalingen[huidigeTaal].statusActief;
                 sessieActief = true;
                 startX = 0; startY = 0; startZ = 0;
-                window.addEventListener('devicemotion', checkBeweging);
+                if (window.DeviceMotionEvent) {
+                    window.addEventListener('devicemotion', checkBeweging);
+                }
             }, 3000);
         }
 
-        function checkBeweging(event) {
-            if (!sessieActief) return;
-            const acc = event.accelerationIncludingGravity;
-            if (!acc) return;
-
-            if (startX === 0 && startY === 0 && startZ === 0) {
-                startX = acc.x; startY = acc.y; startZ = acc.z;return;}let diffX = Math.abs(acc.x - startX);let diffY = Math.abs(acc.y - startY);let diffZ = Math.abs(acc.z - startZ);if (diffX > drempelwaarde || diffY > drempelwaarde || diffZ > drempelwaarde) {sessieActief = false;window.removeEventListener('devicemotion', checkBeweging);// Meld direct over internet aan de andere telefoon dat jij af bent gegaan!if (pubnub) {pubnub.publish({channel: 'silentdisco_room_' + kamerCode,message: { action: 'game-over', verliezer: mijnNaam }});}}}function iemandIsAfgegaan(naamVerliezer) {sessieActief = false;window.removeEventListener('devicemotion', checkBeweging);document.body.classList.add('alarm');if (naamVerliezer === mijnNaam) {document.getElementById('status-text').innerText = vertalingen[huidigeTaal].alarmJij;} else {document.getElementById('status-text').innerText = vertalingen[huidigeTaal].alarmAnder.replace('{naam}', naamVerliezer.toUpperCase());}const strafElement = document.getElementById('straf-text');strafElement.innerText = naamVerliezer + " " + vertalingen[huidigeTaal].straf;strafElement.style.display = 'block';document.getElementById('setup-area').style.display = 'flex';const btn = document.getElementById('main-btn');btn.innerText = vertalingen[huidigeTaal].btnReset;btn.onclick = () => window.location.reload();}
-    
+        function checkBeweging(event) {if (!sessieActief) return;const acc = event.accelerationIncludingGravity;if (!acc) return;if (startX === 0 && startY === 0 && startZ === 0) {startX = acc.x; startY = acc.y; startZ = acc.z;return;}let diffX = Math.abs(acc.x - startX);let diffY = Math.abs(acc.y - startY);let diffZ = Math.abs(acc.z - startZ);if (diffX > drempelwaarde || diffY > drempelwaarde || diffZ > drempelwaarde) {sessieActief = false;window.removeEventListener('devicemotion', checkBeweging);// Meld direct over internet aan de andere telefoon wie er af is gegaan!stuurNetwerkSignaal(afgegaan:${mijnNaam});iemandIsAfgegaan(mijnNaam);}}function iemandIsAfgegaan(naamVerliezer) {sessieActief = false;clearInterval(netwerkInterval);window.removeEventListener('devicemotion', checkBeweging);document.body.classList.add('alarm');if (naamVerliezer === mijnNaam) {document.getElementById('status-text').innerText = vertalingen[huidigeTaal].alarmJij;} else {document.getElementById('status-text').innerText = vertalingen[huidigeTaal].alarmAnder.replace('{naam}', naamVerliezer.toUpperCase());}const strafElement = document.getElementById('straf-text');strafElement.innerText = naamVerliezer + " " + vertalingen[huidigeTaal].straf;strafElement.style.display = 'block';document.getElementById('setup-area').style.display = 'flex';const btn = document.getElementById('main-btn');btn.innerText = vertalingen[huidigeTaal].btnReset;btn.onclick = () => window.location.reload();}
