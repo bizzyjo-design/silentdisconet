@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
@@ -47,7 +47,7 @@
             text-align: center;
             font-weight: bold;
             padding: 0 20px;
-            white-space: pre-line; /* Zorgt dat enters netjes worden weergegeven */
+            white-space: pre-line;
         }
         #straf-text {
             font-size: 1.4rem;
@@ -116,8 +116,8 @@
 <body>
 
     <div class="lang-switch">
-        <button id="btn-nl" class="lang-btn active" onclick="wisselTaal('nl')">NL 🇳🇱</button>
-        <button id="btn-en" class="lang-btn" onclick="wisselTaal('en')">EN 🇬🇧</button>
+        <button id="btn-nl" class="lang-btn active">NL 🇳🇱</button>
+        <button id="btn-en" class="lang-btn">EN 🇬🇧</button>
     </div>
 
     <div id="status-text">Voer een kamer-code in om samen te spelen.</div>
@@ -126,7 +126,7 @@
     <div class="setup-container" id="setup-area">
         <input type="text" id="naam-input" placeholder="Jouw Naam">
         <input type="text" id="room-input" placeholder="Kamer Code (bijv. 1234)">
-        <button id="main-btn" class="btn" onclick="verbindMetLobby()">VERBIND</button>
+        <button id="main-btn" class="btn">VERBIND</button>
     </div>
 
     <div id="debug-log">Status: Netwerk startklaar.</div>
@@ -173,6 +173,11 @@
             }
         };
 
+        // Handmatige klik-luisteraars om vastlopen in iOS te voorkomen
+        document.getElementById('btn-nl').addEventListener('click', function() { wisselTaal('nl'); });
+        document.getElementById('btn-en').addEventListener('click', function() { wisselTaal('en'); });
+        document.getElementById('main-btn').addEventListener('click', function() { verbindMetLobby(); });
+
         function wisselTaal(taal) {
             huidigeTaal = taal;
             document.getElementById('btn-nl').classList.remove('active');
@@ -203,7 +208,7 @@
         }
 
         async function verbindMetLobby() {
-            // Als de naam al bekend is, fungeert deze knop als de startknop
+            // Als de naam al is ingevuld, start het spel voor iedereen over internet
             if (mijnNaam && kamerCode) {
                 activeerMultiplayerSessie();
                 return;
@@ -217,13 +222,13 @@
                 return;
             }
 
-            // iOS Toestemming direct triggeren bij de allereerste klik
+            // iOS Toestemming direct forceren bij de knopklik
             await vraagIoSToestemming();
 
             document.getElementById('naam-input').style.display = 'none';
             document.getElementById('room-input').style.display = 'none';
             
-            // Zet de tekst en het kamernummer definitief op het scherm
+            // Toon de kamer-code definitief op het scherm
             document.getElementById('status-text').innerText = vertalingen[huidigeTaal].connected.replace('{code}', kamerCode);
 
             const btn = document.getElementById('main-btn');
@@ -234,35 +239,31 @@
         }
 
         function luisterNaarNetwerk() {
-            // We gebruiken een uniek, anoniem kanaal op ntfy.sh (vlijmscherpe en crash-proof Wordfeud-postbode)
             const topic = `silentdisco_bizzy_${kamerCode}`;
             eventSource = new EventSource(`https://ntfy.sh{topic}/sse`);
             
             eventSource.onmessage = (event) => {
                 try {
                     const data = JSON.parse(event.data);
-                    // ntfy wikkelt berichten soms in een 'message' veld
                     if (data.message) {
-                        const payload = JSON.parse(data.message);
-                        if (payload.action === 'start') {
+                        // Verwerk de inkomende live signalen
+                        if (data.message === 'start-game-event') {
                             lokaleSessieStarten();
-                        } else if (payload.action === 'game-over') {
-                            iemandIsAfgegaan(payload.verliezer);
+                        } else if (data.message.startsWith('game-over-event:')) {
+                            const verliezer = data.message.replace('game-over-event:', '');
+                            iemandIsAfgegaan(verliezer);
                         }
                     }
-                } catch (e) {
-                    // Als het als platte tekst binnenkomt
-                    if (event.data.includes('start')) lokaleSessieStarten();
-                }
+                } catch (e) {}
             };
 
             logDebug("Kamer online en actief.");
         }
 
-        async function stuurNetwerkSignaal(dataObj) {
+        async function stuurNetwerkSignaal(berichtTekst) {
             const topic = `silentdisco_bizzy_${kamerCode}`;
             try {
                 await fetch(`https://ntfy.sh{topic}`, {
                     method: 'POST',
-                    body: JSON.stringify(dataObj)
-                });} catch (e) {}}function activeerMultiplayerSessie() {stuurNetwerkSignaal({ action: 'start' });lokaleSessieStarten();}function lokaleSessieStarten() {if (sessieActief) return;document.getElementById('straf-text').style.display = 'none';document.getElementById('status-text').innerText = vertalingen[huidigeTaal].statusAftellen;document.getElementById('setup-area').style.display = 'none';setTimeout(() => {document.getElementById('status-text').innerText = vertalingen[huidigeTaal].statusActief;sessieActief = true;startX = 0; startY = 0; startZ = 0;window.addEventListener('devicemotion', checkBeweging);}, 3000);}function checkBeweging(event) {if (!sessieActief) return;const acc = event.accelerationIncludingGravity;if (!acc) return;if (startX === 0 && startY === 0 && startZ === 0) {startX = acc.x; startY = acc.y; startZ = acc.z;return;}let diffX = Math.abs(acc.x - startX);let diffY = Math.abs(acc.y - startY);let diffZ = Math.abs(acc.z - startZ);if (diffX > drempelwaarde || diffY > drempelwaarde || diffZ > drempelwaarde) {sessieActief = false;window.removeEventListener('devicemotion', checkBeweging);// Stuur direct via het live-netwerk naar de andere telefoon dat jij af bent!stuurNetwerkSignaal({ action: 'game-over', verliezer: mijnNaam });iemandIsAfgegaan(mijnNaam);}}function iemandIsAfgegaan(naamVerliezer) {sessieActief = false;window.removeEventListener('devicemotion', checkBeweging);if (eventSource) eventSource.close();document.body.classList.add('alarm');if (naamVerliezer === mijnNaam) {document.getElementById('status-text').innerText = vertalingen[huidigeTaal].alarmJij;} else {document.getElementById('status-text').innerText = vertalingen[huidigeTaal].alarmAnder.replace('{naam}', naamVerliezer.toUpperCase());}const strafElement = document.getElementById('straf-text');strafElement.innerText = naamVerliezer + " " + vertalingen[huidigeTaal].straf;strafElement.style.display = 'block';document.getElementById('setup-area').style.display = 'flex';const btn = document.getElementById('main-btn');btn.innerText = vertalingen[huidigeTaal].btnReset;btn.onclick = () => window.location.reload();}
+                    body: berichtTekst
+                });} catch (e) {}}function activeerMultiplayerSessie() {stuurNetwerkSignaal('start-game-event');lokaleSessieStarten();}function lokaleSessieStarten() {if (sessieActief) return;document.getElementById('straf-text').style.display = 'none';document.getElementById('status-text').innerText = vertalingen[huidigeTaal].statusAftellen;document.getElementById('setup-area').style.display = 'none';setTimeout(() => {document.getElementById('status-text').innerText = vertalingen[huidigeTaal].statusActief;sessieActief = true;startX = 0; startY = 0; startZ = 0;window.addEventListener('devicemotion', checkBeweging);}, 3000);}function checkBeweging(event) {if (!sessieActief) return;const acc = event.accelerationIncludingGravity;if (!acc) return;if (startX === 0 && startY === 0 && startZ === 0) {startX = acc.x; startY = acc.y; startZ = acc.z;return;}let diffX = Math.abs(acc.x - startX);let diffY = Math.abs(acc.y - startY);let diffZ = Math.abs(acc.z - startZ);if (diffX > drempelwaarde || diffY > drempelwaarde || diffZ > drempelwaarde) {sessieActief = false;window.removeEventListener('devicemotion', checkBeweging);// Stuur het verlies-signaal over het internet naar de andere telefoonstuurNetwerkSignaal(game-over-event:${mijnNaam});iemandIsAfgegaan(mijnNaam);}}function iemandIsAfgegaan(naamVerliezer) {sessieActief = false;window.removeEventListener('devicemotion', checkBeweging);if (eventSource) eventSource.close();document.body.classList.add('alarm');if (naamVerliezer === mijnNaam) {document.getElementById('status-text').innerText = vertalingen[huidigeTaal].alarmJij;} else {document.getElementById('status-text').innerText = vertalingen[huidigeTaal].alarmAnder.replace('{naam}', naamVerliezer.toUpperCase());}const strafElement = document.getElementById('straf-text');strafElement.innerText = naamVerliezer + " " + vertalingen[huidigeTaal].straf;strafElement.style.display = 'block';document.getElementById('setup-area').style.display = 'flex';const btn = document.getElementById('main-btn');btn.innerText = vertalingen[huidigeTaal].btnReset;btn.onclick = () => window.location.reload();}
