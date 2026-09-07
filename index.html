@@ -3,110 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Silent Disconet Multiplayer</title>
+    <title>Silent Disconet</title>
     <style>
-        body {
-            margin: 0;
-            background-color: #000000;
-            color: #ffffff;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            overflow: hidden;
-            user-select: none;
-        }
-        .lang-switch {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            display: flex;
-            gap: 10px;
-            z-index: 9999;
-        }
-        .lang-btn {
-            background: #222;
-            border: 1px solid #444;
-            color: white;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: bold;
-        }
-        .lang-btn.active {
-            border-color: #00FF00;
-            background: #111;
-            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
-        }
-        #status-text {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            text-align: center;
-            font-weight: bold;
-            padding: 0 20px;
-        }
-        #straf-text {
-            font-size: 1.4rem;
-            color: #ffcccc;
-            text-align: center;
-            margin-bottom: 2rem;
-            padding: 0 30px;
-            font-style: italic;
-            display: none;
-            font-weight: bold;
-        }
-        .setup-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-            width: 100%;
-            max-width: 300px;
-            z-index: 10;
-        }
-        input[type="text"] {
-            width: 100%;
-            padding: 0.8rem;
-            border-radius: 25px;
-            border: 2px solid #333;
-            background-color: #111;
-            color: #fff;
-            font-size: 1rem;
-            outline: none;
-            text-align: center;
-            box-sizing: border-box;
-        }
-        .btn {
-            background-color: #00FF00;
-            color: #000000;
-            border: none;
-            padding: 1.2rem 3rem;
-            font-size: 1.3rem;
-            font-weight: bold;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.4);
-            width: 100%;
-        }
-        #debug-log {
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-            right: 10px;
-            background: rgba(0,255,0,0.1);
-            color: #66ff66;
-            font-size: 0.8rem;
-            padding: 5px;
-            border-radius: 5px;
-            text-align: center;
-            font-family: monospace;
-        }
-        .alarm {
-            background-color: #FF0033 !important;
-        }
+        body { margin:0; background:#000; color:#fff; font-family:sans-serif; display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; user-select:none; }
+        .lang-switch { position:absolute; top:15px; right:15px; display:flex; gap:10px; }
+        .lang-btn { background:#222; border:1px solid #444; color:#fff; padding:8px 15px; border-radius:5px; cursor:pointer; font-weight:bold; }
+        .lang-btn.active { border-color:#00FF00; background:#111; }
+        #status-text { font-size:1.5rem; margin-bottom:1rem; text-align:center; font-weight:bold; padding:0 20px; }
+        .setup-container { display:flex; flex-direction:column; align-items:center; gap:15px; width:100%; max-width:300px; }
+        input { width:100%; padding:0.8rem; border-radius:25px; border:2px solid #333; background:#111; color:#fff; font-size:1rem; text-align:center; box-sizing:border-box; }
+        .btn { background:#00FF00; color:#000; border:none; padding:1.2rem 3rem; font-size:1.3rem; font-weight:bold; border-radius:50px; cursor:pointer; width:100%; }
+        .alarm { background:#FF0033 !important; }
     </style>
 </head>
 <body>
@@ -116,57 +23,22 @@
         <button id="btn-en" class="lang-btn" onclick="wisselTaal('en')">EN 🇬🇧</button>
     </div>
 
-    <div id="status-text">Voer een kamer-code in om samen te spelen.</div>
-    <div id="straf-text"></div>
+    <div id="status-text">Vul je naam in om te starten:</div>
 
     <div class="setup-container" id="setup-area">
         <input type="text" id="naam-input" placeholder="Jouw Naam">
-        <input type="text" id="room-input" placeholder="Kamer Code (bijv. 1234)">
-        <button id="main-btn" class="btn" onclick="verbindMetLobby()">VERBIND</button>
+        <button id="main-btn" class="btn" onclick="startSpel()">START</button>
     </div>
 
-    <div id="debug-log">Status: Netwerk startklaar.</div>
-
     <script>
-        let mijnNaam = "";
-        let kamerCode = "";
-        let sessieActief = false;
-        let startX = 0, startY = 0, startZ = 0;
-        const drempelwaarde = 1.8;
         let huidigeTaal = 'nl';
-        let eventSource = null;
+        let mijnNaam = "";
+        let startX = 0, startY = 0, startZ = 0;
+        let sessieActief = false;
 
         const vertalingen = {
-            nl: {
-                start: "Voer een kamer-code in om samen te spelen.",
-                namePlaceholder: "Jouw Naam",
-                roomPlaceholder: "Kamer Code (bijv. 1234)",
-                btnConnect: "VERBIND",
-                btnStart: "START SESSIE VOOR IEDEREEN",
-                alertFields: "Vul aub je naam en een kamer-code in!",
-                connected: "Verbonden met kamer: {code}. Wacht tot de maker start...",
-                aftellen: "Sessie start over 3 seconden... LEG NEER!",
-                actief: "🔒 Sessie is actief. NIET AANRAKEN!",
-                alarmJij: "🚨 JIJ HEBT BEWOGEN! 🚨",
-                alarmAnder: "🚨 {naam} HEEFT BEWOGEN! 🚨",
-                btnReset: "RESET GAME",
-                straf: "moet de volgende ronde drankjes betalen! 🍻"
-            },
-            en: {
-                start: "Enter a room code to play together.",
-                namePlaceholder: "Your Name",
-                roomPlaceholder: "Room Code (e.g. 1234)",
-                btnConnect: "CONNECT",
-                btnStart: "START SESSION FOR EVERYONE",
-                alertFields: "Please enter your name and a room code!",
-                connected: "Connected to room: {code}. Waiting for host to start...",
-                aftellen: "Session starts in 3 seconds... PLACE DOWN!",
-                actief: "🔒 Session is active. DO NOT TOUCH!",
-                alarmJij: "🚨 YOU MOVED! 🚨",
-                alarmAnder: "🚨 {naam} MOVED! 🚨",
-                btnReset: "RESET GAME",
-                straf: "has to buy the next round of drinks! 🍻"
-            }
+            nl: { start: "Vul je naam in om te starten:", placeholder: "Jouw Naam", btn: "START", aftellen: "Sessie start over 3 seconden... LEG NEER!", actief: "🔒 Ssshh... Niet aanraken!", alarm: "🚨 JIJ BENT AFGEGAAN! 🚨" },
+            en: { start: "Enter your name to start:", placeholder: "Your Name", btn: "START", aftellen: "Session starts in 3 seconds... PLACE DOWN!", actief: "🔒 Ssshh... Do not touch!", alarm: "🚨 YOU MOVED! 🚨" }
         };
 
         function wisselTaal(taal) {
@@ -174,98 +46,49 @@
             document.getElementById('btn-nl').classList.remove('active');
             document.getElementById('btn-en').classList.remove('active');
             document.getElementById('btn-' + taal).classList.add('active');
-            
-            if (!sessieActief && !mijnNaam) {
-                document.getElementById('status-text').innerText = vertalingen[taal].start;
-                document.getElementById('naam-input').placeholder = vertalingen[taal].namePlaceholder;
-                document.getElementById('room-input').placeholder = vertalingen[taal].roomPlaceholder;
-                document.getElementById('main-btn').innerText = vertalingen[taal].btnConnect;
-            }
+            document.getElementById('status-text').innerText = vertalingen[taal].start;
+            document.getElementById('naam-input').placeholder = vertalingen[taal].placeholder;
+            document.getElementById('main-btn').innerText = vertalingen[taal].btn;
         }
 
-        function logDebug(tekst) {
-            document.getElementById('debug-log').innerText = "Status: " + tekst;
-        }
-
-        async function vraagIoSToestemming() {
-            if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-                try {
-                    const res = await DeviceMotionEvent.requestPermission();
-                    logDebug("Sensor toestemming: " + res);
-                } catch (e) {
-                    logDebug("Sensor weigering.");
-                }
-            }
-        }
-
-        async function verbindMetLobby() {
-            if (mijnNaam && kamerCode) {
-                activeerMultiplayerSessie();
-                return;
-            }
-
+        async function startSpel() {
             mijnNaam = document.getElementById('naam-input').value.trim();
-            kamerCode = document.getElementById('room-input').value.trim();
+            if (!mijnNaam) { alert(huidigeTaal === 'nl' ? "Vul je naam in!" : "Enter your name!"); return; }
 
-            if (!mijnNaam || !kamerCode) {
-                alert(vertalingen[huidigeTaal].alertFields);
-                return;
+            if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+                try { await DeviceMotionEvent.requestPermission(); } catch(e) {}
             }
 
-            // Vraag pas toestemming ná de klik zodat Apple het script niet kan bevriezen
-            await vraagIoSToestemming();
-
-            document.getElementById('naam-input').style.display = 'none';
-            document.getElementById('room-input').style.display = 'none';
-            
-            const btn = document.getElementById('main-btn');
-            btn.innerText = vertalingen[huidigeTaal].btnStart;
-
-            document.getElementById('status-text').innerText = vertalingen[huidigeTaal].connected.replace('{code}', kamerCode);
-            logDebug("Verbonden met server.");
-
-            // Start de échte, stabiele Wordfeud-postbode via ntfy.sh (loopt over SSE, 100% realtime en crash-proof)
-            luisterNaarNetwerk();
-        }
-
-        function luisterNaarNetwerk() {
-            const topic = `silentdisco_room_${kamerCode}`;
-            eventSource = new EventSource(`https://ntfy.sh{topic}/sse`);
-            
-            eventSource.onmessage = (event) => {
-                try {
-                    const data = JSON.parse(event.data);
-                    if (data.action === 'start') {
-                        lokaleSessieStarten();
-                    } else if (data.action === 'game-over') {
-                        iemandIsAfgegaan(data.verliezer);
-                    }
-                } catch (e) {
-                    // Mocht er platte tekst binnenkomen i.p.v. JSON
-                    if (event.data.includes('start')) lokaleSessieStarten();
-                }
-            };
-        }
-
-        async function stuurNetwerkSignaal(dataObj) {
-            const topic = `silentdisco_room_${kamerCode}`;
-            try {
-                await fetch(`https://ntfy.sh{topic}`, {
-                    method: 'POST',
-                    body: JSON.stringify(dataObj)
-                });
-            } catch (e) {}
-        }
-
-        function activeerMultiplayerSessie() {
-            stuurNetwerkSignaal({ action: 'start' });
-            lokaleSessieStarten();
-        }
-
-        function lokaleSessieStarten() {
-            if (sessieActief) return;
-            document.getElementById('straf-text').style.display = 'none';
-            document.getElementById('status-text').innerText = vertalingen[huidigeTaal].statusAftellen;
             document.getElementById('setup-area').style.display = 'none';
+            document.getElementById('status-text').innerText = vertalingen[huidigeTaal].aftellen;
 
-            setTimeout(() => {document.getElementById('status-text').innerText = vertalingen[huidigeTaal].actief;sessieActief = true;startX = 0; startY = 0; startZ = 0;window.addEventListener('devicemotion', checkBeweging);}, 3000);}function checkBeweging(event) {if (!sessieActief) return;const acc = event.accelerationIncludingGravity;if (!acc) return;if (startX === 0 && startY === 0 && startZ === 0) {startX = acc.x; startY = acc.y; startZ = acc.z;return;}let diffX = Math.abs(acc.x - startX);let diffY = Math.abs(acc.y - startY);let diffZ = Math.abs(acc.z - startZ);if (diffX > drempelwaarde || diffY > drempelwaarde || diffZ > drempelwaarde) {sessieActief = false;window.removeEventListener('devicemotion', checkBeweging);// Stuur direct via de live-server naar de andere telefoon wie er af is!stuurNetwerkSignaal({ action: 'game-over', verliezer: mijnNaam });iemandIsAfgegaan(mijnNaam);}}function iemandIsAfgegaan(naamVerliezer) {sessieActief = false;window.removeEventListener('devicemotion', checkBeweging);if (eventSource) eventSource.close();document.body.classList.add('alarm');if (naamVerliezer === mijnNaam) {document.getElementById('status-text').innerText = vertalingen[huidigeTaal].alarmJij;} else {document.getElementById('status-text').innerText = vertalingen[huidigeTaal].alarmAnder.replace('{naam}', naamVerliezer.toUpperCase());}const strafElement = document.getElementById('straf-text');strafElement.innerText = naamVerliezer + " " + vertalingen[huidigeTaal].straf;strafElement.style.display = 'block';document.getElementById('setup-area').style.display = 'flex';const btn = document.getElementById('main-btn');btn.innerText = vertalingen[huidigeTaal].btnReset;btn.onclick = () => window.location.reload();}
+            setTimeout(() => {
+                document.getElementById('status-text').innerText = vertalingen[huidigeTaal].actief;
+                sessieActief = true;
+                window.addEventListener('devicemotion', checkBeweging);
+            }, 3000);
+        }
+
+        function checkBeweging(event) {
+            if (!sessieActief) return;
+            const acc = event.accelerationIncludingGravity;
+            if (!acc) return;
+
+            if (startX === 0 && startY === 0 && startZ === 0) {
+                startX = acc.x; startY = acc.y; startZ = acc.z; return;
+            }
+
+            if (Math.abs(acc.x - startX) > 1.8 || Math.abs(acc.y - startY) > 1.8) {
+                sessieActief = false;
+                window.removeEventListener('devicemotion', checkBeweging);
+                document.body.classList.add('alarm');
+                document.getElementById('status-text').innerText = vertalingen[huidigeTaal].alarm;
+
+                // De WhatsApp-straftruc: opent direct je WhatsApp met de juiste tekst klaar!
+                const tekst = encodeURIComponent(`🚨 ${mijnNaam.toUpperCase()} HEEFT DE TELEFOON BEWOGEN! En betaalt de volgende ronde drankjes! 🍻`);
+                window.location.href = `https://wa.me{tekst}`;
+            }
+        }
+    </script>
+</body>
+</html>
