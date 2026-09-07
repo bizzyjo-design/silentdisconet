@@ -1,261 +1,504 @@
 <!DOCTYPE html>
-<html lang="nl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Silent Disconet Multiplayer</title>
-    <style>
-        body {
-            margin: 0;
-            background-color: #000000;
-            color: #ffffff;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            overflow: hidden;
-            user-select: none;
+
+<html lang="nl"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>Silent Disco Multiplayer V2</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    html,
+    body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        background: #000;
+        color: #fff;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                     Roboto, Helvetica, Arial, sans-serif;
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        overflow: hidden;
+        user-select: none;
+        transition: background-color 0.15s ease;
+    }
+
+    /* =========================
+       TAAL
+    ========================= */
+
+    .lang-switch {
+        position: fixed;
+        top: 15px;
+        right: 15px;
+
+        display: flex;
+        gap: 8px;
+
+        z-index: 9999;
+    }
+
+    .lang-btn {
+        background: #171717;
+        border: 1px solid #444;
+        color: #fff;
+
+        padding: 8px 13px;
+        border-radius: 8px;
+
+        cursor: pointer;
+
+        font-size: 0.85rem;
+        font-weight: 700;
+    }
+
+    .lang-btn.active {
+        border-color: #00ff00;
+        box-shadow: 0 0 12px rgba(0, 255, 0, 0.35);
+    }
+
+    /* =========================
+       HOOFDSCHERM
+    ========================= */
+
+    .app {
+        width: 100%;
+        max-width: 420px;
+
+        padding: 25px;
+
+        text-align: center;
+    }
+
+    .logo {
+        font-size: 2rem;
+        font-weight: 900;
+        letter-spacing: 2px;
+
+        margin-bottom: 10px;
+    }
+
+    .subtitle {
+        color: #888;
+        font-size: 0.9rem;
+        margin-bottom: 30px;
+    }
+
+    /* =========================
+       STATUS
+    ========================= */
+
+    #status-text {
+        font-size: 1.35rem;
+        line-height: 1.35;
+
+        font-weight: 800;
+
+        margin-bottom: 20px;
+
+        white-space: pre-line;
+    }
+
+    #straf-text {
+        display: none;
+
+        font-size: 1.25rem;
+        line-height: 1.4;
+
+        color: #fff;
+
+        padding: 15px;
+
+        margin-bottom: 25px;
+    }
+
+    /* =========================
+       INPUTS
+    ========================= */
+
+    .setup-container {
+        width: 100%;
+
+        display: flex;
+        flex-direction: column;
+
+        gap: 12px;
+    }
+
+    input {
+        width: 100%;
+
+        padding: 15px;
+
+        border-radius: 30px;
+
+        border: 2px solid #333;
+
+        background: #111;
+        color: #fff;
+
+        font-size: 1rem;
+
+        outline: none;
+
+        text-align: center;
+    }
+
+    input:focus {
+        border-color: #00ff00;
+    }
+
+    /* =========================
+       KNOP
+    ========================= */
+
+    .btn {
+        width: 100%;
+
+        border: none;
+        border-radius: 30px;
+
+        padding: 16px 20px;
+
+        background: #00ff00;
+        color: #000;
+
+        font-size: 1.05rem;
+        font-weight: 900;
+
+        cursor: pointer;
+
+        box-shadow:
+            0 0 15px rgba(0, 255, 0, 0.35);
+
+        transition: transform 0.1s ease,
+                    opacity 0.2s ease;
+    }
+
+    .btn:active {
+        transform: scale(0.97);
+    }
+
+    .btn:disabled {
+        opacity: 0.4;
+        cursor: default;
+        box-shadow: none;
+    }
+
+    /* =========================
+       LOBBY
+    ========================= */
+
+    #lobby {
+        display: none;
+
+        margin-top: 20px;
+    }
+
+    .room-code {
+        font-size: 2.4rem;
+        font-weight: 900;
+
+        letter-spacing: 8px;
+
+        margin: 15px 0;
+    }
+
+    .players {
+        margin: 20px 0;
+
+        text-align: left;
+    }
+
+    .player {
+        background: #111;
+
+        border: 1px solid #222;
+
+        padding: 12px 15px;
+
+        margin-bottom: 8px;
+
+        border-radius: 12px;
+
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .player-host {
+        color: #00ff00;
+        font-size: 0.75rem;
+        font-weight: 800;
+    }
+
+    /* =========================
+       COUNTDOWN
+    ========================= */
+
+    #countdown {
+        display: none;
+
+        font-size: 8rem;
+        line-height: 1;
+
+        font-weight: 900;
+
+        margin: 20px 0;
+    }
+
+    /* =========================
+       ACTIEF
+    ========================= */
+
+    #active-screen {
+        display: none;
+    }
+
+    .silence {
+        font-size: 5rem;
+        margin-bottom: 15px;
+    }
+
+    .active-title {
+        font-size: 2rem;
+        font-weight: 900;
+    }
+
+    .active-subtitle {
+        color: #999;
+        margin-top: 15px;
+    }
+
+    /* =========================
+       ALARM
+    ========================= */
+
+    body.alarm {
+        background: #ff0033;
+    }
+
+    body.alarm .app {
+        animation: alarmPulse 0.45s infinite alternate;
+    }
+
+    @keyframes alarmPulse {
+        from {
+            transform: scale(1);
         }
-        .lang-switch {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            display: flex;
-            gap: 10px;
-            z-index: 9999;
+
+        to {
+            transform: scale(1.025);
         }
-        .lang-btn {
-            background: #222;
-            border: 1px solid #444;
-            color: white;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: bold;
-        }
-        .lang-btn.active {
-            border-color: #00FF00;
-            background: #111;
-            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
-        }
-        #status-text {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            text-align: center;
-            font-weight: bold;
-            padding: 0 20px;
-            white-space: pre-line;
-        }
-        #straf-text {
-            font-size: 1.4rem;
-            color: #ffcccc;
-            text-align: center;
-            margin-bottom: 2rem;
-            padding: 0 30px;
-            font-style: italic;
-            display: none;
-            font-weight: bold;
-        }
-        .setup-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-            width: 100%;
-            max-width: 300px;
-            z-index: 10;
-        }
-        input[type="text"] {
-            width: 100%;
-            padding: 0.8rem;
-            border-radius: 25px;
-            border: 2px solid #333;
-            background-color: #111;
-            color: #fff;
-            font-size: 1rem;
-            outline: none;
-            text-align: center;
-            box-sizing: border-box;
-        }
-        input[type="text"]:focus {
-            border-color: #00FF00;
-        }
-        .btn {
-            background-color: #00FF00;
-            color: #000000;
-            border: none;
-            padding: 1.2rem 3rem;
-            font-size: 1.3rem;
-            font-weight: bold;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.4);
-            width: 100%;
-        }
-        .alarm {
-            background-color: #FF0033 !important;
-        }
-    </style>
+    }
+
+    .alarm-icon {
+        font-size: 5rem;
+        margin-bottom: 15px;
+    }
+
+    .loser-name {
+        font-size: 2.5rem;
+        font-weight: 1000;
+
+        text-transform: uppercase;
+
+        margin: 15px 0;
+    }
+
+    /* =========================
+       HULPTEKST
+    ========================= */
+
+    .small-text {
+        color: #777;
+        font-size: 0.8rem;
+        line-height: 1.4;
+        margin-top: 15px;
+    }
+
+    /* =========================
+       HIDDEN
+    ========================= */
+
+    .hidden {
+        display: none !important;
+    }
+</style>
+
 </head>
+
 <body>
 
-    <div class="lang-switch">
-        <button id="btn-nl" class="lang-btn active">NL 🇳🇱</button>
-        <button id="btn-en" class="lang-btn">EN 🇬🇧</button>
+<!-- TAALKEUZE -->
+
+<div class="lang-switch">
+    <button id="btn-nl" class="lang-btn active">
+        NL 🇳🇱
+    </button>
+
+    <button id="btn-en" class="lang-btn">
+        EN 🇬🇧
+    </button>
+</div>
+
+
+<main class="app">
+
+    <div class="logo">
+        SILENT DISCO
     </div>
 
-    <div id="status-text">Voer een kamer-code in om samen te spelen.</div>
-    <div id="straf-text"></div>
-
-    <div class="setup-container" id="setup-area">
-        <input type="text" id="naam-input" placeholder="Jouw Naam">
-        <input type="text" id="room-input" placeholder="Kamer Code (bijv. 1234)">
-        <button id="main-btn" class="btn">VERBIND</button>
+    <div class="subtitle">
+        Multiplayer Party Game
     </div>
 
-    <script>
-        let mijnNaam = "";
-        let kamerCode = "";
-        let sessieActief = false;
-        let startX = 0, startY = 0, startZ = 0;
-        const drempelwaarde = 1.8;
-        let huidigeTaal = 'nl';
-        let eventSource = null;
 
-        const vertalingen = {
-            nl: {
-                start: "Voer een kamer-code in om samen te spelen.",
-                namePlaceholder: "Jouw Naam",
-                roomPlaceholder: "Kamer Code (bijv. 1234)",
-                btnConnect: "VERBIND",
-                btnStart: "START SESSIE VOOR IEDEREEN",
-                alertFields: "Vul aub je naam en een kamer-code in!",
-                connected: "Verbonden met kamer: {code}.\nLeg je telefoon neer en klik op START.",
-                aftellen: "Sessie start over 3 seconden... LEG NEER!",
-                actief: "🔒 Sessie is actief. NIET AANRAKEN!",
-                alarmJij: "🚨 JIJ HEBT BEWOGEN! 🚨",
-                alarmAnder: "🚨 {naam} HEEFT BEWOGEN! 🚨",
-                btnReset: "RESET GAME",
-                straf: "moet de volgende ronde drankjes betalen! 🍻"
-            },
-            en: {
-                start: "Enter a room code to play together.",
-                namePlaceholder: "Your Name",
-                roomPlaceholder: "Room Code (e.g. 1234)",
-                btnConnect: "CONNECT",
-                btnStart: "START SESSION FOR EVERYONE",
-                alertFields: "Please enter your name and a room code!",
-                connected: "Connected to room: {code}.\nPlace your phone down and click START.",
-                aftellen: "Session starts in 3 seconds... PLACE DOWN!",
-                actief: "🔒 Session is active. DO NOT TOUCH!",
-                alarmJij: "🚨 YOU MOVED! 🚨",
-                alarmAnder: "🚨 {naam} MOVED! 🚨",
-                btnReset: "RESET GAME",
-                straf: "has to buy the next round of drinks! 🍻"
-            }
-        };
+    <!-- =========================
+         SETUP
+    ========================== -->
 
-        // WATERDICHTE KOPPELING DIRECT BIJ HET INLADEN
-        document.getElementById('btn-nl').onclick = function() { wisselTaal('nl'); };
-        document.getElementById('btn-en').onclick = function() { wisselTaal('en'); };
-        document.getElementById('main-btn').onclick = function() { verbindMetLobby(); };
+    <section id="setup-area">
 
-        function wisselTaal(taal) {
-            huidigeTaal = taal;
-            document.getElementById('btn-nl').classList.remove('active');
-            document.getElementById('btn-en').classList.remove('active');
-            document.getElementById('btn-' + taal).classList.add('active');
-            
-            if (!sessieActief && !mijnNaam) {
-                document.getElementById('status-text').innerText = vertalingen[taal].start;
-                document.getElementById('naam-input').placeholder = vertalingen[taal].namePlaceholder;
-                document.getElementById('room-input').placeholder = vertalingen[taal].roomPlaceholder;
-                document.getElementById('main-btn').innerText = vertalingen[taal].btnConnect;
-            }
-        }
+        <div id="status-text">
+            Voer een kamer-code in om samen te spelen.
+        </div>
 
-        async function vraagIoSToestemming() {
-            if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-                try { await DeviceMotionEvent.requestPermission(); } catch (e) {}
-            }
-        }
+        <input
+            type="text"
+            id="naam-input"
+            placeholder="Jouw Naam"
+            maxlength="20"
+            autocomplete="off"
+        >
 
-        async function verbindMetLobby() {
-            // Als de naam al bekend is, werkt de knop als startknop voor de multiplayer-sessie
-            if (mijnNaam !== "" && kamerCode !== "") {
-                activeerMultiplayerSessie();
-                return;
-            }
+        <input
+            type="text"
+            id="room-input"
+            placeholder="Kamer Code (bijv. 1234)"
+            maxlength="10"
+            inputmode="numeric"
+            autocomplete="off"
+        >
 
-            mijnNaam = document.getElementById('naam-input').value.trim();
-            kamerCode = document.getElementById('room-input').value.trim();
+        <button
+            id="main-btn"
+            class="btn"
+        >
+            VERBIND
+        </button>
 
-            if (!mijnNaam || !kamerCode) {
-                alert(vertalingen[huidigeTaal].alertFields);
-                return;
-            }
+        <div class="small-text" id="setup-help">
+            Kies dezelfde kamer-code als de andere spelers.
+        </div>
 
-            await vraagIoSToestemming();
+    </section>
 
-            document.getElementById('naam-input').style.display = 'none';
-            document.getElementById('room-input').style.display = 'none';
-            
-            document.getElementById('status-text').innerText = vertalingen[huidigeTaal].connected.replace('{code}', kamerCode);
-            
-            const btn = document.getElementById('main-btn');
-            btn.innerText = vertalingen[huidigeTaal].btnStart;
 
-            // Start de officiële realtime netwerkluisteraar via Server-Sent Events (SSE)
-            luisterNaarNetwerk();
-        }
+    <!-- =========================
+         LOBBY
+    ========================== -->
 
-        function luisterNaarNetwerk() {
-            const topic = `silentdisco_bizzy_${kamerCode}`;
-            // Dit is de officiële manier om live naar ntfy.sh te luisteren zonder polling-crashes
-            eventSource = new EventSource(`https://ntfy.sh{topic}/sse`);
-            
-            eventSource.onmessage = function(event) {
-                try {
-                    const data = JSON.parse(event.data);
-                    if (data.message) {
-                        const msg = data.message.trim();
-                        if (msg === 'start-game-event') {
-                            lokaleSessieStarten();
-                        } else if (msg.indexOf('game-over-event:') === 0) {
-                            const verliezer = msg.replace('game-over-event:', '');
-                            iemandIsAfgegaan(verliezer);
-                        }
-                    }
-                } catch (e) {}
-            };
-        }
+    <section id="lobby">
 
-        async function stuurNetwerkSignaal(berichtInhoud) {
-            const topic = `silentdisco_bizzy_${kamerCode}`;
-            try {
-                await fetch(`https://ntfy.sh{topic}`, {
-                    method: 'POST',
-                    body: berichtInhoud
-                });
-            } catch (e) {}
-        }
+        <div id="lobby-status">
+            Wachten op spelers...
+        </div>
 
-        function activeerMultiplayerSessie() {
-            stuurNetwerkSignaal('start-game-event');
-            lokaleSessieStarten();
-        }
+        <div class="room-code" id="room-code-display">
+            0000
+        </div>
 
-        function lokaleSessieStarten() {
-            if (sessieActief) return;
-            document.getElementById('straf-text').style.display = 'none';
-            document.getElementById('status-text').innerText = vertalingen[huidigeTaal].aftellen;
-            document.getElementById('setup-area').style.display = 'none';
+        <div class="players" id="players-list">
+        </div>
 
-            setTimeout(() => {
-                document.getElementById('status-text').innerText = vertalingen[huidigeTaal].actief;
-                sessieActief = true;
-                startX = 0; startY = 0; startZ = 0;
-                if (window.DeviceMotionEvent) {window.addEventListener('devicemotion', checkBeweging);}}, 3000);}function checkBeweging(event) {if (!sessieActief) return;const acc = event.accelerationIncludingGravity;if (!acc) return;if (startX === 0 && startY === 0 && startZ === 0) {startX = acc.x; startY = acc.y; startZ = acc.z;return;}let diffX = Math.abs(acc.x - startX);let diffY = Math.abs(acc.y - startY);let diffZ = Math.abs(acc.z - startZ);if (diffX > drempelwaarde || diffY > drempelwaarde || diffZ > drempelwaarde) {sessieActief = false;window.removeEventListener('devicemotion', checkBeweging);stuurNetwerkSignaal(game-over-event:${mijnNaam});iemandIsAfgegaan(mijnNaam);}}function iemandIsAfgegaan(naamVerliezer) {sessieActief = false;window.removeEventListener('devicemotion', checkBeweging);if (eventSource) eventSource.close();document.body.classList.add('alarm');if (naamVerliezer === mijnNaam) {document.getElementById('status-text').innerText = vertalingen[huidigeTaal].alarmJij;} else {document.getElementById('status-text').innerText = vertalingen[huidigeTaal].alarmAnder.replace('{naam}', naamVerliezer.toUpperCase());}const strafElement = document.getElementById('straf-text');strafElement.innerText = naamVerliezer + " " + vertalingen[huidigeTaal].straf;strafElement.style.display = 'block';document.getElementById('setup-area').style.display = 'flex';const btn = document.getElementById('main-btn');btn.innerText = vertalingen[huidigeTaal].btnReset;btn.onclick = () => window.location.reload();}
+        <button
+            id="start-btn"
+            class="btn"
+        >
+            START
+        </button>
+
+        <div class="small-text" id="host-help">
+            Alleen de host kan de sessie starten.
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         COUNTDOWN
+    ========================== -->
+
+    <section id="countdown">
+        3
+    </section>
+
+
+    <!-- =========================
+         ACTIVE GAME
+    ========================== -->
+
+    <section id="active-screen">
+
+        <div class="silence">
+            🤫
+        </div>
+
+        <div class="active-title" id="active-title">
+            NIET BEWEGEN
+        </div>
+
+        <div class="active-subtitle" id="active-subtitle">
+            Leg je telefoon plat neer.
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         GAME OVER
+    ========================== -->
+
+    <section id="game-over" class="hidden">
+
+        <div class="alarm-icon">
+            🚨
+        </div>
+
+        <div id="alarm-title">
+            IEMAND HEEFT BEWOGEN!
+        </div>
+
+        <div class="loser-name" id="loser-name">
+            TOM
+        </div>
+
+        <div id="straf-text">
+        </div>
+
+        <button
+            id="reset-btn"
+            class="btn"
+        >
+            NIEUWE RONDE
+        </button>
+
+    </section>
+
+</main>
+
+<script> /* ========================================================= SILENT DISCO MULTIPLAYER V2 Prototype: - HTML / CSS / JavaScript - ntfy.sh realtime messaging - DeviceMotion - NL / EN ========================================================= */ /* ========================================================= CONFIGURATIE ========================================================= */ const NTFY_BASE_URL = "https://ntfy.sh"; /* ========================================================= SPELERDATA ========================================================= */ let mijnNaam = ""; let kamerCode = ""; let spelerId = ""; let isHost = false; let sessieActief = false; let gameBezig = false; let huidigeTaal = "nl"; let eventSource = null; /* ========================================================= SENSOR ========================================================= */ const DREMPELWAARDE = 1.8; let vorigeX = null; let vorigeY = null; let vorigeZ = null; let laatsteBeweging = 0; const MINIMALE_BEWEGING_INTERVAL = 300; /* ========================================================= VERTALINGEN ========================================================= */ const vertalingen = { nl: { start: "Voer een kamer-code in om samen te spelen.", namePlaceholder: "Jouw Naam", roomPlaceholder: "Kamer Code (bijv. 1234)", connect: "VERBIND", lobby: "Wachten op spelers...", startGame: "START", waiting: "Wachten op de host...", host: "HOST", connected: "Verbonden met kamer {code}", countdown: "Leg je telefoon neer...", active: "NIET BEWEGEN", activeSubtitle: "Leg je telefoon plat neer. Raak hem niet aan.", movedYou: "🚨 JIJ HEBT BEWOGEN! 🚨", movedOther: "🚨 {name} HEEFT BEWOGEN! 🚨", penalty: "moet de volgende ronde drankjes betalen! 🍻", newRound: "NIEUWE RONDE", fields: "Vul je naam en kamer-code in.", permission: "Bewegingstoestemming is nodig om het spel te spelen.", help: "Kies dezelfde kamer-code als de andere spelers.", hostHelp: "Alleen de host kan de sessie starten." }, en: { start: "Enter a room code to play together.", namePlaceholder: "Your Name", roomPlaceholder: "Room Code (e.g. 1234)", connect: "CONNECT", lobby: "Waiting for players...", startGame: "START", waiting: "Waiting for the host...", host: "HOST", connected: "Connected to room {code}", countdown: "Place your phone down...", active: "DO NOT MOVE", activeSubtitle: "Place your phone flat. Do not touch it.", movedYou: "🚨 YOU MOVED! 🚨", movedOther: "🚨 {name} MOVED! 🚨", penalty: "has to buy the next round of drinks! 🍻", newRound: "NEW ROUND", fields: "Enter your name and room code.", permission: "Motion permission is required to play.", help: "Use the same room code as the other players.", hostHelp: "Only the host can start the session." } }; /* ========================================================= ELEMENTEN ========================================================= */ const btnNL = document.getElementById("btn-nl"); const btnEN = document.getElementById("btn-en"); const statusText = document.getElementById("status-text"); const naamInput = document.getElementById("naam-input"); const roomInput = document.getElementById("room-input"); const mainBtn = document.getElementById("main-btn"); const setupArea = document.getElementById("setup-area"); const lobby = document.getElementById("lobby"); const lobbyStatus = document.getElementById("lobby-status"); const roomCodeDisplay = document.getElementById("room-code-display"); const playersList = document.getElementById("players-list"); const startBtn = document.getElementById("start-btn"); const countdown = document.getElementById("countdown"); const activeScreen = document.getElementById("active-screen"); const activeTitle = document.getElementById("active-title"); const activeSubtitle = document.getElementById("active-subtitle"); const gameOver = document.getElementById("game-over"); const alarmTitle = document.getElementById("alarm-title"); const loserName = document.getElementById("loser-name"); const strafText = document.getElementById("straf-text"); const resetBtn = document.getElementById("reset-btn"); const setupHelp = document.getElementById("setup-help"); const hostHelp = document.getElementById("host-help"); /* ========================================================= INIT ========================================================= */ document.addEventListener("DOMContentLoaded", function () { updateLanguageUI(); }); /* ========================================================= TAAL ========================================================= */ btnNL.addEventListener("click", function () { wisselTaal("nl"); }); btnEN.addEventListener("click", function () { wisselTaal("en"); }); function wisselTaal(taal) { huidigeTaal = taal; btnNL.classList.toggle("active", taal === "nl"); btnEN.classList.toggle("active", taal === "en"); updateLanguageUI(); } function updateLanguageUI() { const t = vertalingen[huidigeTaal]; if (!mijnNaam) { statusText.innerText = t.start; naamInput.placeholder = t.namePlaceholder; roomInput.placeholder = t.roomPlaceholder; mainBtn.innerText = t.connect; setupHelp.innerText = t.help; } activeTitle.innerText = t.active; activeSubtitle.innerText = t.activeSubtitle; startBtn.innerText = t.startGame; resetBtn.innerText = t.newRound; hostHelp.innerText = t.hostHelp; } /* ========================================================= ID GENEREREN ========================================================= */ function genereerSpelerId() { return ( Date.now().toString(36) + "-" + Math.random() .toString(36) .substring(2, 10) ); } /* ========================================================= IOS MOTION TOESTEMMING ========================================================= */ async function vraagMotionToestemming() { if ( typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function" ) { try { const permission = await DeviceMotionEvent.requestPermission(); if (permission !== "granted") { alert( vertalingen[huidigeTaal].permission ); return false; } } catch (error) { console.error( "Motion permission error:", error ); return false; } } return true; } /* ========================================================= VERBINDEN ========================================================= */ mainBtn.addEventListener( "click", verbindMetLobby ); async function verbindMetLobby() { mijnNaam = naamInput.value .trim() .substring(0, 20); kamerCode = roomInput.value .trim() .replace(/\s/g, ""); if (!mijnNaam || !kamerCode) { alert( vertalingen[huidigeTaal].fields ); return; } spelerId = genereerSpelerId(); const motionOK = await vraagMotionToestemming(); if (!motionOK) { return; } naamInput.style.display = "none"; roomInput.style.display = "none"; mainBtn.style.display = "none"; setupHelp.style.display = "none"; statusText.innerText = vertalingen[huidigeTaal] .connected .replace( "{code}", kamerCode ); roomCodeDisplay.innerText = kamerCode; setupArea.style.display = "none"; lobby.style.display = "block"; bepaalHost(); luisterNaarNetwerk(); // Meld jezelf aan in de kamer. await stuurNetwerkSignaal({ type: "player-join", id: spelerId, name: mijnNaam, isHost: isHost }); // Stuur periodiek een heartbeat. startHeartbeat(); } /* ========================================================= HOST ========================================================= */ /* In deze prototypeversie wordt de eerste speler als host beschouwd. Dit is voldoende om met twee telefoons te testen. In de uiteindelijke versie laten we de server de host bepalen. */ function bepaalHost() { const bestaandeHost = localStorage.getItem( "silentdisco_host_" + kamerCode ); if (!bestaandeHost) { localStorage.setItem( "silentdisco_host_" + kamerCode, spelerId ); isHost = true; } else { isHost = bestaandeHost === spelerId; } updateHostUI(); } function updateHostUI() { const t = vertalingen[huidigeTaal]; if (isHost) { startBtn.disabled = false; hostHelp.innerText = t.hostHelp; } else { startBtn.disabled = true; startBtn.innerText = t.waiting; hostHelp.innerText = t.waiting; } } /* ========================================================= REALTIME LISTENER ========================================================= */ function luisterNaarNetwerk() { if (eventSource) { eventSource.close(); } const topic = "silentdisco_bizzy_" + encodeURIComponent(kamerCode); const url = NTFY_BASE_URL + "/" + topic + "/sse"; console.log( "Connecting SSE:", url ); eventSource = new EventSource(url); eventSource.onopen = function () { console.log( "Realtime connection established." ); }; eventSource.onmessage = function (event) { verwerkNetwerkBericht( event.data ); }; eventSource.onerror = function (error) { console.warn( "SSE connection problem:", error ); /* We sluiten hier niet onmiddellijk. EventSource probeert automatisch opnieuw verbinding te maken. */ }; } /* ========================================================= NETWERKBERICHT VERWERKEN ========================================================= */ function verwerkNetwerkBericht(rawData) { try { const data = JSON.parse(rawData); if (!data.message) { return; } const bericht = JSON.parse(data.message); console.log( "NETWORK:", bericht ); switch (bericht.type) { case "player-join": voegSpelerToe( bericht ); break; case "player-heartbeat": voegSpelerToe( bericht ); break; case "start-game": if ( bericht.startAt ) { ontvangStartSignaal( bericht.startAt ); } break; case "game-over": if ( bericht.loserName ) { iemandIsAfgegaan( bericht.loserName ); } break; case "new-round": resetLokaleRonde(); break; } } catch (error) { console.warn( "Invalid network message:", rawData ); } } /* ========================================================= NETWERKBERICHT VERSTUREN ========================================================= */ async function stuurNetwerkSignaal(bericht) { const topic = "silentdisco_bizzy_" + encodeURIComponent(kamerCode); const url = NTFY_BASE_URL + "/" + topic; try { const response = await fetch( url, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify( bericht ) } ); if (!response.ok) { console.warn( "ntfy HTTP error:", response.status ); } } catch (error) { console.error( "Network error:", error ); } } /* ========================================================= STARTKNOP ========================================================= */ startBtn.addEventListener( "click", startMultiplayerGame ); async function startMultiplayerGame() { if (!isHost) { return; } if (gameBezig) { return; } /* Gebruik een toekomstige servertijd. 3,5 seconden geeft de andere telefoons tijd om het bericht te ontvangen. */ const startAt = Date.now() + 3500; await stuurNetwerkSignaal({ type: "start-game", startAt: startAt }); /* Host start lokaal eveneens. */ ontvangStartSignaal( startAt ); } /* ========================================================= STARTSIGNAAAL ONTVANGEN ========================================================= */ function ontvangStartSignaal(startAt) { if (gameBezig) { return; } gameBezig = true; sessieActief = false; lobby.style.display = "none"; setupArea.style.display = "none"; activeScreen.style.display = "none"; gameOver.classList.add( "hidden" ); document.body.classList.remove( "alarm" ); const interval = setInterval( function () { const resterend = startAt - Date.now(); if (resterend <= 0) { clearInterval( interval ); countdown.style.display = "none"; startActieveSessie(); return; } const seconden = Math.ceil( resterend / 1000 ); countdown.innerText = Math.max( 1, seconden ); countdown.style.display = "block"; }, 50 ); } /* ========================================================= ACTIEVE SESSIE ========================================================= */ function startActieveSessie() { sessieActief = true; vorigeX = null; vorigeY = null; vorigeZ = null; countdown.style.display = "none"; activeScreen.style.display = "block"; window.addEventListener( "devicemotion", checkBeweging, true ); console.log( "MOTION DETECTION ACTIVE" ); } /* ========================================================= BEWEGING DETECTEREN ========================================================= */ function checkBeweging(event) { if (!sessieActief) { return; } const acceleration = event.accelerationIncludingGravity; if (!acceleration) { return; } const x = acceleration.x; const y = acceleration.y; const z = acceleration.z; if ( x === null || y === null || z === null ) { return; } /* Eerste sensorwaarde gebruiken als referentie. */ if ( vorigeX === null || vorigeY === null || vorigeZ === null ) { vorigeX = x; vorigeY = y; vorigeZ = z; return; } const verschilX = Math.abs( x - vorigeX ); const verschilY = Math.abs( y - vorigeY ); const verschilZ = Math.abs( z - vorigeZ ); /* Sensorruis niet onmiddellijk als beweging behandelen. */ const beweging = verschilX > DREMPELWAARDE || verschilY > DREMPELWAARDE || verschilZ > DREMPELWAARDE; /* Referentie langzaam bijwerken. */ vorigeX = (vorigeX * 0.9) + (x * 0.1); vorigeY = (vorigeY * 0.9) + (y * 0.1); vorigeZ = (vorigeZ * 0.9) + (z * 0.1); if (!beweging) { return; } const nu = Date.now(); if ( nu - laatsteBeweging < MINIMALE_BEWEGING_INTERVAL ) { return; } laatsteBeweging = nu; registreerEigenBeweging(); } /* ========================================================= EIGEN BEWEGING ========================================================= */ function registreerEigenBeweging() { if (!sessieActief) { return; } sessieActief = false; window.removeEventListener( "devicemotion", checkBeweging, true ); /* Stuur game-over naar de kamer. */ stuurNetwerkSignaal({ type: "game-over", loserId: spelerId, loserName: mijnNaam }); /* Toon onmiddellijk lokaal het alarm. */ iemandIsAfgegaan( mijnNaam ); } /* ========================================================= IEMAND IS AFGEGAAN ========================================================= */ function iemandIsAfgegaan( naamVerliezer ) { if ( !naamVerliezer ) { return; } sessieActief = false; gameBezig = false; window.removeEventListener( "devicemotion", checkBeweging, true ); activeScreen.style.display = "none"; countdown.style.display = "none"; lobby.style.display = "none"; setupArea.style.display = "none"; gameOver.classList.remove( "hidden" ); document.body.classList.add( "alarm" ); const t = vertalingen[huidigeTaal]; if ( naamVerliezer .toLowerCase() === mijnNaam.toLowerCase() ) { alarmTitle.innerText = t.movedYou; } else { alarmTitle.innerText = t.movedOther .replace( "{name}", naamVerliezer .toUpperCase() ); } loserName.innerText = naamVerliezer .toUpperCase(); strafText.innerText = naamVerliezer + " " + t.penalty; strafText.style.display = "block"; } /* ========================================================= NIEUWE RONDE ========================================================= */ resetBtn.addEventListener( "click", startNieuweRonde ); async function startNieuweRonde() { document.body.classList.remove( "alarm" ); gameOver.classList.add( "hidden" ); strafText.style.display = "none"; /* Iedereen krijgt hetzelfde reset-signaal. */ await stuurNetwerkSignaal({ type: "new-round" }); resetLokaleRonde(); } /* ========================================================= LOKALE RESET ========================================================= */ function resetLokaleRonde() { sessieActief = false; gameBezig = false; window.removeEventListener( "devicemotion", checkBeweging, true ); gameOver.classList.add( "hidden" ); document.body.classList.remove( "alarm" ); lobby.style.display = "block"; setupArea.style.display = "none"; updateHostUI(); } /* ========================================================= HEARTBEAT ========================================================= */ let heartbeatInterval = null; function startHeartbeat() { if (heartbeatInterval) { clearInterval( heartbeatInterval ); } heartbeatInterval = setInterval( function () { if (!kamerCode) { return; } stuurNetwerkSignaal({ type: "player-heartbeat", id: spelerId, name: mijnNaam, isHost: isHost }); }, 5000 ); } /* ========================================================= LOKALE SPELERLIJST ========================================================= */ const spelers = {}; function voegSpelerToe( speler ) { if ( !speler || !speler.id || !speler.name ) { return; } spelers[speler.id] = { id: speler.id, name: speler.name, isHost: Boolean( speler.isHost ), lastSeen: Date.now() }; tekenSpelers(); } /* ========================================================= SPELERS TONEN ========================================================= */ function tekenSpelers() { playersList.innerHTML = ""; const spelerArray = Object.values( spelers ); /* Voeg jezelf altijd toe. */ const bestaatAl = spelerArray.some( speler => speler.id === spelerId ); if (!bestaatAl) { spelerArray.push({ id: spelerId, name: mijnNaam, isHost: isHost, lastSeen: Date.now() }); } spelerArray.forEach( function (speler) { const div = document.createElement( "div" ); div.className = "player"; const naam = document.createElement( "span" ); naam.innerText = speler.name; div.appendChild( naam ); if (speler.isHost) { const host = document.createElement( "span" ); host.className = "player-host"; host.innerText = vertalingen[ huidigeTaal ].host; div.appendChild( host ); } playersList.appendChild( div ); } ); } /* ========================================================= OUDE SPELERS OPRUIMEN ========================================================= */ setInterval( function () { const nu = Date.now(); Object.keys( spelers ).forEach( function (id) { if ( nu - spelers[id].lastSeen > 15000 ) { delete spelers[id]; } } ); tekenSpelers(); }, 5000 ); /* ========================================================= PAGINA VERLATEN ========================================================= */ window.addEventListener( "beforeunload", function () { if (eventSource) { eventSource.close(); } if (heartbeatInterval) { clearInterval( heartbeatInterval ); } window.removeEventListener( "devicemotion", checkBeweging, true ); } ); </script>
+
+</body> </html>
