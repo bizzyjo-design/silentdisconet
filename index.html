@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Silent Disco V5.2</title>
+<title>Silent Disco V5.3</title>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;min-height:100%;background:#050505;color:#fff}
@@ -231,12 +231,26 @@ if("wakeLock" in navigator){if(wakeLock)try{await wakeLock.release()}catch(e){};
 }
 async function connect(isHost){
 if(!(await motionOK())){alert(T[language].motion);return false}
-const ready=await listenReady();
-if(!ready){alert("Realtime verbinding kon niet worden gestart. Probeer opnieuw.");return false}
-add({id:playerId,name});show("lobby");await requestWake();await send({type:"player-join",id:playerId,name});startHeartbeat();if(isHost){$("invite").classList.remove("hidden");$("start").classList.remove("hidden")}return true
+listen();
+add({id:playerId,name});
+show("lobby");
+await requestWake();
+startHeartbeat();
+if(isHost){$("invite").classList.remove("hidden");$("start").classList.remove("hidden")}
+return true
 }
 function topic(){return "silentdisco_bizzy_"+encodeURIComponent(room)}
-function attachMessages(){
+function listen(){
+if(source)source.close();
+source=new EventSource(NTFY+"/"+topic()+"/sse");
+
+/* Belangrijk: we melden een speler pas bij de kamer aan zodra
+   zijn realtime luisterverbinding echt OPEN is. Als de host de
+   naam ziet, weten we dus dat die speler START kan ontvangen. */
+source.onopen=()=>{
+if(room&&playerId&&name)send({type:"player-join",id:playerId,name})
+};
+
 source.onmessage=e=>{
 try{
 const outer=JSON.parse(e.data);if(!outer.message)return;const m=JSON.parse(outer.message);
@@ -248,25 +262,15 @@ else if(m.type==="new-round")resetLocal();
 }catch(err){console.warn(err)}
 }
 }
-function listen(){
-if(source)source.close();
-source=new EventSource(NTFY+"/"+topic()+"/sse");
-attachMessages();
-}
-function listenReady(){
-if(source)source.close();
-source=new EventSource(NTFY+"/"+topic()+"/sse");
-attachMessages();
-return new Promise(resolve=>{
-let done=false;
-const finish=v=>{if(done)return;done=true;clearTimeout(timer);resolve(v)};
-const timer=setTimeout(()=>finish(false),8000);
-source.onopen=()=>finish(true);
-source.onerror=()=>{if(source.readyState===EventSource.CLOSED)finish(false)};
-})
-}
 async function send(m){try{await fetch(NTFY+"/"+topic(),{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify(m)})}catch(e){console.error(e)}}
-function startHeartbeat(){clearInterval(heartbeat);heartbeat=setInterval(()=>send({type:"player-heartbeat",id:playerId,name}),5000)}
+function startHeartbeat(){
+clearInterval(heartbeat);
+if(playerId&&name)add({id:playerId,name});
+heartbeat=setInterval(()=>{
+if(playerId&&name)add({id:playerId,name});
+send({type:"player-heartbeat",id:playerId,name})
+},5000)
+}
 function add(p){if(!p.id||!p.name)return;playerMap[p.id]={id:p.id,name:p.name,lastSeen:Date.now()};draw()}
 function draw(){const box=$("players");box.innerHTML="";Object.values(playerMap).forEach(p=>{const d=document.createElement("div");d.className="player";d.textContent=p.name;box.appendChild(d)})}
 function drawSettings(){
@@ -290,7 +294,10 @@ return list[Math.floor(Math.random()*list.length)]
 $("start").onclick=async()=>{
 if(busy||!creator)return;
 currentPenalty=choosePenalty();
-const startAt=Date.now()+4500,endAt=startAt+settings.duration*60000;
+
+/* Iets meer marge + twee herhalingen: mocht één netwerkbericht
+   onderweg verloren gaan, gebruikt elk toestel exact dezelfde startAt. */
+const startAt=Date.now()+5000,endAt=startAt+settings.duration*60000;
 const msg={type:"start-game",startAt,endAt,settings,penalty:currentPenalty};
 await send(msg);
 setTimeout(()=>send(msg),700);
