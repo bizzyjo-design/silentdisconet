@@ -5,172 +5,249 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#050505">
-<title>Silent Disco V9</title>
+<title>DON'T TOUCH V11</title>
 <style>
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
-  --bg:#050506;
-  --panel:#0d0f12;
-  --panel2:#13161a;
-  --line:#242830;
-  --muted:#8f98a6;
-  --text:#f8fafc;
-  --green:#00f56a;
-  --green2:#43ff9a;
-  --danger:#ff174d;
-  --radius:24px;
+  --bg:#05030b; --panel:rgba(13,12,24,.82); --panel2:rgba(18,15,33,.9);
+  --text:#fff; --muted:#a8aac0; --pink:#ff3ad7; --violet:#7b61ff;
+  --cyan:#21d4ff; --green:#23f7a3; --orange:#ffad2f; --danger:#ff164f;
+  --ring:0 0 0 1px rgba(255,255,255,.06) inset;
 }
-html,body{margin:0;min-height:100%;background:
- radial-gradient(circle at 50% -10%,rgba(0,245,106,.14),transparent 34%),
- radial-gradient(circle at 100% 20%,rgba(0,245,106,.06),transparent 28%),
- var(--bg);color:var(--text)}
+html,body{margin:0;min-height:100%;background:#05030b;color:var(--text)}
 body{
- font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
- display:flex;justify-content:center;align-items:flex-start;
- min-height:100svh;padding:28px 0 44px;user-select:none;transition:background .2s ease,color .2s ease;
- overflow-x:hidden
+  font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  min-height:100svh;display:flex;justify-content:center;align-items:flex-start;
+  padding:26px 0 50px;user-select:none;overflow-x:hidden;
+  background:
+    radial-gradient(circle at 15% 5%,rgba(255,58,215,.22),transparent 26%),
+    radial-gradient(circle at 82% 0%,rgba(33,212,255,.19),transparent 30%),
+    radial-gradient(circle at 50% 38%,rgba(123,97,255,.12),transparent 34%),
+    linear-gradient(180deg,#090414 0%,#05030b 52%,#030207 100%);
+  transition:background .2s ease
 }
 body:before{
- content:"";position:fixed;inset:0;pointer-events:none;opacity:.35;
- background-image:
- linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),
- linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);
- background-size:28px 28px;
- mask-image:linear-gradient(to bottom,black,transparent 72%)
+  content:"";position:fixed;inset:0;pointer-events:none;opacity:.5;
+  background:
+    linear-gradient(125deg,transparent 0 18%,rgba(255,58,215,.10) 19%,transparent 21% 100%),
+    linear-gradient(55deg,transparent 0 76%,rgba(33,212,255,.08) 77%,transparent 79% 100%);
+  filter:blur(2px)
 }
-.app{width:100%;max-width:470px;padding:26px 22px;text-align:center;position:relative;z-index:1}
+body:after{
+  content:"";position:fixed;left:50%;top:0;transform:translateX(-50%);
+  width:720px;height:720px;border-radius:50%;pointer-events:none;opacity:.28;
+  background:radial-gradient(circle,rgba(123,97,255,.28),transparent 62%);
+  filter:blur(40px)
+}
+.app{width:100%;max-width:520px;padding:22px 20px;text-align:center;position:relative;z-index:1}
 .lang{position:fixed;top:14px;right:14px;display:flex;gap:8px;z-index:20}
 .lang button{
- background:rgba(18,20,24,.86);backdrop-filter:blur(10px);
- border:1px solid #343943;color:#fff;padding:9px 12px;border-radius:13px;font-weight:900;
- box-shadow:0 8px 24px rgba(0,0,0,.22)
+  background:rgba(7,7,15,.72);backdrop-filter:blur(16px);
+  border:1px solid rgba(255,255,255,.16);color:#fff;padding:10px 13px;
+  border-radius:999px;font-weight:900;box-shadow:0 10px 30px rgba(0,0,0,.28)
 }
-.lang button.active{border-color:var(--green);box-shadow:0 0 0 1px rgba(0,245,106,.16) inset,0 0 20px rgba(0,245,106,.08)}
+.lang button.active{
+  border-color:var(--green);box-shadow:0 0 0 1px rgba(35,247,163,.18) inset,0 0 22px rgba(35,247,163,.18)
+}
 .logo{
- font-size:clamp(2rem,7vw,2.65rem);font-weight:1000;letter-spacing:2.8px;margin-top:34px;
- line-height:1;background:linear-gradient(180deg,#fff 0%,#d9dee5 100%);
- -webkit-background-clip:text;background-clip:text;color:transparent;position:relative
+  margin-top:48px;font-size:clamp(2.1rem,8vw,3rem);font-weight:1000;letter-spacing:.075em;
+  background:linear-gradient(90deg,#fff 0%,#c6f6ff 36%,#f8c7ff 72%,#fff 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:0 0 34px rgba(123,97,255,.18);position:relative
 }
 .logo:before{
- content:"";display:block;width:58px;height:6px;border-radius:999px;margin:0 auto 16px;
- background:linear-gradient(90deg,var(--green),var(--green2));
- box-shadow:0 0 26px rgba(0,245,106,.55)
+  content:"🎧";display:block;font-size:4.4rem;line-height:1;margin-bottom:8px;
+  filter:drop-shadow(0 0 22px rgba(255,58,215,.42)) drop-shadow(0 0 34px rgba(33,212,255,.28))
+}
+.logo:after{
+  content:"";display:block;width:92px;height:5px;border-radius:999px;margin:15px auto 0;
+  background:linear-gradient(90deg,var(--cyan),var(--pink));box-shadow:0 0 26px rgba(123,97,255,.7)
 }
 .subtitle{
- color:var(--muted);margin:9px 0 30px;font-size:.92rem;letter-spacing:.18em;text-transform:uppercase
+  color:#bec3d9;margin:10px 0 28px;font-size:.9rem;letter-spacing:.24em;text-transform:uppercase
 }
-section{display:none;animation:fadeUp .28s ease}.show{display:block}
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-h1{font-size:1.48rem;margin:0 0 20px;letter-spacing:-.025em}
-.stack{display:flex;flex-direction:column;gap:12px}
+section{display:none;animation:rise .32s ease}.show{display:block}
+@keyframes rise{from{opacity:0;transform:translateY(10px) scale(.99)}to{opacity:1;transform:none}}
+h1{font-size:1.58rem;margin:0 0 20px;letter-spacing:-.03em}
+.stack{display:flex;flex-direction:column;gap:13px}
 input,select,textarea{
- width:100%;padding:15px 17px;border-radius:18px;border:1px solid #2a2f37;
- background:linear-gradient(180deg,#111419,#0d0f12);color:#fff;font-size:16px;outline:none;
- box-shadow:0 10px 28px rgba(0,0,0,.16);transition:.18s ease
+  width:100%;padding:16px 17px;border-radius:18px;border:1px solid rgba(255,255,255,.13);
+  background:linear-gradient(180deg,rgba(18,18,34,.94),rgba(9,9,18,.94));color:#fff;font-size:16px;
+  outline:none;box-shadow:0 16px 38px rgba(0,0,0,.28),var(--ring);transition:.18s ease
 }
 input:focus,select:focus,textarea:focus{
- border-color:var(--green);box-shadow:0 0 0 3px rgba(0,245,106,.09),0 12px 30px rgba(0,0,0,.2)
+  border-color:var(--cyan);box-shadow:0 0 0 3px rgba(33,212,255,.10),0 18px 40px rgba(0,0,0,.34)
 }
-textarea{min-height:92px;resize:vertical}
-label{display:block;text-align:left;font-weight:900;margin:8px 5px 5px;font-size:.88rem;color:#d9dee5}
+textarea{min-height:94px;resize:vertical}
+label{display:block;text-align:left;font-weight:900;margin:8px 5px 5px;color:#e6e7f1;font-size:.9rem}
 .btn{
- width:100%;border:0;border-radius:999px;padding:17px 20px;
- background:linear-gradient(135deg,var(--green),var(--green2));color:#021006;
- font-weight:1000;font-size:1rem;letter-spacing:.025em;cursor:pointer;
- box-shadow:0 13px 34px rgba(0,245,106,.16),0 1px 0 rgba(255,255,255,.32) inset;
- transition:transform .12s ease,filter .12s ease,box-shadow .12s ease
+  width:100%;border:0;border-radius:999px;padding:17px 20px;
+  background:linear-gradient(90deg,var(--pink),var(--violet) 48%,var(--cyan));
+  color:#fff;font-weight:1000;font-size:1rem;letter-spacing:.03em;cursor:pointer;
+  box-shadow:0 0 24px rgba(255,58,215,.32),0 0 30px rgba(33,212,255,.16),0 14px 34px rgba(0,0,0,.32);
+  transition:transform .12s ease,filter .12s ease
 }
-.btn:active{transform:scale(.985)} .btn:hover{filter:brightness(1.035)}
+.btn:hover{filter:brightness(1.08)} .btn:active{transform:scale(.985)}
 .btn.secondary{
- background:linear-gradient(180deg,#181b20,#111318);color:#fff;border:1px solid #30353e;
- box-shadow:0 12px 28px rgba(0,0,0,.18)
+  background:linear-gradient(180deg,rgba(28,26,44,.96),rgba(13,12,22,.96));
+  border:1px solid rgba(255,255,255,.14);box-shadow:0 14px 30px rgba(0,0,0,.26)
 }
-.btn:disabled{opacity:.42;cursor:not-allowed;filter:saturate(.4)}
+.btn:disabled{opacity:.45;cursor:not-allowed;filter:saturate(.4)}
 .small{color:var(--muted);font-size:.84rem;line-height:1.5;margin-top:12px}
-.cards{display:grid;grid-template-columns:1fr;gap:11px}
+.cards{display:grid;grid-template-columns:1fr;gap:12px}
 .mode{
- border:1px solid #2b3038;background:linear-gradient(180deg,#111419,#0c0f12);
- color:#fff;border-radius:20px;padding:16px 17px;text-align:left;cursor:pointer;
- position:relative;overflow:hidden;transition:.16s ease;box-shadow:0 10px 24px rgba(0,0,0,.14)
+  border:1px solid rgba(255,255,255,.12);background:linear-gradient(180deg,rgba(20,18,34,.92),rgba(10,9,18,.94));
+  color:#fff;border-radius:22px;padding:17px 18px;text-align:left;cursor:pointer;position:relative;overflow:hidden;
+  box-shadow:0 16px 36px rgba(0,0,0,.24),var(--ring);transition:.18s ease
 }
+.mode:before{
+  content:"";position:absolute;inset:0 auto 0 0;width:5px;background:rgba(255,255,255,.08)
+}
+.mode:nth-child(1):before{background:linear-gradient(var(--pink),var(--violet))}
+.mode:nth-child(2):before{background:linear-gradient(var(--cyan),#3478ff)}
+.mode:nth-child(3):before{background:linear-gradient(var(--orange),#ff6a2f)}
 .mode:after{
- content:"";position:absolute;right:16px;top:50%;width:10px;height:10px;border-radius:50%;
- background:#343941;transform:translateY(-50%);box-shadow:0 0 0 5px rgba(255,255,255,.018)
+  content:"";position:absolute;right:17px;top:50%;transform:translateY(-50%);
+  width:12px;height:12px;border-radius:50%;background:#323243;box-shadow:0 0 0 5px rgba(255,255,255,.02)
 }
-.mode.selected{border-color:var(--green);background:linear-gradient(180deg,rgba(0,245,106,.105),rgba(0,245,106,.028))}
-.mode.selected:after{background:var(--green);box-shadow:0 0 18px rgba(0,245,106,.7)}
-.mode strong{display:block;font-size:1.06rem}.mode span{display:block;color:var(--muted);font-size:.83rem;margin-top:4px;max-width:84%}
-.players{margin:17px 0;text-align:left;display:flex;flex-direction:column;gap:9px}
+.mode.selected{
+  transform:translateY(-1px);border-color:rgba(255,58,215,.75);
+  box-shadow:0 0 0 1px rgba(255,58,215,.16) inset,0 0 25px rgba(255,58,215,.22),0 14px 34px rgba(0,0,0,.28)
+}
+.mode.selected:after{background:#fff;box-shadow:0 0 0 5px rgba(255,58,215,.25),0 0 22px rgba(255,58,215,.8)}
+.mode strong{display:block;font-size:1.12rem}.mode span{display:block;color:#aeb2c8;font-size:.84rem;margin-top:4px;max-width:82%}
+.players{margin:18px 0;text-align:left;display:flex;flex-direction:column;gap:10px}
 .player{
- background:linear-gradient(180deg,#111419,#0d0f12);border:1px solid #252a31;padding:13px 15px;
- border-radius:16px;box-shadow:0 8px 20px rgba(0,0,0,.13);position:relative;padding-left:42px
+  background:linear-gradient(180deg,rgba(18,17,31,.94),rgba(10,9,18,.94));
+  border:1px solid rgba(255,255,255,.11);padding:14px 15px 14px 44px;border-radius:17px;
+  box-shadow:0 12px 28px rgba(0,0,0,.22);position:relative
 }
 .player:before{
- content:"";position:absolute;left:15px;top:50%;transform:translateY(-50%);width:11px;height:11px;border-radius:50%;
- background:var(--green);box-shadow:0 0 12px rgba(0,245,106,.55)
+  content:"";position:absolute;left:16px;top:50%;transform:translateY(-50%);
+  width:11px;height:11px;border-radius:50%;background:var(--green);box-shadow:0 0 15px rgba(35,247,163,.75)
 }
 .panel{
- background:linear-gradient(180deg,rgba(18,21,25,.96),rgba(11,13,16,.96));
- border:1px solid #282d35;border-radius:22px;padding:17px;margin:15px 0;text-align:left;
- box-shadow:0 14px 34px rgba(0,0,0,.18);backdrop-filter:blur(12px)
+  background:linear-gradient(180deg,rgba(18,17,31,.84),rgba(10,9,18,.86));
+  border:1px solid rgba(255,255,255,.12);border-radius:22px;padding:17px;margin:15px 0;text-align:left;
+  backdrop-filter:blur(16px);box-shadow:0 18px 38px rgba(0,0,0,.25),var(--ring)
 }
-.panel .row{display:flex;justify-content:space-between;gap:10px;margin:8px 0;align-items:center}
-.panel .muted{color:var(--muted)}
+.panel .row{display:flex;justify-content:space-between;gap:10px;margin:9px 0;align-items:center}
+.panel .muted{color:#a5a9bd}
+#lobby h1:before{
+  content:"LIVE";display:inline-block;margin-right:9px;padding:5px 9px;border-radius:999px;font-size:.62rem;
+  letter-spacing:.14em;vertical-align:middle;background:rgba(35,247,163,.10);color:var(--green);
+  border:1px solid rgba(35,247,163,.35);box-shadow:0 0 18px rgba(35,247,163,.12)
+}
 #countdown{
- font-size:clamp(7rem,30vw,10rem);font-weight:1000;padding-top:42px;line-height:1;
- color:#fff;text-shadow:0 0 34px rgba(0,245,106,.42);
- animation:pulseCount .7s ease-in-out infinite alternate
+  font-size:clamp(8rem,31vw,11rem);font-weight:1000;padding-top:45px;line-height:1;
+  background:linear-gradient(180deg,#fff,#d9efff 60%,#ffb9f4);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 30px rgba(123,97,255,.55));animation:countPulse .62s ease-in-out infinite alternate
 }
-@keyframes pulseCount{to{transform:scale(1.045);text-shadow:0 0 58px rgba(0,245,106,.66)}}
-.silence,.alarm-icon,.win-icon{font-size:5.4rem;filter:drop-shadow(0 12px 25px rgba(0,0,0,.28))}
-.active-title{font-size:2.25rem;font-weight:1000;margin-top:12px;letter-spacing:.02em}
+@keyframes countPulse{to{transform:scale(1.055);filter:drop-shadow(0 0 50px rgba(255,58,215,.72))}}
+.silence,.alarm-icon,.win-icon{font-size:5.8rem;filter:drop-shadow(0 12px 26px rgba(0,0,0,.3))}
+.active-title{
+  font-size:2.45rem;font-weight:1000;margin-top:12px;letter-spacing:.03em;
+  background:linear-gradient(90deg,#fff,var(--cyan),#fff);-webkit-background-clip:text;background-clip:text;color:transparent
+}
 .active-title:after{
- content:"";display:block;width:76px;height:5px;border-radius:999px;background:var(--green);
- margin:14px auto 0;box-shadow:0 0 20px rgba(0,245,106,.5)
+  content:"";display:block;width:96px;height:5px;border-radius:999px;margin:15px auto 0;
+  background:linear-gradient(90deg,var(--cyan),var(--pink));box-shadow:0 0 22px rgba(123,97,255,.6)
 }
-.active-subtitle{color:var(--muted);margin-top:14px;line-height:1.5}
+.active-subtitle{color:#b0b3c5;margin-top:15px;line-height:1.55}
 .timer{
- font-variant-numeric:tabular-nums;font-size:2.65rem;font-weight:1000;margin:26px auto 0;
- width:max-content;padding:12px 22px;border-radius:18px;background:#0c0f12;border:1px solid #242a31;
- box-shadow:0 12px 30px rgba(0,0,0,.18);letter-spacing:.03em
+  font-variant-numeric:tabular-nums;font-size:2.9rem;font-weight:1000;margin:27px auto 0;width:max-content;
+  padding:13px 23px;border-radius:19px;background:rgba(8,8,16,.72);border:1px solid rgba(255,255,255,.13);
+  box-shadow:0 14px 34px rgba(0,0,0,.25),0 0 24px rgba(33,212,255,.08);letter-spacing:.04em
 }
 body.alarm{
- background:
- radial-gradient(circle at 50% 15%,rgba(255,255,255,.13),transparent 28%),
- linear-gradient(180deg,#ff174d,#b8002e);
- animation:alarmPulse .45s ease-in-out infinite alternate
+  background:
+    radial-gradient(circle at 50% 10%,rgba(255,255,255,.18),transparent 28%),
+    linear-gradient(180deg,#ff164f 0%,#a4002a 100%);
+  animation:alarmFlash .44s ease-in-out infinite alternate
 }
-@keyframes alarmPulse{to{filter:brightness(1.12)}}
-body.alarm:before{opacity:.1}
-.loser{font-size:clamp(2.2rem,9vw,3.1rem);font-weight:1000;text-transform:uppercase;margin:16px 0;letter-spacing:.02em}
-.result-big{font-size:2.2rem;font-weight:1000;margin:12px 0}
-#over .btn,#success .btn{margin-top:8px}
+@keyframes alarmFlash{to{filter:brightness(1.14)}}
+body.alarm:before{opacity:.12}
+.loser{font-size:clamp(2.4rem,9vw,3.3rem);font-weight:1000;text-transform:uppercase;margin:18px 0;letter-spacing:.025em}
+.result-big{
+  font-size:2.35rem;font-weight:1000;margin:12px 0;
+  background:linear-gradient(90deg,#fff,var(--green));-webkit-background-clip:text;background-clip:text;color:transparent
+}
 .hidden{display:none!important}
 #errorBox{
- background:rgba(255,23,77,.12);color:#ffc3d1;border:1px solid rgba(255,23,77,.42);
- border-radius:16px;padding:13px 14px;margin:12px 0;text-align:left;display:none
+  background:rgba(255,22,79,.12);color:#ffd1dc;border:1px solid rgba(255,22,79,.4);
+  border-radius:16px;padding:13px 14px;margin:12px 0;text-align:left;display:none
 }
-#home,#setupName,#setup,#join,#lobby,#active,#over,#success{
- padding:20px 0 8px;
+#home,#setupName,#setup,#join,#lobby,#active,#over,#success{padding:18px 0 10px}
+#home:before{
+  content:"SAME BEAT • NO MOVEMENT • LAST ONE STANDING";display:block;margin:0 0 18px;padding:10px 12px;
+  border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08);
+  color:#cfd2e3;font-size:.72rem;letter-spacing:.16em
 }
-#home .btn{margin-top:4px}
-#lobby h1:before{
- content:"LIVE";display:inline-block;margin-right:8px;padding:4px 8px;border-radius:999px;
- font-size:.62rem;vertical-align:middle;letter-spacing:.12em;background:rgba(0,245,106,.1);
- color:var(--green);border:1px solid rgba(0,245,106,.35)
+@media(max-width:560px){
+  body{padding-top:18px}.app{padding:20px 17px}.lang{top:10px;right:10px}
+  .logo{margin-top:54px}.logo:before{font-size:3.9rem}.subtitle{font-size:.78rem;letter-spacing:.18em}
 }
-@media (max-width:560px){
- body{padding-top:20px}.app{padding:22px 18px}.lang{top:10px;right:10px}
- .logo{margin-top:48px}.subtitle{margin-bottom:26px}
+
+
+/* V11 DON’T TOUCH warm cinematic brand layer */
+:root{
+  --bg:#090604!important;
+  --panel:rgba(24,15,10,.88)!important;
+  --panel2:rgba(34,20,12,.92)!important;
+  --text:#fffaf3!important;
+  --muted:#c8b7a6!important;
+  --pink:#ff3b75!important;
+  --violet:#b4552b!important;
+  --cyan:#35bff2!important;
+  --green:#27ed87!important;
+  --orange:#ffb72e!important;
+  --danger:#ff164f!important;
 }
+body{
+  background:
+    radial-gradient(circle at 14% 5%,rgba(255,153,42,.24),transparent 28%),
+    radial-gradient(circle at 86% 7%,rgba(35,155,255,.15),transparent 28%),
+    radial-gradient(circle at 52% 35%,rgba(255,58,80,.10),transparent 34%),
+    linear-gradient(180deg,#130b07 0%,#080504 55%,#030202 100%)!important;
+}
+body:after{
+  background:radial-gradient(circle,rgba(255,139,40,.20),transparent 62%)!important;
+}
+.logo{
+  background:linear-gradient(90deg,#fffaf3 0%,#ffd77c 46%,#ff9e35 72%,#fffaf3 100%)!important;
+  -webkit-background-clip:text!important;background-clip:text!important;color:transparent!important;
+}
+.logo:before{
+  content:"☝️"!important;
+  filter:drop-shadow(0 0 22px rgba(255,164,45,.45))!important;
+}
+.logo:after{
+  background:linear-gradient(90deg,#ffb52e,#ff3b75,#35bff2)!important;
+  box-shadow:0 0 26px rgba(255,139,40,.45)!important;
+}
+.btn{
+  background:linear-gradient(90deg,#ff9d27,#ff4b3f 46%,#ff3b75)!important;
+  box-shadow:0 0 24px rgba(255,130,35,.28),0 0 30px rgba(255,59,117,.14),0 14px 34px rgba(0,0,0,.32)!important;
+}
+.mode:nth-child(1):before{background:linear-gradient(#ff3b75,#ff9b28)!important}
+.mode:nth-child(2):before{background:linear-gradient(#35bff2,#3478ff)!important}
+.mode:nth-child(3):before{background:linear-gradient(#ffb72e,#ff6a2f)!important}
+.mode.selected{border-color:rgba(255,155,40,.78)!important;box-shadow:0 0 0 1px rgba(255,155,40,.14) inset,0 0 25px rgba(255,118,40,.20),0 14px 34px rgba(0,0,0,.28)!important}
+.mode.selected:after{background:#fff!important;box-shadow:0 0 0 5px rgba(255,155,40,.24),0 0 22px rgba(255,119,40,.7)!important}
+.active-title{
+  background:linear-gradient(90deg,#fff,#ffd47d,#fff)!important;
+  -webkit-background-clip:text!important;background-clip:text!important;color:transparent!important;
+}
+.active-title:after{background:linear-gradient(90deg,#ffb52e,#ff3b75)!important}
 
 </style>
 </head>
 <body>
 <div class="lang"><button id="nl" class="active">NL 🇳🇱</button><button id="en">EN 🇬🇧</button></div>
 <main class="app">
-<div class="logo">SILENT DISCO</div><div class="subtitle">Phone-Free Challenge</div>
+<div class="logo">DON’T TOUCH</div><div class="subtitle">Phone-Free Challenge</div>
 <div id="errorBox"></div>
 
 <section id="home" class="show">
@@ -223,9 +300,37 @@ let language="nl",name="",room="",playerId="",creator=false,wakeLock=null,unsubs
 let active=false,busy=false,gameEndAt=0,gameInterval=null,countdownInterval=null,currentPenalty={nl:"",en:""},settings={mode:"party",duration:15,penaltyType:"random",customPenalty:""};
 let px=null,py=null,pz=null,lastMove=0,lastRoundId="",roomData=null;
 
+let audioCtx=null;
+function audio(){
+  try{
+    if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==="suspended") audioCtx.resume();
+    return audioCtx;
+  }catch(e){return null}
+}
+function tone(freq,duration=0.12,type="sine",gain=0.10,delay=0){
+  const c=audio(); if(!c)return;
+  const o=c.createOscillator(),g=c.createGain(),t=c.currentTime+delay;
+  o.type=type;o.frequency.setValueAtTime(freq,t);
+  g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(gain,t+0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+duration);
+  o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+duration+.03);
+}
+function startSound(){ tone(92,.22,"sine",.15); }
+function countSound(n){ tone(n===3?440:n===2?560:700,.10,"square",.055); }
+function goSound(){ tone(110,.20,"sine",.13); tone(220,.14,"sine",.06,.04); }
+function alarmSound(){
+  tone(185,.20,"sawtooth",.12); tone(105,.22,"square",.08,.05);
+  tone(185,.20,"sawtooth",.12,.25); tone(105,.22,"square",.08,.30);
+}
+function winSound(){
+  tone(392,.12,"sine",.08);tone(523.25,.14,"sine",.08,.12);tone(659.25,.22,"sine",.09,.26);
+}
+
+
 const T={
-nl:{home:"Klaar om te spelen?",newGame:"NIEUW SPEL",homeHelp:"Eén organisator. Iedereen speelt gratis mee via de uitnodigingslink.",creator:"Wie organiseert?",name:"Jouw naam",next:"GA VERDER",setup:"Kies je spel",mode:"Modus",partyDesc:"Feestje met grappige straffen",classDesc:"Telefoonvrij in de klas",meetingDesc:"Focus tijdens vergadering",time:"Tijd",penalty:"Straf / melding",random:"Willekeurig uit de lijst",custom:"Zelf invullen",customPh:"Typ je eigen straf of melding…",create:"MAAK SPEL",joinTitle:"Je bent uitgenodigd!",join:"SPEEL MEE",joinHelp:"Vul alleen je naam in.",lobby:"Wachten op spelers...",share:"DEEL UITNODIGING",shareHelp:"Stuur de link via WhatsApp, sms, Messenger…",start:"START",guestWait:"Wacht tot de organisator start.",active:"NIET BEWEGEN",activeSub:"Leg je telefoon plat neer. Raak hem niet aan.",you:"🚨 JIJ HEBT BEWOGEN! 🚨",other:"🚨 {name} HEEFT BEWOGEN! 🚨",reset:"NIEUWE RONDE",success:"GEHAALD!",shareResult:"DEEL RESULTAAT",needName:"Vul je naam in.",needPenalty:"Vul je eigen straf of melding in.",motion:"Bewegingstoestemming is nodig om te spelen.",shareText:"Speel Silent Disco met mij!",copied:"Link gekopieerd!",resultCopied:"Resultaat gekopieerd!",roomMissing:"Deze uitnodiging is niet meer actief.",connection:"Geen verbinding met de spelserver. Probeer opnieuw.",players:"spelers",minutes:"minuten telefoonvrij",modeNames:{party:"Party",classroom:"Classroom",meeting:"Meeting"}},
-en:{home:"Ready to play?",newGame:"NEW GAME",homeHelp:"One host. Everyone else joins free through the invite link.",creator:"Who is hosting?",name:"Your name",next:"CONTINUE",setup:"Choose your game",mode:"Mode",partyDesc:"Party mode with fun penalties",classDesc:"Phone-free classroom challenge",meetingDesc:"Stay focused during meetings",time:"Time",penalty:"Penalty / message",random:"Random from the list",custom:"Write your own",customPh:"Type your own penalty or message…",create:"CREATE GAME",joinTitle:"You're invited!",join:"JOIN GAME",joinHelp:"Just enter your name.",lobby:"Waiting for players...",share:"SHARE INVITE",shareHelp:"Send the link via WhatsApp, text, Messenger…",start:"START",guestWait:"Wait for the host to start.",active:"DO NOT MOVE",activeSub:"Place your phone flat. Do not touch it.",you:"🚨 YOU MOVED! 🚨",other:"🚨 {name} MOVED! 🚨",reset:"NEW ROUND",success:"YOU DID IT!",shareResult:"SHARE RESULT",needName:"Enter your name.",needPenalty:"Enter your own penalty or message.",motion:"Motion permission is required to play.",shareText:"Play Silent Disco with me!",copied:"Link copied!",resultCopied:"Result copied!",roomMissing:"This invitation is no longer active.",connection:"No connection to the game server. Try again.",players:"players",minutes:"minutes phone-free",modeNames:{party:"Party",classroom:"Classroom",meeting:"Meeting"}}
+nl:{home:"Klaar om te spelen?",newGame:"NIEUW SPEL",homeHelp:"Eén organisator. Iedereen speelt gratis mee via de uitnodigingslink.",creator:"Wie organiseert?",name:"Jouw naam",next:"GA VERDER",setup:"Kies je spel",mode:"Modus",partyDesc:"Feestje met grappige straffen",classDesc:"Telefoonvrij in de klas",meetingDesc:"Focus tijdens vergadering",time:"Tijd",penalty:"Straf / melding",random:"Willekeurig uit de lijst",custom:"Zelf invullen",customPh:"Typ je eigen straf of melding…",create:"MAAK SPEL",joinTitle:"Je bent uitgenodigd!",join:"SPEEL MEE",joinHelp:"Vul alleen je naam in.",lobby:"Wachten op spelers...",share:"DEEL UITNODIGING",shareHelp:"Stuur de link via WhatsApp, sms, Messenger…",start:"START",guestWait:"Wacht tot de organisator start.",active:"NIET BEWEGEN",activeSub:"Leg je telefoon plat neer. Raak hem niet aan.",you:"🚨 JIJ HEBT BEWOGEN! 🚨",other:"🚨 {name} HEEFT BEWOGEN! 🚨",reset:"NIEUWE RONDE",success:"GEHAALD!",shareResult:"DEEL RESULTAAT",needName:"Vul je naam in.",needPenalty:"Vul je eigen straf of melding in.",motion:"Bewegingstoestemming is nodig om te spelen.",shareText:"Speel DON’T TOUCH met mij! Last phone untouched wins.",copied:"Link gekopieerd!",resultCopied:"Resultaat gekopieerd!",roomMissing:"Deze uitnodiging is niet meer actief.",connection:"Geen verbinding met de spelserver. Probeer opnieuw.",players:"spelers",minutes:"minuten telefoonvrij",modeNames:{party:"Party",classroom:"Classroom",meeting:"Meeting"}},
+en:{home:"Ready to play?",newGame:"NEW GAME",homeHelp:"One host. Everyone else joins free through the invite link.",creator:"Who is hosting?",name:"Your name",next:"CONTINUE",setup:"Choose your game",mode:"Mode",partyDesc:"Party mode with fun penalties",classDesc:"Phone-free classroom challenge",meetingDesc:"Stay focused during meetings",time:"Time",penalty:"Penalty / message",random:"Random from the list",custom:"Write your own",customPh:"Type your own penalty or message…",create:"CREATE GAME",joinTitle:"You're invited!",join:"JOIN GAME",joinHelp:"Just enter your name.",lobby:"Waiting for players...",share:"SHARE INVITE",shareHelp:"Send the link via WhatsApp, text, Messenger…",start:"START",guestWait:"Wait for the host to start.",active:"DO NOT MOVE",activeSub:"Place your phone flat. Do not touch it.",you:"🚨 YOU MOVED! 🚨",other:"🚨 {name} MOVED! 🚨",reset:"NEW ROUND",success:"YOU DID IT!",shareResult:"SHARE RESULT",needName:"Enter your name.",needPenalty:"Enter your own penalty or message.",motion:"Motion permission is required to play.",shareText:"Play DON’T TOUCH with me! Last phone untouched wins.",copied:"Link copied!",resultCopied:"Result copied!",roomMissing:"This invitation is no longer active.",connection:"No connection to the game server. Try again.",players:"players",minutes:"minutes phone-free",modeNames:{party:"Party",classroom:"Classroom",meeting:"Meeting"}}
 };
 const PENALTIES={
 party:{nl:["trakteert de volgende ronde! 🍻","moet 30 seconden dansen zonder muziek 💃","moet de groep een compliment geven 😄","doet de volgende opdracht die de groep kiest 🎲"],en:["buys the next round! 🍻","has to dance for 30 seconds with no music 💃","must give the group a compliment 😄","does the next challenge chosen by the group 🎲"]},
@@ -259,8 +364,8 @@ function paint(){
  if($("over").classList.contains("show")&&roomData?.game?.loserName)renderGameOver(roomData.game);
 }
 $("nl").onclick=()=>{language="nl";paint()};$("en").onclick=()=>{language="en";paint()};
-$("newGame").onclick=()=>show("setupName");
-$("toSetup").onclick=()=>{name=$("creatorName").value.trim().slice(0,20);if(!name)return alert(T[language].needName);show("setup")};
+$("newGame").onclick=()=>{audio();show("setupName")};
+$("toSetup").onclick=()=>{audio();name=$("creatorName").value.trim().slice(0,20);if(!name)return alert(T[language].needName);show("setup")};
 document.querySelectorAll(".mode").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll(".mode").forEach(x=>x.classList.remove("selected"));b.classList.add("selected");settings.mode=b.dataset.mode}));
 $("penaltyType").onchange=()=>{$("customPenalty").classList.toggle("hidden",$("penaltyType").value!=="custom")};
 
@@ -314,7 +419,7 @@ $("create").onclick=async()=>{
    if(!(await connect()))return;
  }catch(e){console.error(e);showError(T[language].connection)}
 };
-$("joinGame").onclick=async()=>{
+$("joinGame").onclick=async()=>{audio();
  name=$("joinName").value.trim().slice(0,20);if(!name)return alert(T[language].needName);
  playerId=uid();creator=false;clearError();
  try{
@@ -335,7 +440,7 @@ function drawPlayers(){
  Object.values(players).filter(p=>p?.name).forEach(p=>{const d=document.createElement("div");d.className="player";d.textContent=p.name;box.appendChild(d)});
 }
 $("share").onclick=async()=>{
- const url=APP_URL+"?room="+encodeURIComponent(room),data={title:"Silent Disco",text:T[language].shareText,url};
+ const url=APP_URL+"?room="+encodeURIComponent(room),data={title:"DON’T TOUCH",text:T[language].shareText,url};
  try{if(navigator.share)await navigator.share(data);else{await navigator.clipboard.writeText(url);alert(T[language].copied)}}catch(e){}
 };
 function choosePenalty(){
@@ -344,7 +449,9 @@ function choosePenalty(){
  return {nl:nl[i],en:en[i]||nl[i]};
 }
 $("start").onclick=async()=>{
+ audio();
  if(busy||!creator)return;
+ startSound();
  currentPenalty=choosePenalty();const startAt=Date.now()+4000,endAt=startAt+settings.duration*60000,roundId=uid();
  $("start").disabled=true;
  try{await set(gameRef(),{status:"countdown",roundId,startAt,endAt,penalty:currentPenalty,startedBy:playerId});}
@@ -362,9 +469,10 @@ function handleGame(g){
  if(g.status==="success"){lastRoundId=g.roundId;gameSuccess();return}
 }
 function receiveStart(startAt,endAt){
- if(!startAt||!endAt)return;busy=true;active=false;gameEndAt=endAt;show("countdown");
+ if(!startAt||!endAt)return;
+ let lastCountSound=null;busy=true;active=false;gameEndAt=endAt;show("countdown");
  clearInterval(countdownInterval);
- const tick=()=>{const left=startAt-Date.now();if(left<=0){clearInterval(countdownInterval);startActive();return}$("countdown").textContent=Math.max(1,Math.ceil(left/1000))};
+ const tick=()=>{const left=startAt-Date.now();if(left<=0){clearInterval(countdownInterval);goSound();startActive();return}const n=Math.max(1,Math.ceil(left/1000));$("countdown").textContent=n;if(n!==lastCountSound&&n<=3){lastCountSound=n;countSound(n)}};
  tick();countdownInterval=setInterval(tick,50);
 }
 function startActive(){
@@ -399,12 +507,14 @@ async function ownMove(){
  }catch(e){console.error(e);showError(T[language].connection)}
 }
 function renderGameOver(g){
+ alarmSound();
  active=false;busy=false;clearInterval(gameInterval);clearInterval(countdownInterval);window.removeEventListener("devicemotion",checkMove,true);show("over");document.body.classList.add("alarm");
  const loserName=g.loserName||"",t=T[language];$("alarmTitle").textContent=loserName.toLowerCase()===name.toLowerCase()?t.you:t.other.replace("{name}",loserName.toUpperCase());
  $("loser").textContent=loserName.toUpperCase();$("penalty").textContent=loserName+" "+penaltyText(g.penalty);
  $("start").disabled=false;
 }
 function gameSuccess(){
+ winSound();
  active=false;busy=false;clearInterval(gameInterval);clearInterval(countdownInterval);window.removeEventListener("devicemotion",checkMove,true);document.body.classList.remove("alarm");show("success");
  const t=T[language],count=Object.keys(roomData?.players||{}).length;$("successTitle").textContent=t.success;$("successDetail").textContent=count+" "+t.players+" • "+settings.duration+" "+t.minutes;$("start").disabled=false;
 }
@@ -421,8 +531,8 @@ function resetLocal(showLobby=true){
  if(creator){$("invite").classList.remove("hidden");$("start").classList.remove("hidden")}else{$("invite").classList.add("hidden");$("start").classList.add("hidden")}
 }
 $("shareResult").onclick=async()=>{
- const t=T[language],count=Object.keys(roomData?.players||{}).length,text=`Silent Disco — ${t.success} ${count} ${t.players}, ${settings.duration} ${t.minutes}.`;
- try{if(navigator.share)await navigator.share({title:"Silent Disco",text});else{await navigator.clipboard.writeText(text);alert(t.resultCopied)}}catch(e){}
+ const t=T[language],count=Object.keys(roomData?.players||{}).length,text=`DON’T TOUCH — ${t.success} ${count} ${t.players}, ${settings.duration} ${t.minutes}.`;
+ try{if(navigator.share)await navigator.share({title:"DON’T TOUCH",text});else{await navigator.clipboard.writeText(text);alert(t.resultCopied)}}catch(e){}
 };
 document.addEventListener("visibilitychange",async()=>{
  if(document.visibilityState==="visible"&&room&&name){await requestWake();try{await attachPresence()}catch(e){}}
