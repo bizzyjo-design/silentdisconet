@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#050505">
-<title>Silent Disco V6.0</title>
+<title>Silent Disco V7.0</title>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;min-height:100%;background:#050505;color:#fff}
@@ -50,7 +50,7 @@ body.alarm{background:#ff0033}
 <div class="lang"><button id="nl" class="active">NL 🇳🇱</button><button id="en">EN 🇬🇧</button></div>
 <main class="app">
 <div class="logo">SILENT DISCO</div>
-<div class="subtitle">Phone-Free Challenge</div>
+<div class="subtitle">Phone-Free Challenge <span style="opacity:.35">V7</span></div>
 
 <section id="home" class="show">
 <h1 id="homeTitle"></h1>
@@ -143,20 +143,18 @@ body.alarm{background:#ff0033}
 
 const NTFY="https://ntfy.sh";
 const APP_URL="https://bizzyjo-design.github.io/silentdisconet/";
-const STORE="silentdisco_v6_state";
+const STORE="silentdisco_v7_state";
 const THRESHOLD=1.8;
-const POLL_MS=1250;
 const HEARTBEAT_MS=2500;
 const PLAYER_TIMEOUT_MS=12000;
 
 let language="nl",name="",room="",playerId="",creator=false;
 let settings={mode:"party",duration:15,penaltyType:"random",customPenalty:""};
-let wakeLock=null,pollTimer=null,heartbeatTimer=null,countdownTimer=null,gameTimerInterval=null;
-let polling=false,lastNtfyId="",networkOK=false;
+let wakeLock=null,source=null,heartbeatTimer=null,countdownTimer=null,gameTimerInterval=null;
+let networkOK=false;
 let active=false,busy=false,phase="home",roundId="",startAt=0,gameEndAt=0,currentPenalty="",lastLoser="";
 let px=null,py=null,pz=null,lastMove=0,moveReported=false;
 const playerMap={};
-const seenNtfyIds=new Set();
 const seenEventIds=new Set();
 
 const T={
@@ -297,24 +295,20 @@ wakeLock.addEventListener("release",()=>{wakeLock=null});
 }
 
 function topic(){return "silentdisco_bizzy_"+room}
-async function fetchTimeout(url,options={},timeout=3500){
-const controller=new AbortController();
-const timer=setTimeout(()=>controller.abort(),timeout);
-try{return await fetch(url,{...options,signal:controller.signal,cache:"no-store"})}
-finally{clearTimeout(timer)}
-}
 async function sendMessage(m){
 if(!room)return false;
 const msg={...m,eventId:m.eventId||uid(),sentAt:Date.now()};
-const body=JSON.stringify(msg);
-for(let attempt=0;attempt<2;attempt++){
 try{
-const r=await fetchTimeout(`${NTFY}/${topic()}`,{method:"POST",headers:{"Content-Type":"text/plain"},body},3500);
-if(r.ok){networkOK=true;drawNetwork();return true}
-}catch(e){}
-await sleep(250);
+const r=await fetch(`${NTFY}/${topic()}`,{
+method:"POST",
+headers:{"Content-Type":"text/plain"},
+body:JSON.stringify(msg)
+});
+return r.ok;
+}catch(e){
+console.warn("Send failed",e);
+return false;
 }
-networkOK=false;drawNetwork();return false;
 }
 function remember(set,value){
 if(!value)return false;
@@ -324,13 +318,27 @@ if(set.size>600){const first=set.values().next().value;set.delete(first)}
 return false;
 }
 function processOuter(outer){
-if(!outer)return;
-if(outer.id)lastNtfyId=outer.id;
-if(outer.event!=="message"||!outer.message)return;
-if(outer.id&&remember(seenNtfyIds,outer.id))return;
+if(!outer||outer.event!=="message"||!outer.message)return;
 let m;try{m=JSON.parse(outer.message)}catch(e){return}
 if(m.eventId&&remember(seenEventIds,m.eventId))return;
 processMessage(m);
+}
+function startTransport(){
+if(!room)return;
+if(source){try{source.close()}catch(e){}}
+networkOK=false;drawNetwork();
+source=new EventSource(`${NTFY}/${topic()}/sse`);
+source.onopen=()=>{
+networkOK=true;drawNetwork();
+sendMessage({type:"player-heartbeat",id:playerId,name,creator,settings:creator?settings:null,state:creator?hostState():null});
+if(!creator)sendMessage({type:"state-request",id:playerId,name});
+};
+source.onmessage=e=>{
+try{processOuter(JSON.parse(e.data))}catch(err){console.warn("Invalid realtime message",err)}
+};
+source.onerror=()=>{
+networkOK=false;drawNetwork();
+};
 }
 function hostState(){
 return {phase,roundId,startAt,endAt:gameEndAt,penalty:currentPenalty,settings,lastLoser};
@@ -376,27 +384,6 @@ gameSuccess();
 else if(m.type==="new-round"){
 resetLocal();
 }
-}
-async function pollMessages(){
-if(polling||!room)return;
-polling=true;
-try{
-const since=lastNtfyId||"10m";
-const r=await fetchTimeout(`${NTFY}/${topic()}/json?poll=1&since=${encodeURIComponent(since)}`,{},4000);
-if(!r.ok)throw new Error("poll");
-const text=await r.text();
-for(const line of text.split(/\r?\n/)){
-if(!line.trim())continue;
-try{processOuter(JSON.parse(line))}catch(e){}
-}
-networkOK=true;
-}catch(e){networkOK=false}
-finally{polling=false;drawNetwork()}
-}
-function startTransport(){
-clearInterval(pollTimer);
-pollMessages();
-pollTimer=setInterval(pollMessages,POLL_MS);
 }
 function startHeartbeat(){
 clearInterval(heartbeatTimer);
@@ -567,7 +554,7 @@ window.addEventListener("focus",()=>{
 if(room&&name){startTransport();sendMessage({type:"state-request",id:playerId,name})}
 });
 window.addEventListener("beforeunload",()=>{
-clearInterval(pollTimer);clearInterval(heartbeatTimer);clearInterval(countdownTimer);clearInterval(gameTimerInterval);
+if(source)try{source.close()}catch(e){};clearInterval(heartbeatTimer);clearInterval(countdownTimer);clearInterval(gameTimerInterval);
 window.removeEventListener("devicemotion",checkMove,true);
 });
 
@@ -575,7 +562,7 @@ window.removeEventListener("devicemotion",checkMove,true);
 paint();
 const q=new URLSearchParams(location.search);
 const r=(q.get("room")||"").replace(/[^a-zA-Z0-9_-]/g,"").slice(0,80);
-if(!r){phase="home";show("home");return}
+if(!r){try{localStorage.removeItem(STORE)}catch(e){};phase="home";show("home");return}
 let saved=null;try{saved=JSON.parse(localStorage.getItem(STORE)||"null")}catch(e){}
 if(saved&&saved.room===r&&saved.name){
 room=r;name=saved.name;playerId=saved.playerId||uid();creator=!!saved.creator;settings=saved.settings||settings;
