@@ -4,16 +4,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Silent Disco V5.4</title>
+<meta name="theme-color" content="#050505">
+<title>Silent Disco V6.0</title>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;min-height:100%;background:#050505;color:#fff}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;display:flex;justify-content:center;align-items:flex-start;padding:28px 0;user-select:none;transition:background .15s}
 .app{width:100%;max-width:440px;padding:24px;text-align:center}
-.lang{position:absolute;top:14px;right:14px;display:flex;gap:8px}
+.lang{position:fixed;top:14px;right:14px;display:flex;gap:8px;z-index:10}
 .lang button{background:#171717;border:1px solid #444;color:#fff;padding:8px 11px;border-radius:10px;font-weight:800}
 .lang button.active{border-color:#00ff66}
-.logo{font-size:2rem;font-weight:950;letter-spacing:2px;margin-top:24px}.subtitle{color:#888;margin:7px 0 26px}
+.logo{font-size:2rem;font-weight:950;letter-spacing:2px;margin-top:24px}
+.subtitle{color:#888;margin:7px 0 26px}
 section{display:none}.show{display:block}
 h1{font-size:1.4rem;margin:0 0 18px}
 .stack{display:flex;flex-direction:column;gap:12px}
@@ -30,18 +32,25 @@ label{display:block;text-align:left;font-weight:800;margin:6px 4px 5px}
 .mode strong{display:block;font-size:1.04rem}.mode span{display:block;color:#888;font-size:.82rem;margin-top:3px}
 .players{margin:16px 0;text-align:left}.player{background:#111;border:1px solid #242424;padding:11px 14px;margin-bottom:8px;border-radius:13px}
 .panel{background:#0d0d0d;border:1px solid #242424;border-radius:18px;padding:15px;margin:14px 0;text-align:left}
-.panel .row{display:flex;justify-content:space-between;gap:10px;margin:7px 0}.panel .muted{color:#888}
-#countdown{font-size:8rem;font-weight:950;padding-top:40px}.silence,.alarm-icon,.win-icon{font-size:5rem}.active-title{font-size:2rem;font-weight:950;margin-top:8px}.active-subtitle{color:#999;margin-top:10px}
+.panel .row{display:flex;justify-content:space-between;gap:10px;margin:7px 0}
+.panel .muted{color:#888}
+#countdown{font-size:8rem;font-weight:950;padding-top:40px}
+.silence,.alarm-icon,.win-icon{font-size:5rem}
+.active-title{font-size:2rem;font-weight:950;margin-top:8px}
+.active-subtitle{color:#999;margin-top:10px}
 .timer{font-size:2.2rem;font-weight:950;margin-top:20px}
-body.alarm{background:#ff0033}.loser{font-size:2.35rem;font-weight:950;text-transform:uppercase;margin:14px 0}
+body.alarm{background:#ff0033}
+.loser{font-size:2.35rem;font-weight:950;text-transform:uppercase;margin:14px 0}
 .result-big{font-size:2rem;font-weight:950;margin:10px 0}
 .hidden{display:none!important}
+.status{margin-top:10px;font-size:.78rem;color:#777}
 </style>
 </head>
 <body>
 <div class="lang"><button id="nl" class="active">NL 🇳🇱</button><button id="en">EN 🇬🇧</button></div>
 <main class="app">
-<div class="logo">SILENT DISCO</div><div class="subtitle">Phone-Free Challenge</div>
+<div class="logo">SILENT DISCO</div>
+<div class="subtitle">Phone-Free Challenge</div>
 
 <section id="home" class="show">
 <h1 id="homeTitle"></h1>
@@ -52,7 +61,7 @@ body.alarm{background:#ff0033}.loser{font-size:2.35rem;font-weight:950;text-tran
 <section id="setupName">
 <h1 id="creatorTitle"></h1>
 <div class="stack">
-<input id="creatorName" maxlength="20">
+<input id="creatorName" maxlength="20" autocomplete="name">
 <button id="toSetup" class="btn"></button>
 </div>
 </section>
@@ -66,23 +75,13 @@ body.alarm{background:#ff0033}.loser{font-size:2.35rem;font-weight:950;text-tran
 <button class="mode" data-mode="classroom"><strong>🎓 Classroom</strong><span id="classDesc"></span></button>
 <button class="mode" data-mode="meeting"><strong>💼 Meeting</strong><span id="meetingDesc"></span></button>
 </div>
-
 <label id="timeLabel"></label>
 <select id="duration">
-<option value="1">1 min</option>
-<option value="5">5 min</option>
-<option value="15" selected>15 min</option>
-<option value="30">30 min</option>
-<option value="60">60 min</option>
+<option value="1">1 min</option><option value="5">5 min</option><option value="15" selected>15 min</option><option value="30">30 min</option><option value="60">60 min</option>
 </select>
-
 <label id="penaltyLabel"></label>
-<select id="penaltyType">
-<option value="random"></option>
-<option value="custom"></option>
-</select>
+<select id="penaltyType"><option value="random"></option><option value="custom"></option></select>
 <textarea id="customPenalty" class="hidden" maxlength="120"></textarea>
-
 <button id="create" class="btn"></button>
 </div>
 </section>
@@ -90,7 +89,7 @@ body.alarm{background:#ff0033}.loser{font-size:2.35rem;font-weight:950;text-tran
 <section id="join">
 <h1 id="joinTitle"></h1>
 <div class="stack">
-<input id="joinName" maxlength="20">
+<input id="joinName" maxlength="20" autocomplete="name">
 <button id="joinGame" class="btn"></button>
 </div>
 <div id="joinHelp" class="small"></div>
@@ -106,6 +105,7 @@ body.alarm{background:#ff0033}.loser{font-size:2.35rem;font-weight:950;text-tran
 </div>
 <button id="start" class="btn hidden"></button>
 <div id="guestWait" class="small"></div>
+<div id="networkStatus" class="status"></div>
 </section>
 
 <section id="countdown">3</section>
@@ -122,7 +122,8 @@ body.alarm{background:#ff0033}.loser{font-size:2.35rem;font-weight:950;text-tran
 <div id="alarmTitle"></div>
 <div id="loser" class="loser"></div>
 <div id="penalty" style="margin:14px 0 22px"></div>
-<button id="reset" class="btn"></button>
+<button id="reset" class="btn hidden"></button>
+<div id="resultWait" class="small"></div>
 </section>
 
 <section id="success">
@@ -131,17 +132,32 @@ body.alarm{background:#ff0033}.loser{font-size:2.35rem;font-weight:950;text-tran
 <div id="successDetail"></div>
 <div class="stack" style="margin-top:20px">
 <button id="shareResult" class="btn"></button>
-<button id="successReset" class="btn secondary"></button>
+<button id="successReset" class="btn secondary hidden"></button>
 </div>
+<div id="successWait" class="small"></div>
 </section>
 </main>
 
 <script>
-const NTFY="https://ntfy.sh", APP_URL="https://bizzyjo-design.github.io/silentdisconet/", THRESHOLD=1.8, STORE="silentdisco_v5_state";
-let pollTimer=null,lastNtfyId="",seenNtfyIds=new Set(),seenEventIds=new Set();
-let language="nl", name="", room="", playerId="", creator=false, source=null, heartbeat=null, wakeLock=null;
-let active=false,busy=false,gameEndAt=0,gameInterval=null,currentPenalty="",settings={mode:"party",duration:15,penaltyType:"random",customPenalty:""};
-let px=null,py=null,pz=null,lastMove=0; const playerMap={};
+"use strict";
+
+const NTFY="https://ntfy.sh";
+const APP_URL="https://bizzyjo-design.github.io/silentdisconet/";
+const STORE="silentdisco_v6_state";
+const THRESHOLD=1.8;
+const POLL_MS=1250;
+const HEARTBEAT_MS=2500;
+const PLAYER_TIMEOUT_MS=12000;
+
+let language="nl",name="",room="",playerId="",creator=false;
+let settings={mode:"party",duration:15,penaltyType:"random",customPenalty:""};
+let wakeLock=null,pollTimer=null,heartbeatTimer=null,countdownTimer=null,gameTimerInterval=null;
+let polling=false,lastNtfyId="",networkOK=false;
+let active=false,busy=false,phase="home",roundId="",startAt=0,gameEndAt=0,currentPenalty="",lastLoser="";
+let px=null,py=null,pz=null,lastMove=0,moveReported=false;
+const playerMap={};
+const seenNtfyIds=new Set();
+const seenEventIds=new Set();
 
 const T={
 nl:{
@@ -150,7 +166,7 @@ creator:"Wie organiseert?",name:"Jouw naam",next:"GA VERDER",setup:"Kies je spel
 joinTitle:"Je bent uitgenodigd!",join:"SPEEL MEE",joinHelp:"Vul alleen je naam in.",lobby:"Wachten op spelers...",share:"DEEL UITNODIGING",shareHelp:"Stuur de link via WhatsApp, sms, Messenger…",start:"START",guestWait:"Wacht tot de organisator start.",
 active:"NIET BEWEGEN",activeSub:"Leg je telefoon plat neer. Raak hem niet aan.",you:"🚨 JIJ HEBT BEWOGEN! 🚨",other:"🚨 {name} HEEFT BEWOGEN! 🚨",reset:"NIEUWE RONDE",
 success:"GEHAALD!",shareResult:"DEEL RESULTAAT",needName:"Vul je naam in.",needPenalty:"Vul je eigen straf of melding in.",motion:"Bewegingstoestemming is nodig om te spelen.",shareText:"Speel Silent Disco met mij!",copied:"Link gekopieerd!",resultCopied:"Resultaat gekopieerd!",
-players:"spelers",minutes:"minuten telefoonvrij",modeNames:{party:"Party",classroom:"Classroom",meeting:"Meeting"}
+players:"spelers",minutes:"minuten telefoonvrij",modeNames:{party:"Party",classroom:"Classroom",meeting:"Meeting"},connecting:"Verbinden…",online:"Verbonden",offline:"Verbinding herstellen…",moveSent:"Beweging gemeld. Wacht op resultaat…",waitRound:"Wacht tot de organisator een nieuwe ronde start."
 },
 en:{
 home:"Ready to play?",newGame:"NEW GAME",homeHelp:"One host. Everyone else joins free through the invite link.",
@@ -158,7 +174,7 @@ creator:"Who is hosting?",name:"Your name",next:"CONTINUE",setup:"Choose your ga
 joinTitle:"You're invited!",join:"JOIN GAME",joinHelp:"Just enter your name.",lobby:"Waiting for players...",share:"SHARE INVITE",shareHelp:"Send the link via WhatsApp, text, Messenger…",start:"START",guestWait:"Wait for the host to start.",
 active:"DO NOT MOVE",activeSub:"Place your phone flat. Do not touch it.",you:"🚨 YOU MOVED! 🚨",other:"🚨 {name} MOVED! 🚨",reset:"NEW ROUND",
 success:"YOU DID IT!",shareResult:"SHARE RESULT",needName:"Enter your name.",needPenalty:"Enter your own penalty or message.",motion:"Motion permission is required to play.",shareText:"Play Silent Disco with me!",copied:"Link copied!",resultCopied:"Result copied!",
-players:"players",minutes:"minutes phone-free",modeNames:{party:"Party",classroom:"Classroom",meeting:"Meeting"}
+players:"players",minutes:"minutes phone-free",modeNames:{party:"Party",classroom:"Classroom",meeting:"Meeting"},connecting:"Connecting…",online:"Connected",offline:"Restoring connection…",moveSent:"Movement reported. Waiting for result…",waitRound:"Wait for the host to start a new round."
 }
 };
 
@@ -178,9 +194,37 @@ en:["was caught using the phone during the meeting 📱","broke the phone-free f
 };
 
 const $=id=>document.getElementById(id);
-function show(id){document.querySelectorAll("main section").forEach(s=>s.classList.remove("show"));$(id).classList.add("show")}
-function saveState(){localStorage.setItem(STORE,JSON.stringify({room,name,playerId,creator,settings}))}
-function clearState(){localStorage.removeItem(STORE)}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+function show(id){
+document.querySelectorAll("main section").forEach(s=>s.classList.remove("show"));
+$(id).classList.add("show");
+phase=id==="countdown"?"countdown":id==="active"?"active":id==="over"?"over":id==="success"?"success":id==="lobby"?"lobby":phase;
+}
+function uid(){
+if(crypto&&crypto.getRandomValues){
+const a=new Uint32Array(3);crypto.getRandomValues(a);return Array.from(a,n=>n.toString(36)).join("-");
+}
+return Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,10);
+}
+function makeRoom(){
+const a=new Uint32Array(5);crypto.getRandomValues(a);
+return Array.from(a,n=>n.toString(36)).join("").slice(0,24);
+}
+function escapeHtml(s){
+return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+}
+function saveState(){
+try{
+localStorage.setItem(STORE,JSON.stringify({room,name,playerId,creator,settings,phase,roundId,startAt,gameEndAt,currentPenalty,lastLoser}));
+}catch(e){}
+}
+function clearRuntime(){
+active=false;busy=false;moveReported=false;roundId="";startAt=0;gameEndAt=0;currentPenalty="";lastLoser="";
+clearInterval(countdownTimer);clearInterval(gameTimerInterval);
+window.removeEventListener("devicemotion",checkMove,true);
+document.body.classList.remove("alarm");
+}
 function paint(){
 const t=T[language];
 $("nl").classList.toggle("active",language==="nl");$("en").classList.toggle("active",language==="en");
@@ -189,223 +233,363 @@ $("creatorTitle").textContent=t.creator;$("creatorName").placeholder=t.name;$("t
 $("setupTitle").textContent=t.setup;$("modeLabel").textContent=t.mode;$("partyDesc").textContent=t.partyDesc;$("classDesc").textContent=t.classDesc;$("meetingDesc").textContent=t.meetingDesc;
 $("timeLabel").textContent=t.time;$("penaltyLabel").textContent=t.penalty;$("penaltyType").options[0].text=t.random;$("penaltyType").options[1].text=t.custom;$("customPenalty").placeholder=t.customPh;$("create").textContent=t.create;
 $("joinTitle").textContent=t.joinTitle;$("joinName").placeholder=t.name;$("joinGame").textContent=t.join;$("joinHelp").textContent=t.joinHelp;
-$("lobbyTitle").textContent=t.lobby;$("share").textContent=t.share;$("shareHelp").textContent=t.shareHelp;$("start").textContent=t.start;$("guestWait").textContent=creator?"":t.guestWait;
-$("activeTitle").textContent=t.active;$("activeSub").textContent=t.activeSub;$("reset").textContent=t.reset;$("shareResult").textContent=t.shareResult;$("successReset").textContent=t.reset;
-drawSettings();draw();
+$("lobbyTitle").textContent=t.lobby;$("share").textContent=t.share;$("shareHelp").textContent=t.shareHelp;$("start").textContent=t.start;
+$("guestWait").textContent=creator?"":t.guestWait;$("activeTitle").textContent=t.active;$("activeSub").textContent=t.activeSub;
+$("reset").textContent=t.reset;$("shareResult").textContent=t.shareResult;$("successReset").textContent=t.reset;
+$("resultWait").textContent=creator?"":t.waitRound;$("successWait").textContent=creator?"":t.waitRound;
+drawSettings();drawPlayers();drawNetwork();
 }
-$("nl").onclick=()=>{language="nl";paint()};$("en").onclick=()=>{language="en";paint()};
-$("newGame").onclick=()=>show("setupName");
-$("toSetup").onclick=()=>{name=$("creatorName").value.trim().slice(0,20);if(!name)return alert(T[language].needName);show("setup")};
+function drawNetwork(){
+if(!$("networkStatus"))return;
+$("networkStatus").textContent=networkOK?T[language].online:T[language].offline;
+}
+function drawSettings(){
+if(!room){$("settingsPanel").innerHTML="";return}
+const t=T[language],mode=t.modeNames[settings.mode]||settings.mode;
+const p=settings.penaltyType==="custom"?(settings.customPenalty||"—"):t.random;
+$("settingsPanel").innerHTML=`<div class="row"><span class="muted">${t.mode}</span><strong>${escapeHtml(mode)}</strong></div><div class="row"><span class="muted">${t.time}</span><strong>${settings.duration} min</strong></div><div class="row"><span class="muted">${t.penalty}</span><strong>${escapeHtml(p)}</strong></div>`;
+}
+function addPlayer(p){
+if(!p||!p.id||!p.name)return;
+playerMap[p.id]={id:p.id,name:p.name,lastSeen:Date.now(),creator:!!p.creator};
+drawPlayers();
+}
+function drawPlayers(){
+const box=$("players");box.innerHTML="";
+Object.values(playerMap).sort((a,b)=>(b.creator?1:0)-(a.creator?1:0)).forEach(p=>{
+const d=document.createElement("div");d.className="player";d.textContent=p.name;box.appendChild(d);
+});
+}
+function prunePlayers(){
+const now=Date.now();
+Object.keys(playerMap).forEach(k=>{if(k!==playerId&&now-playerMap[k].lastSeen>PLAYER_TIMEOUT_MS)delete playerMap[k]});
+drawPlayers();
+}
 
+$("nl").onclick=()=>{language="nl";paint()};
+$("en").onclick=()=>{language="en";paint()};
+$("newGame").onclick=()=>show("setupName");
+$("toSetup").onclick=()=>{
+name=$("creatorName").value.trim().slice(0,20);
+if(!name)return alert(T[language].needName);
+show("setup");
+};
 document.querySelectorAll(".mode").forEach(b=>b.addEventListener("click",()=>{
-document.querySelectorAll(".mode").forEach(x=>x.classList.remove("selected"));b.classList.add("selected");settings.mode=b.dataset.mode;
+document.querySelectorAll(".mode").forEach(x=>x.classList.remove("selected"));
+b.classList.add("selected");settings.mode=b.dataset.mode;
 }));
 $("penaltyType").onchange=()=>{$("customPenalty").classList.toggle("hidden",$("penaltyType").value!=="custom")};
 
-function uid(){return Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,10)}
-function makeRoom(){const a=new Uint32Array(4);crypto.getRandomValues(a);return Array.from(a,n=>n.toString(36)).join("").slice(0,20)}
+async function motionOK(){
+if(typeof DeviceMotionEvent!=="undefined"&&typeof DeviceMotionEvent.requestPermission==="function"){
+try{return await DeviceMotionEvent.requestPermission()==="granted"}catch(e){return false}
+}
+return true;
+}
+async function requestWake(){
+try{
+if("wakeLock" in navigator){
+if(wakeLock)try{await wakeLock.release()}catch(e){}
+wakeLock=await navigator.wakeLock.request("screen");
+wakeLock.addEventListener("release",()=>{wakeLock=null});
+}
+}catch(e){}
+}
+
+function topic(){return "silentdisco_bizzy_"+room}
+async function fetchTimeout(url,options={},timeout=3500){
+const controller=new AbortController();
+const timer=setTimeout(()=>controller.abort(),timeout);
+try{return await fetch(url,{...options,signal:controller.signal,cache:"no-store"})}
+finally{clearTimeout(timer)}
+}
+async function sendMessage(m){
+if(!room)return false;
+const msg={...m,eventId:m.eventId||uid(),sentAt:Date.now()};
+const body=JSON.stringify(msg);
+for(let attempt=0;attempt<2;attempt++){
+try{
+const r=await fetchTimeout(`${NTFY}/${topic()}`,{method:"POST",headers:{"Content-Type":"text/plain"},body},3500);
+if(r.ok){networkOK=true;drawNetwork();return true}
+}catch(e){}
+await sleep(250);
+}
+networkOK=false;drawNetwork();return false;
+}
+function remember(set,value){
+if(!value)return false;
+if(set.has(value))return true;
+set.add(value);
+if(set.size>600){const first=set.values().next().value;set.delete(first)}
+return false;
+}
+function processOuter(outer){
+if(!outer)return;
+if(outer.id)lastNtfyId=outer.id;
+if(outer.event!=="message"||!outer.message)return;
+if(outer.id&&remember(seenNtfyIds,outer.id))return;
+let m;try{m=JSON.parse(outer.message)}catch(e){return}
+if(m.eventId&&remember(seenEventIds,m.eventId))return;
+processMessage(m);
+}
+function hostState(){
+return {phase,roundId,startAt,endAt:gameEndAt,penalty:currentPenalty,settings,lastLoser};
+}
+function applyHostState(s){
+if(!s||creator)return;
+if(s.settings){settings=s.settings;drawSettings()}
+if((s.phase==="countdown"||s.phase==="active")&&s.roundId&&s.startAt&&s.endAt){
+if(roundId!==s.roundId||(!active&&phase!=="countdown"))receiveStart({roundId:s.roundId,startAt:s.startAt,endAt:s.endAt,settings:s.settings||settings,penalty:s.penalty||""});
+}else if(s.phase==="over"&&s.lastLoser&&phase!=="over"){
+gameOver(s.lastLoser,s.penalty||"");
+}else if(s.phase==="success"&&phase!=="success"){
+gameSuccess();
+}else if(s.phase==="lobby"&&(phase==="over"||phase==="success")){
+resetLocal();
+}
+}
+function processMessage(m){
+if(!m||!m.type)return;
+if(m.type==="player-join"||m.type==="player-heartbeat"){
+addPlayer(m);
+if(m.creator&&m.settings){settings=m.settings;drawSettings()}
+if(m.creator&&m.state)applyHostState(m.state);
+}
+else if(m.type==="state-request"&&creator){
+sendMessage({type:"host-state",id:playerId,name,creator:true,state:hostState()});
+}
+else if(m.type==="host-state"){
+addPlayer(m);applyHostState(m.state);
+}
+else if(m.type==="start-game"&&m.startAt&&m.endAt){
+receiveStart(m);
+}
+else if(m.type==="move-report"&&creator){
+handleMoveReport(m);
+}
+else if(m.type==="game-over"&&m.loserName){
+gameOver(m.loserName,m.penalty||currentPenalty);
+}
+else if(m.type==="game-success"){
+gameSuccess();
+}
+else if(m.type==="new-round"){
+resetLocal();
+}
+}
+async function pollMessages(){
+if(polling||!room)return;
+polling=true;
+try{
+const since=lastNtfyId||"10m";
+const r=await fetchTimeout(`${NTFY}/${topic()}/json?poll=1&since=${encodeURIComponent(since)}`,{},4000);
+if(!r.ok)throw new Error("poll");
+const text=await r.text();
+for(const line of text.split(/\r?\n/)){
+if(!line.trim())continue;
+try{processOuter(JSON.parse(line))}catch(e){}
+}
+networkOK=true;
+}catch(e){networkOK=false}
+finally{polling=false;drawNetwork()}
+}
+function startTransport(){
+clearInterval(pollTimer);
+pollMessages();
+pollTimer=setInterval(pollMessages,POLL_MS);
+}
+function startHeartbeat(){
+clearInterval(heartbeatTimer);
+addPlayer({id:playerId,name,creator});
+const beat=()=>{
+addPlayer({id:playerId,name,creator});
+sendMessage({type:"player-heartbeat",id:playerId,name,creator,settings:creator?settings:null,state:creator?hostState():null});
+};
+beat();heartbeatTimer=setInterval(beat,HEARTBEAT_MS);
+}
+async function startSession(){
+addPlayer({id:playerId,name,creator});
+show("lobby");drawSettings();
+$("invite").classList.toggle("hidden",!creator);
+$("start").classList.toggle("hidden",!creator);
+$("guestWait").textContent=creator?"":T[language].guestWait;
+$("reset").classList.toggle("hidden",!creator);
+$("successReset").classList.toggle("hidden",!creator);
+await requestWake();
+startTransport();startHeartbeat();
+sendMessage({type:"player-join",id:playerId,name,creator,settings:creator?settings:null,state:creator?hostState():null});
+if(!creator)sendMessage({type:"state-request",id:playerId,name});
+saveState();
+}
 
 $("create").onclick=async()=>{
 settings.duration=parseInt($("duration").value,10);
 settings.penaltyType=$("penaltyType").value;
 settings.customPenalty=$("customPenalty").value.trim().slice(0,120);
 if(settings.penaltyType==="custom"&&!settings.customPenalty)return alert(T[language].needPenalty);
-room=makeRoom();creator=true;playerId=uid();
-if(await connect(true)){history.replaceState(null,"",location.pathname+"?room="+encodeURIComponent(room));saveState();$("invite").classList.remove("hidden");$("start").classList.remove("hidden");drawSettings()}
+room=makeRoom();creator=true;playerId=uid();phase="lobby";clearRuntime();phase="lobby";
+history.replaceState(null,"",location.pathname+"?room="+encodeURIComponent(room));
+saveState();
+await startSession();
 };
-
 $("joinGame").onclick=async()=>{
-name=$("joinName").value.trim().slice(0,20);if(!name)return alert(T[language].needName);
-playerId=uid();creator=false;if(await connect(false)){saveState()}
+name=$("joinName").value.trim().slice(0,20);
+if(!name)return alert(T[language].needName);
+if(!(await motionOK()))return alert(T[language].motion);
+playerId=uid();creator=false;phase="lobby";clearRuntime();phase="lobby";
+saveState();
+await startSession();
 };
-
-async function motionOK(){
-if(typeof DeviceMotionEvent!=="undefined"&&typeof DeviceMotionEvent.requestPermission==="function"){
-try{return await DeviceMotionEvent.requestPermission()==="granted"}catch(e){return false}
-}
-return true
-}
-async function requestWake(){
-try{
-if("wakeLock" in navigator){if(wakeLock)try{await wakeLock.release()}catch(e){};wakeLock=await navigator.wakeLock.request("screen");wakeLock.addEventListener("release",()=>{wakeLock=null})}
-}catch(e){console.warn("Wake lock unavailable",e)}
-}
-async function connect(isHost){
-if(!(await motionOK())){alert(T[language].motion);return false}
-listen();startPoll();
-add({id:playerId,name});show("lobby");$("guestWait").textContent=isHost?"":T[language].guestWait;
-await requestWake();
-await send({type:"player-join",id:playerId,name,creator:isHost,settings:isHost?settings:null});
-startHeartbeat();
-if(isHost){$("invite").classList.remove("hidden");$("start").classList.remove("hidden")}
-return true
-}
-function topic(){return "silentdisco_bizzy_"+encodeURIComponent(room)}
-function remember(set,value){
-if(!value)return false;
-if(set.has(value))return true;
-set.add(value);
-if(set.size>500){const first=set.values().next().value;set.delete(first)}
-return false
-}
-function processOuter(outer){
-if(!outer||outer.event!=="message"||!outer.message)return;
-if(outer.id&&remember(seenNtfyIds,outer.id))return;
-let m;try{m=JSON.parse(outer.message)}catch(e){return}
-if(m.eventId&&remember(seenEventIds,m.eventId))return;
-processMessage(m);
-if(outer.id)lastNtfyId=outer.id;
-}
-function processMessage(m){
-if(!m||!m.type)return;
-if(m.type==="player-join"||m.type==="player-heartbeat"){
-add(m);
-if(m.creator&&m.settings){settings=m.settings;drawSettings()}
-}
-else if(m.type==="start-game"&&m.startAt){
-settings=m.settings||settings;currentPenalty=m.penalty||"";drawSettings();receiveStart(m.startAt,m.endAt)
-}
-else if(m.type==="game-over"&&m.loserName)gameOver(m.loserName,m.penalty||currentPenalty);
-else if(m.type==="game-success")gameSuccess(m.endAt||Date.now());
-else if(m.type==="new-round")resetLocal();
-}
-function listen(){
-if(source)source.close();
-source=new EventSource(NTFY+"/"+topic()+"/sse?since=10s");
-source.onmessage=e=>{try{processOuter(JSON.parse(e.data))}catch(err){console.warn(err)}};
-source.onerror=e=>console.warn("SSE reconnecting",e);
-}
-async function pollMessages(){
-if(!room)return;
-const since=lastNtfyId||"10m";
-try{
-const r=await fetch(NTFY+"/"+topic()+"/json?poll=1&since="+encodeURIComponent(since),{cache:"no-store"});
-if(!r.ok)return;
-const body=await r.text();
-for(const line of body.split(/\r?\n/)){
-if(!line.trim())continue;
-try{processOuter(JSON.parse(line))}catch(e){}
-}
-}catch(e){console.warn("Polling unavailable",e)}
-}
-function startPoll(){
-clearInterval(pollTimer);
-pollMessages();
-pollTimer=setInterval(pollMessages,1200);
-}
-async function send(m){
-if(!m.eventId)m.eventId=uid();
-const body=JSON.stringify(m);
-for(let attempt=0;attempt<2;attempt++){
-try{
-const r=await fetch(NTFY+"/"+topic(),{method:"POST",headers:{"Content-Type":"text/plain"},body});
-if(r.ok)return true;
-}catch(e){}
-await new Promise(resolve=>setTimeout(resolve,250));
-}
-console.warn("Message send failed",m.type);
-return false
-}
-function startHeartbeat(){
-clearInterval(heartbeat);
-add({id:playerId,name});
-heartbeat=setInterval(()=>{
-add({id:playerId,name});
-send({type:"player-heartbeat",id:playerId,name,creator,settings:creator?settings:null})
-},3000)
-}
-function add(p){if(!p.id||!p.name)return;playerMap[p.id]={id:p.id,name:p.name,lastSeen:Date.now()};draw()}
-function draw(){const box=$("players");box.innerHTML="";Object.values(playerMap).forEach(p=>{const d=document.createElement("div");d.className="player";d.textContent=p.name;box.appendChild(d)})}
-function drawSettings(){
-if(!room){$("settingsPanel").innerHTML="";return}
-const t=T[language], mode=t.modeNames[settings.mode]||settings.mode;
-const penaltyLabel=settings.penaltyType==="custom"?(settings.customPenalty||"—"):t.random;
-$("settingsPanel").innerHTML=`<div class="row"><span class="muted">${t.mode}</span><strong>${mode}</strong></div><div class="row"><span class="muted">${t.time}</span><strong>${settings.duration} min</strong></div><div class="row"><span class="muted">${t.penalty}</span><strong>${escapeHtml(penaltyLabel)}</strong></div>`;
-}
-function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
-
 $("share").onclick=async()=>{
-const url=APP_URL+"?room="+encodeURIComponent(room),data={title:"Silent Disco",text:T[language].shareText,url};
-try{if(navigator.share)await navigator.share(data);else{await navigator.clipboard.writeText(url);alert(T[language].copied)}}catch(e){}
+const url=APP_URL+"?room="+encodeURIComponent(room);
+const data={title:"Silent Disco",text:T[language].shareText,url};
+try{
+if(navigator.share)await navigator.share(data);
+else{await navigator.clipboard.writeText(url);alert(T[language].copied)}
+}catch(e){}
 };
-
 function choosePenalty(){
 if(settings.penaltyType==="custom")return settings.customPenalty;
 const list=PENALTIES[settings.mode][language]||PENALTIES[settings.mode].nl;
-return list[Math.floor(Math.random()*list.length)]
+return list[Math.floor(Math.random()*list.length)];
 }
-$("start").onclick=async()=>{
-if(busy||!creator)return;
+$("start").onclick=()=>{
+if(!creator||busy)return;
 currentPenalty=choosePenalty();
-const startAt=Date.now()+5000,endAt=startAt+settings.duration*60000;
-await send({type:"start-game",startAt,endAt,settings,penalty:currentPenalty});
-receiveStart(startAt,endAt)
+roundId=uid();startAt=Date.now()+5000;gameEndAt=startAt+settings.duration*60000;
+moveReported=false;lastLoser="";busy=true;phase="countdown";saveState();
+const msg={type:"start-game",roundId,startAt,endAt:gameEndAt,settings,penalty:currentPenalty};
+sendMessage(msg);
+setTimeout(()=>sendMessage(msg),700);
+receiveStart(msg);
 };
-
-function receiveStart(startAt,endAt){
-if(busy)return;busy=true;active=false;gameEndAt=endAt;show("countdown");
-const timer=setInterval(()=>{const left=startAt-Date.now();if(left<=0){clearInterval(timer);startActive();return}$("countdown").textContent=Math.max(1,Math.ceil(left/1000))},50)
+function receiveStart(m){
+if(!m||!m.startAt||!m.endAt)return;
+if(m.settings){settings=m.settings;drawSettings()}
+currentPenalty=m.penalty||currentPenalty;roundId=m.roundId||roundId||uid();startAt=m.startAt;gameEndAt=m.endAt;
+busy=true;moveReported=false;lastLoser="";document.body.classList.remove("alarm");
+clearInterval(countdownTimer);clearInterval(gameTimerInterval);window.removeEventListener("devicemotion",checkMove,true);
+const now=Date.now();
+if(now>=gameEndAt){gameSuccess();return}
+if(now>=startAt){startActive();return}
+phase="countdown";show("countdown");saveState();
+const tick=()=>{
+const left=startAt-Date.now();
+if(left<=0){clearInterval(countdownTimer);startActive();return}
+$("countdown").textContent=Math.max(1,Math.ceil(left/1000));
+};
+tick();countdownTimer=setInterval(tick,80);
 }
 function startActive(){
-active=true;px=py=pz=null;show("active");requestWake();window.addEventListener("devicemotion",checkMove,true);
-updateGameTimer();clearInterval(gameInterval);gameInterval=setInterval(updateGameTimer,250)
+if(Date.now()>=gameEndAt){gameSuccess();return}
+phase="active";active=true;busy=true;moveReported=false;px=py=pz=null;
+show("active");requestWake();window.addEventListener("devicemotion",checkMove,true);
+updateGameTimer();clearInterval(gameTimerInterval);gameTimerInterval=setInterval(updateGameTimer,250);saveState();
 }
 function updateGameTimer(){
 const left=gameEndAt-Date.now();
-if(left<=0){clearInterval(gameInterval);if(active&&creator){active=false;send({type:"game-success",endAt:gameEndAt});gameSuccess(gameEndAt)}return}
-const total=Math.ceil(left/1000),m=Math.floor(total/60),s=total%60;$("gameTimer").textContent=String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")
+if(left<=0){
+clearInterval(gameTimerInterval);
+if(active){active=false;window.removeEventListener("devicemotion",checkMove,true)}
+if(creator)sendMessage({type:"game-success",roundId});
+gameSuccess();return;
+}
+const total=Math.ceil(left/1000),m=Math.floor(total/60),s=total%60;
+$("gameTimer").textContent=String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
 }
 function checkMove(e){
-if(!active)return;const a=e.accelerationIncludingGravity;if(!a||a.x==null||a.y==null||a.z==null)return;
-const x=a.x,y=a.y,z=a.z;if(px===null){px=x;py=y;pz=z;return}
+if(!active||moveReported)return;
+const a=e.accelerationIncludingGravity;
+if(!a||a.x==null||a.y==null||a.z==null)return;
+const x=a.x,y=a.y,z=a.z;
+if(px===null){px=x;py=y;pz=z;return}
 const moved=Math.abs(x-px)>THRESHOLD||Math.abs(y-py)>THRESHOLD||Math.abs(z-pz)>THRESHOLD;
 px=px*.9+x*.1;py=py*.9+y*.1;pz=pz*.9+z*.1;
-if(!moved)return;const now=Date.now();if(now-lastMove<300)return;lastMove=now;ownMove()
+if(!moved)return;
+const now=Date.now();if(now-lastMove<350)return;lastMove=now;ownMove();
 }
 function ownMove(){
-if(!active)return;active=false;clearInterval(gameInterval);window.removeEventListener("devicemotion",checkMove,true);
-send({type:"game-over",loserId:playerId,loserName:name,penalty:currentPenalty});gameOver(name,currentPenalty)
+if(!active||moveReported)return;
+moveReported=true;active=false;window.removeEventListener("devicemotion",checkMove,true);
+$("activeSub").textContent=T[language].moveSent;
+const report={type:"move-report",roundId,loserId:playerId,loserName:name,detectedAt:Date.now()};
+if(creator)handleMoveReport(report);else sendMessage(report);
+}
+function handleMoveReport(m){
+if(!creator||phase!=="active"||lastLoser||m.roundId!==roundId)return;
+lastLoser=m.loserName;currentPenalty=currentPenalty||choosePenalty();
+const result={type:"game-over",roundId,loserId:m.loserId,loserName:m.loserName,penalty:currentPenalty};
+sendMessage(result);gameOver(m.loserName,currentPenalty);
 }
 function gameOver(loserName,penaltyText){
-active=false;busy=false;clearInterval(gameInterval);window.removeEventListener("devicemotion",checkMove,true);show("over");document.body.classList.add("alarm");
-const t=T[language];$("alarmTitle").textContent=loserName.toLowerCase()===name.toLowerCase()?t.you:t.other.replace("{name}",loserName.toUpperCase());
-$("loser").textContent=loserName.toUpperCase();$("penalty").textContent=loserName+" "+(penaltyText||currentPenalty)
+if(phase==="over"&&lastLoser===loserName)return;
+active=false;busy=false;phase="over";lastLoser=loserName;currentPenalty=penaltyText||currentPenalty;
+clearInterval(countdownTimer);clearInterval(gameTimerInterval);window.removeEventListener("devicemotion",checkMove,true);
+show("over");document.body.classList.add("alarm");
+const t=T[language];
+$("alarmTitle").textContent=loserName.toLowerCase()===name.toLowerCase()?t.you:t.other.replace("{name}",loserName.toUpperCase());
+$("loser").textContent=loserName.toUpperCase();$("penalty").textContent=loserName+" "+currentPenalty;
+$("reset").classList.toggle("hidden",!creator);$("resultWait").textContent=creator?"":t.waitRound;saveState();
 }
 function gameSuccess(){
-active=false;busy=false;clearInterval(gameInterval);window.removeEventListener("devicemotion",checkMove,true);document.body.classList.remove("alarm");show("success");
-const t=T[language],count=Object.keys(playerMap).length;$("successTitle").textContent=t.success;$("successDetail").textContent=count+" "+t.players+" • "+settings.duration+" "+t.minutes
+if(phase==="success")return;
+active=false;busy=false;phase="success";
+clearInterval(countdownTimer);clearInterval(gameTimerInterval);window.removeEventListener("devicemotion",checkMove,true);
+document.body.classList.remove("alarm");show("success");
+const t=T[language],count=Object.keys(playerMap).length;
+$("successTitle").textContent=t.success;$("successDetail").textContent=count+" "+t.players+" • "+settings.duration+" "+t.minutes;
+$("successReset").classList.toggle("hidden",!creator);$("successWait").textContent=creator?"":t.waitRound;saveState();
 }
-$("reset").onclick=async()=>{if(creator)await send({type:"new-round"});resetLocal()};
-$("successReset").onclick=async()=>{if(creator)await send({type:"new-round"});resetLocal()};
-function resetLocal(){active=false;busy=false;clearInterval(gameInterval);window.removeEventListener("devicemotion",checkMove,true);document.body.classList.remove("alarm");show("lobby");if(creator){$("invite").classList.remove("hidden");$("start").classList.remove("hidden")}}
-
+function resetLocal(){
+clearRuntime();phase="lobby";show("lobby");drawSettings();
+$("invite").classList.toggle("hidden",!creator);$("start").classList.toggle("hidden",!creator);
+$("guestWait").textContent=creator?"":T[language].guestWait;
+$("activeSub").textContent=T[language].activeSub;saveState();
+}
+$("reset").onclick=()=>{if(!creator)return;sendMessage({type:"new-round",eventId:uid()});resetLocal()};
+$("successReset").onclick=()=>{if(!creator)return;sendMessage({type:"new-round",eventId:uid()});resetLocal()};
 $("shareResult").onclick=async()=>{
 const t=T[language],count=Object.keys(playerMap).length,text=`Silent Disco — ${t.success} ${count} ${t.players}, ${settings.duration} ${t.minutes}.`;
-try{if(navigator.share)await navigator.share({title:"Silent Disco",text});else{await navigator.clipboard.writeText(text);alert(t.resultCopied)}}catch(e){}
+try{
+if(navigator.share)await navigator.share({title:"Silent Disco",text});
+else{await navigator.clipboard.writeText(text);alert(t.resultCopied)}
+}catch(e){}
 };
 
-setInterval(()=>{const now=Date.now();Object.keys(playerMap).forEach(k=>{if(now-playerMap[k].lastSeen>20000)delete playerMap[k]});draw()},5000);
+setInterval(prunePlayers,3000);
 
 document.addEventListener("visibilitychange",async()=>{
 if(document.visibilityState==="visible"&&room&&name){
-await requestWake();listen();startPoll();await send({type:"player-heartbeat",id:playerId,name,creator,settings:creator?settings:null});startHeartbeat()
+await requestWake();startTransport();startHeartbeat();sendMessage({type:"state-request",id:playerId,name});
 }
 });
-window.addEventListener("beforeunload",()=>{if(source)source.close();clearInterval(heartbeat);clearInterval(pollTimer);clearInterval(gameInterval);window.removeEventListener("devicemotion",checkMove,true)});
+window.addEventListener("focus",()=>{
+if(room&&name){startTransport();sendMessage({type:"state-request",id:playerId,name})}
+});
+window.addEventListener("beforeunload",()=>{
+clearInterval(pollTimer);clearInterval(heartbeatTimer);clearInterval(countdownTimer);clearInterval(gameTimerInterval);
+window.removeEventListener("devicemotion",checkMove,true);
+});
 
-(function init(){
+(async function init(){
 paint();
-const q=new URLSearchParams(location.search),r=(q.get("room")||"").replace(/[^a-zA-Z0-9_-]/g,"").slice(0,60);
+const q=new URLSearchParams(location.search);
+const r=(q.get("room")||"").replace(/[^a-zA-Z0-9_-]/g,"").slice(0,80);
+if(!r){phase="home";show("home");return}
 let saved=null;try{saved=JSON.parse(localStorage.getItem(STORE)||"null")}catch(e){}
-if(!r){
-show("home");
-return;
-}
 if(saved&&saved.room===r&&saved.name){
 room=r;name=saved.name;playerId=saved.playerId||uid();creator=!!saved.creator;settings=saved.settings||settings;
-connect(creator).then(()=>{if(creator){$("invite").classList.remove("hidden");$("start").classList.remove("hidden")}drawSettings()});
+phase=saved.phase||"lobby";roundId=saved.roundId||"";startAt=saved.startAt||0;gameEndAt=saved.gameEndAt||0;currentPenalty=saved.currentPenalty||"";lastLoser=saved.lastLoser||"";
+await startSession();
+if(phase==="countdown"||phase==="active"){
+receiveStart({roundId,startAt,endAt:gameEndAt,settings,penalty:currentPenalty});
+}else if(phase==="over"&&lastLoser){
+gameOver(lastLoser,currentPenalty);
+}else if(phase==="success"){
+gameSuccess();
+}
 }else{
-room=r;creator=false;show("join");
+room=r;creator=false;phase="lobby";show("join");
 }
 })();
 </script>
