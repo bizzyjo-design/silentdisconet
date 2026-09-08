@@ -139,8 +139,7 @@ body.alarm{background:#ff0033}.loser{font-size:2.35rem;font-weight:950;text-tran
 <script>
 const NTFY="https://ntfy.sh", THRESHOLD=1.8, STORE="silentdisco_v5_state";
 let language="nl", name="", room="", playerId="", creator=false, source=null, heartbeat=null, wakeLock=null;
-let active=false,busy=false,gameEndAt=0,gameInterval=null,countdownInterval=null,currentPenalty="",settings={mode:"party",duration:15,penaltyType:"random",customPenalty:""};
-let gamePhase="lobby",currentStartAt=0,lastLoserName="";
+let active=false,busy=false,gameEndAt=0,gameInterval=null,currentPenalty="",settings={mode:"party",duration:15,penaltyType:"random",customPenalty:""};
 let px=null,py=null,pz=null,lastMove=0; const playerMap={};
 
 const T={
@@ -232,61 +231,42 @@ if("wakeLock" in navigator){if(wakeLock)try{await wakeLock.release()}catch(e){};
 }
 async function connect(isHost){
 if(!(await motionOK())){alert(T[language].motion);return false}
-const ready=await listen();
+const ready=await listenReady();
 if(!ready){alert("Realtime verbinding kon niet worden gestart. Probeer opnieuw.");return false}
-add({id:playerId,name});show("lobby");await requestWake();
-await send({type:"player-join",id:playerId,name,creator:!!isHost});
-if(!isHost)await send({type:"state-request",id:playerId,name});
-startHeartbeat();
-if(isHost){$("invite").classList.remove("hidden");$("start").classList.remove("hidden")}
-return true
+add({id:playerId,name});show("lobby");await requestWake();await send({type:"player-join",id:playerId,name});startHeartbeat();if(isHost){$("invite").classList.remove("hidden");$("start").classList.remove("hidden")}return true
 }
 function topic(){return "silentdisco_bizzy_"+encodeURIComponent(room)}
-function listen(){
-if(source)source.close();
-source=new EventSource(NTFY+"/"+topic()+"/sse");
-return new Promise(resolve=>{
-let settled=false;
-const done=v=>{if(!settled){settled=true;clearTimeout(timeout);resolve(v)}};
-const timeout=setTimeout(()=>done(false),7000);
-source.onopen=()=>done(true);
-source.onerror=()=>{if(source&&source.readyState===EventSource.CLOSED)done(false)};
+function attachMessages(){
 source.onmessage=e=>{
 try{
 const outer=JSON.parse(e.data);if(!outer.message)return;const m=JSON.parse(outer.message);
-if(m.type==="player-join"||m.type==="player-heartbeat"){
-add(m);
-if(!creator&&m.creator&&m.phase)applyHostState(m);
-if(creator&&m.type==="player-join")sendHostState();
-}
-else if(m.type==="state-request"&&creator)sendHostState();
-else if(m.type==="state-sync"&&!creator)applyHostState(m);
+if(m.type==="player-join"||m.type==="player-heartbeat")add(m);
 else if(m.type==="start-game"&&m.startAt){settings=m.settings||settings;currentPenalty=m.penalty||"";drawSettings();receiveStart(m.startAt,m.endAt)}
 else if(m.type==="game-over"&&m.loserName)gameOver(m.loserName,m.penalty||currentPenalty);
 else if(m.type==="game-success")gameSuccess(m.endAt||Date.now());
 else if(m.type==="new-round")resetLocal();
 }catch(err){console.warn(err)}
-};
+}
+}
+function listen(){
+if(source)source.close();
+source=new EventSource(NTFY+"/"+topic()+"/sse");
+attachMessages();
+}
+function listenReady(){
+if(source)source.close();
+source=new EventSource(NTFY+"/"+topic()+"/sse");
+attachMessages();
+return new Promise(resolve=>{
+let done=false;
+const finish=v=>{if(done)return;done=true;clearTimeout(timer);resolve(v)};
+const timer=setTimeout(()=>finish(false),8000);
+source.onopen=()=>finish(true);
+source.onerror=()=>{if(source.readyState===EventSource.CLOSED)finish(false)};
 })
 }
-async function send(m){try{const r=await fetch(NTFY+"/"+topic(),{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify(m)});return r.ok}catch(e){console.error(e);return false}}
-function heartbeatPayload(){
-const m={type:"player-heartbeat",id:playerId,name,creator:!!creator};
-if(creator){m.phase=gamePhase;m.startAt=currentStartAt;m.endAt=gameEndAt;m.settings=settings;m.penalty=currentPenalty;m.loserName=lastLoserName}
-return m
-}
-async function sendHostState(){
-if(!creator)return;
-await send({type:"state-sync",creator:true,phase:gamePhase,startAt:currentStartAt,endAt:gameEndAt,settings,penalty:currentPenalty,loserName:lastLoserName})
-}
-function applyHostState(m){
-settings=m.settings||settings;currentPenalty=m.penalty||currentPenalty;drawSettings();
-if((m.phase==="countdown"||m.phase==="active")&&m.startAt&&m.endAt&&!busy)receiveStart(m.startAt,m.endAt);
-else if(m.phase==="over"&&m.loserName&&gamePhase!=="over")gameOver(m.loserName,m.penalty||currentPenalty);
-else if(m.phase==="success"&&gamePhase!=="success")gameSuccess();
-else if(m.phase==="lobby"&&gamePhase!=="lobby")resetLocal()
-}
-function startHeartbeat(){clearInterval(heartbeat);send(heartbeatPayload());heartbeat=setInterval(()=>send(heartbeatPayload()),3000)}
+async function send(m){try{await fetch(NTFY+"/"+topic(),{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify(m)})}catch(e){console.error(e)}}
+function startHeartbeat(){clearInterval(heartbeat);heartbeat=setInterval(()=>send({type:"player-heartbeat",id:playerId,name}),5000)}
 function add(p){if(!p.id||!p.name)return;playerMap[p.id]={id:p.id,name:p.name,lastSeen:Date.now()};draw()}
 function draw(){const box=$("players");box.innerHTML="";Object.values(playerMap).forEach(p=>{const d=document.createElement("div");d.className="player";d.textContent=p.name;box.appendChild(d)})}
 function drawSettings(){
@@ -310,8 +290,7 @@ return list[Math.floor(Math.random()*list.length)]
 $("start").onclick=async()=>{
 if(busy||!creator)return;
 currentPenalty=choosePenalty();
-const startAt=Date.now()+4000,endAt=startAt+settings.duration*60000;
-currentStartAt=startAt;gameEndAt=endAt;gamePhase="countdown";
+const startAt=Date.now()+4500,endAt=startAt+settings.duration*60000;
 const msg={type:"start-game",startAt,endAt,settings,penalty:currentPenalty};
 await send(msg);
 setTimeout(()=>send(msg),700);
@@ -320,15 +299,11 @@ receiveStart(startAt,endAt)
 };
 
 function receiveStart(startAt,endAt){
-if(busy)return;
-busy=true;active=false;currentStartAt=startAt;gameEndAt=endAt;
-clearInterval(countdownInterval);
-if(Date.now()>=startAt){startActive();return}
-show("countdown");
-countdownInterval=setInterval(()=>{const left=startAt-Date.now();if(left<=0){clearInterval(countdownInterval);startActive();return}$("countdown").textContent=Math.max(1,Math.ceil(left/1000))},50)
+if(busy)return;busy=true;active=false;gameEndAt=endAt;show("countdown");
+const timer=setInterval(()=>{const left=startAt-Date.now();if(left<=0){clearInterval(timer);startActive();return}$("countdown").textContent=Math.max(1,Math.ceil(left/1000))},50)
 }
 function startActive(){
-gamePhase="active";active=true;px=py=pz=null;show("active");requestWake();window.addEventListener("devicemotion",checkMove,true);
+active=true;px=py=pz=null;show("active");requestWake();window.addEventListener("devicemotion",checkMove,true);
 updateGameTimer();clearInterval(gameInterval);gameInterval=setInterval(updateGameTimer,250)
 }
 function updateGameTimer(){
@@ -348,17 +323,17 @@ if(!active)return;active=false;clearInterval(gameInterval);window.removeEventLis
 send({type:"game-over",loserId:playerId,loserName:name,penalty:currentPenalty});gameOver(name,currentPenalty)
 }
 function gameOver(loserName,penaltyText){
-gamePhase="over";lastLoserName=loserName;active=false;busy=false;clearInterval(countdownInterval);clearInterval(gameInterval);window.removeEventListener("devicemotion",checkMove,true);show("over");document.body.classList.add("alarm");
+active=false;busy=false;clearInterval(gameInterval);window.removeEventListener("devicemotion",checkMove,true);show("over");document.body.classList.add("alarm");
 const t=T[language];$("alarmTitle").textContent=loserName.toLowerCase()===name.toLowerCase()?t.you:t.other.replace("{name}",loserName.toUpperCase());
 $("loser").textContent=loserName.toUpperCase();$("penalty").textContent=loserName+" "+(penaltyText||currentPenalty)
 }
 function gameSuccess(){
-gamePhase="success";lastLoserName="";active=false;busy=false;clearInterval(countdownInterval);clearInterval(gameInterval);window.removeEventListener("devicemotion",checkMove,true);document.body.classList.remove("alarm");show("success");
+active=false;busy=false;clearInterval(gameInterval);window.removeEventListener("devicemotion",checkMove,true);document.body.classList.remove("alarm");show("success");
 const t=T[language],count=Object.keys(playerMap).length;$("successTitle").textContent=t.success;$("successDetail").textContent=count+" "+t.players+" • "+settings.duration+" "+t.minutes
 }
 $("reset").onclick=async()=>{if(creator)await send({type:"new-round"});resetLocal()};
 $("successReset").onclick=async()=>{if(creator)await send({type:"new-round"});resetLocal()};
-function resetLocal(){gamePhase="lobby";currentStartAt=0;gameEndAt=0;currentPenalty="";lastLoserName="";active=false;busy=false;clearInterval(countdownInterval);clearInterval(gameInterval);window.removeEventListener("devicemotion",checkMove,true);document.body.classList.remove("alarm");show("lobby");if(creator){$("invite").classList.remove("hidden");$("start").classList.remove("hidden")}}
+function resetLocal(){active=false;busy=false;clearInterval(gameInterval);window.removeEventListener("devicemotion",checkMove,true);document.body.classList.remove("alarm");show("lobby");if(creator){$("invite").classList.remove("hidden");$("start").classList.remove("hidden")}}
 
 $("shareResult").onclick=async()=>{
 const t=T[language],count=Object.keys(playerMap).length,text=`Silent Disco — ${t.success} ${count} ${t.players}, ${settings.duration} ${t.minutes}.`;
@@ -369,10 +344,10 @@ setInterval(()=>{const now=Date.now();Object.keys(playerMap).forEach(k=>{if(now-
 
 document.addEventListener("visibilitychange",async()=>{
 if(document.visibilityState==="visible"&&room&&name){
-await requestWake();const ready=await listen();if(ready){await send(heartbeatPayload());if(!creator)await send({type:"state-request",id:playerId,name});startHeartbeat()}
+await requestWake();listen();await send({type:"player-heartbeat",id:playerId,name});startHeartbeat()
 }
 });
-window.addEventListener("beforeunload",()=>{if(source)source.close();clearInterval(heartbeat);clearInterval(countdownInterval);clearInterval(gameInterval);window.removeEventListener("devicemotion",checkMove,true)});
+window.addEventListener("beforeunload",()=>{if(source)source.close();clearInterval(heartbeat);clearInterval(gameInterval);window.removeEventListener("devicemotion",checkMove,true)});
 
 (function init(){
 paint();
