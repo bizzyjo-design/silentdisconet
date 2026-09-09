@@ -1,0 +1,634 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<title>DON'T TOUCH V11.3</title>
+<style>
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#05030b; --panel:rgba(13,12,24,.82); --panel2:rgba(18,15,33,.9);
+  --text:#fff; --muted:#a8aac0; --pink:#ff3ad7; --violet:#7b61ff;
+  --cyan:#21d4ff; --green:#23f7a3; --orange:#ffad2f; --danger:#ff164f;
+  --ring:0 0 0 1px rgba(255,255,255,.06) inset;
+}
+html,body{margin:0;min-height:100%;background:#05030b;color:var(--text)}
+body{
+  font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  min-height:100svh;display:flex;justify-content:center;align-items:flex-start;
+  padding:26px 0 50px;user-select:none;overflow-x:hidden;
+  background:
+    radial-gradient(circle at 15% 5%,rgba(255,58,215,.22),transparent 26%),
+    radial-gradient(circle at 82% 0%,rgba(33,212,255,.19),transparent 30%),
+    radial-gradient(circle at 50% 38%,rgba(123,97,255,.12),transparent 34%),
+    linear-gradient(180deg,#090414 0%,#05030b 52%,#030207 100%);
+  transition:background .2s ease
+}
+body:before{
+  content:"";position:fixed;inset:0;pointer-events:none;opacity:.5;
+  background:
+    linear-gradient(125deg,transparent 0 18%,rgba(255,58,215,.10) 19%,transparent 21% 100%),
+    linear-gradient(55deg,transparent 0 76%,rgba(33,212,255,.08) 77%,transparent 79% 100%);
+  filter:blur(2px)
+}
+body:after{
+  content:"";position:fixed;left:50%;top:0;transform:translateX(-50%);
+  width:720px;height:720px;border-radius:50%;pointer-events:none;opacity:.28;
+  background:radial-gradient(circle,rgba(123,97,255,.28),transparent 62%);
+  filter:blur(40px)
+}
+.app{width:100%;max-width:520px;padding:22px 20px;text-align:center;position:relative;z-index:1}
+.lang{position:fixed;top:14px;right:14px;display:flex;gap:8px;z-index:20}
+.lang button{
+  background:rgba(7,7,15,.72);backdrop-filter:blur(16px);
+  border:1px solid rgba(255,255,255,.16);color:#fff;padding:10px 13px;
+  border-radius:999px;font-weight:900;box-shadow:0 10px 30px rgba(0,0,0,.28)
+}
+.lang button.active{
+  border-color:var(--green);box-shadow:0 0 0 1px rgba(35,247,163,.18) inset,0 0 22px rgba(35,247,163,.18)
+}
+.logo{
+  margin-top:48px;font-size:clamp(2.1rem,8vw,3rem);font-weight:1000;letter-spacing:.075em;
+  background:linear-gradient(90deg,#fff 0%,#c6f6ff 36%,#f8c7ff 72%,#fff 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:0 0 34px rgba(123,97,255,.18);position:relative
+}
+.logo:before{
+  content:"🎧";display:block;font-size:4.4rem;line-height:1;margin-bottom:8px;
+  filter:drop-shadow(0 0 22px rgba(255,58,215,.42)) drop-shadow(0 0 34px rgba(33,212,255,.28))
+}
+.logo:after{
+  content:"";display:block;width:92px;height:5px;border-radius:999px;margin:15px auto 0;
+  background:linear-gradient(90deg,var(--cyan),var(--pink));box-shadow:0 0 26px rgba(123,97,255,.7)
+}
+.subtitle{
+  color:#bec3d9;margin:10px 0 28px;font-size:.9rem;letter-spacing:.24em;text-transform:uppercase
+}
+section{display:none;animation:rise .32s ease}.show{display:block}
+@keyframes rise{from{opacity:0;transform:translateY(10px) scale(.99)}to{opacity:1;transform:none}}
+h1{font-size:1.58rem;margin:0 0 20px;letter-spacing:-.03em}
+.stack{display:flex;flex-direction:column;gap:13px}
+input,select,textarea{
+  width:100%;padding:16px 17px;border-radius:18px;border:1px solid rgba(255,255,255,.13);
+  background:linear-gradient(180deg,rgba(18,18,34,.94),rgba(9,9,18,.94));color:#fff;font-size:16px;
+  outline:none;box-shadow:0 16px 38px rgba(0,0,0,.28),var(--ring);transition:.18s ease
+}
+input:focus,select:focus,textarea:focus{
+  border-color:var(--cyan);box-shadow:0 0 0 3px rgba(33,212,255,.10),0 18px 40px rgba(0,0,0,.34)
+}
+textarea{min-height:94px;resize:vertical}
+label{display:block;text-align:left;font-weight:900;margin:8px 5px 5px;color:#e6e7f1;font-size:.9rem}
+.btn{
+  width:100%;border:0;border-radius:999px;padding:17px 20px;
+  background:linear-gradient(90deg,var(--pink),var(--violet) 48%,var(--cyan));
+  color:#fff;font-weight:1000;font-size:1rem;letter-spacing:.03em;cursor:pointer;
+  box-shadow:0 0 24px rgba(255,58,215,.32),0 0 30px rgba(33,212,255,.16),0 14px 34px rgba(0,0,0,.32);
+  transition:transform .12s ease,filter .12s ease
+}
+.btn:hover{filter:brightness(1.08)} .btn:active{transform:scale(.985)}
+.btn.secondary{
+  background:linear-gradient(180deg,rgba(28,26,44,.96),rgba(13,12,22,.96));
+  border:1px solid rgba(255,255,255,.14);box-shadow:0 14px 30px rgba(0,0,0,.26)
+}
+.btn:disabled{opacity:.45;cursor:not-allowed;filter:saturate(.4)}
+.small{color:var(--muted);font-size:.84rem;line-height:1.5;margin-top:12px}
+.cards{display:grid;grid-template-columns:1fr;gap:12px}
+.mode{
+  border:1px solid rgba(255,255,255,.12);background:linear-gradient(180deg,rgba(20,18,34,.92),rgba(10,9,18,.94));
+  color:#fff;border-radius:22px;padding:17px 18px;text-align:left;cursor:pointer;position:relative;overflow:hidden;
+  box-shadow:0 16px 36px rgba(0,0,0,.24),var(--ring);transition:.18s ease
+}
+.mode:before{
+  content:"";position:absolute;inset:0 auto 0 0;width:5px;background:rgba(255,255,255,.08)
+}
+.mode:nth-child(1):before{background:linear-gradient(var(--pink),var(--violet))}
+.mode:nth-child(2):before{background:linear-gradient(var(--cyan),#3478ff)}
+.mode:nth-child(3):before{background:linear-gradient(var(--orange),#ff6a2f)}
+.mode:after{
+  content:"";position:absolute;right:17px;top:50%;transform:translateY(-50%);
+  width:12px;height:12px;border-radius:50%;background:#323243;box-shadow:0 0 0 5px rgba(255,255,255,.02)
+}
+.mode.selected{
+  transform:translateY(-1px);border-color:rgba(255,58,215,.75);
+  box-shadow:0 0 0 1px rgba(255,58,215,.16) inset,0 0 25px rgba(255,58,215,.22),0 14px 34px rgba(0,0,0,.28)
+}
+.mode.selected:after{background:#fff;box-shadow:0 0 0 5px rgba(255,58,215,.25),0 0 22px rgba(255,58,215,.8)}
+.mode strong{display:block;font-size:1.12rem}.mode span{display:block;color:#aeb2c8;font-size:.84rem;margin-top:4px;max-width:82%}
+.players{margin:18px 0;text-align:left;display:flex;flex-direction:column;gap:10px}
+.player{
+  background:linear-gradient(180deg,rgba(18,17,31,.94),rgba(10,9,18,.94));
+  border:1px solid rgba(255,255,255,.11);padding:14px 15px 14px 44px;border-radius:17px;
+  box-shadow:0 12px 28px rgba(0,0,0,.22);position:relative
+}
+.player:before{
+  content:"";position:absolute;left:16px;top:50%;transform:translateY(-50%);
+  width:11px;height:11px;border-radius:50%;background:var(--green);box-shadow:0 0 15px rgba(35,247,163,.75)
+}
+.panel{
+  background:linear-gradient(180deg,rgba(18,17,31,.84),rgba(10,9,18,.86));
+  border:1px solid rgba(255,255,255,.12);border-radius:22px;padding:17px;margin:15px 0;text-align:left;
+  backdrop-filter:blur(16px);box-shadow:0 18px 38px rgba(0,0,0,.25),var(--ring)
+}
+.panel .row{display:flex;justify-content:space-between;gap:10px;margin:9px 0;align-items:center}
+.panel .muted{color:#a5a9bd}
+#lobby h1:before{
+  content:"LIVE";display:inline-block;margin-right:9px;padding:5px 9px;border-radius:999px;font-size:.62rem;
+  letter-spacing:.14em;vertical-align:middle;background:rgba(35,247,163,.10);color:var(--green);
+  border:1px solid rgba(35,247,163,.35);box-shadow:0 0 18px rgba(35,247,163,.12)
+}
+#countdown{
+  font-size:clamp(8rem,31vw,11rem);font-weight:1000;padding-top:45px;line-height:1;
+  background:linear-gradient(180deg,#fff,#d9efff 60%,#ffb9f4);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 30px rgba(123,97,255,.55));animation:countPulse .62s ease-in-out infinite alternate
+}
+@keyframes countPulse{to{transform:scale(1.055);filter:drop-shadow(0 0 50px rgba(255,58,215,.72))}}
+.silence,.alarm-icon,.win-icon{font-size:5.8rem;filter:drop-shadow(0 12px 26px rgba(0,0,0,.3))}
+.active-title{
+  font-size:2.45rem;font-weight:1000;margin-top:12px;letter-spacing:.03em;
+  background:linear-gradient(90deg,#fff,var(--cyan),#fff);-webkit-background-clip:text;background-clip:text;color:transparent
+}
+.active-title:after{
+  content:"";display:block;width:96px;height:5px;border-radius:999px;margin:15px auto 0;
+  background:linear-gradient(90deg,var(--cyan),var(--pink));box-shadow:0 0 22px rgba(123,97,255,.6)
+}
+.active-subtitle{color:#b0b3c5;margin-top:15px;line-height:1.55}
+.timer{
+  font-variant-numeric:tabular-nums;font-size:2.9rem;font-weight:1000;margin:27px auto 0;width:max-content;
+  padding:13px 23px;border-radius:19px;background:rgba(8,8,16,.72);border:1px solid rgba(255,255,255,.13);
+  box-shadow:0 14px 34px rgba(0,0,0,.25),0 0 24px rgba(33,212,255,.08);letter-spacing:.04em
+}
+body.alarm{
+  background:
+    radial-gradient(circle at 50% 10%,rgba(255,255,255,.18),transparent 28%),
+    linear-gradient(180deg,#ff164f 0%,#a4002a 100%);
+  animation:alarmFlash .44s ease-in-out infinite alternate
+}
+@keyframes alarmFlash{to{filter:brightness(1.14)}}
+body.alarm:before{opacity:.12}
+.loser{font-size:clamp(2.4rem,9vw,3.3rem);font-weight:1000;text-transform:uppercase;margin:18px 0;letter-spacing:.025em}
+.result-big{
+  font-size:2.35rem;font-weight:1000;margin:12px 0;
+  background:linear-gradient(90deg,#fff,var(--green));-webkit-background-clip:text;background-clip:text;color:transparent
+}
+.hidden{display:none!important}
+#errorBox{
+  background:rgba(255,22,79,.12);color:#ffd1dc;border:1px solid rgba(255,22,79,.4);
+  border-radius:16px;padding:13px 14px;margin:12px 0;text-align:left;display:none
+}
+#home,#setupName,#setup,#join,#lobby,#active,#over,#success{padding:18px 0 10px}
+#home:before{
+  content:"SAME BEAT • NO MOVEMENT • LAST ONE STANDING";display:block;margin:0 0 18px;padding:10px 12px;
+  border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08);
+  color:#cfd2e3;font-size:.72rem;letter-spacing:.16em
+}
+@media(max-width:560px){
+  body{padding-top:18px}.app{padding:20px 17px}.lang{top:10px;right:10px}
+  .logo{margin-top:54px}.logo:before{font-size:3.9rem}.subtitle{font-size:.78rem;letter-spacing:.18em}
+}
+
+
+/* V11 DON’T TOUCH warm cinematic brand layer */
+:root{
+  --bg:#090604!important;
+  --panel:rgba(24,15,10,.88)!important;
+  --panel2:rgba(34,20,12,.92)!important;
+  --text:#fffaf3!important;
+  --muted:#c8b7a6!important;
+  --pink:#ff3b75!important;
+  --violet:#b4552b!important;
+  --cyan:#35bff2!important;
+  --green:#27ed87!important;
+  --orange:#ffb72e!important;
+  --danger:#ff164f!important;
+}
+body{
+  background:
+    radial-gradient(circle at 14% 5%,rgba(255,153,42,.24),transparent 28%),
+    radial-gradient(circle at 86% 7%,rgba(35,155,255,.15),transparent 28%),
+    radial-gradient(circle at 52% 35%,rgba(255,58,80,.10),transparent 34%),
+    linear-gradient(180deg,#130b07 0%,#080504 55%,#030202 100%)!important;
+}
+body:after{
+  background:radial-gradient(circle,rgba(255,139,40,.20),transparent 62%)!important;
+}
+.logo{
+  background:linear-gradient(90deg,#fffaf3 0%,#ffd77c 46%,#ff9e35 72%,#fffaf3 100%)!important;
+  -webkit-background-clip:text!important;background-clip:text!important;color:transparent!important;
+}
+.logo:before{
+  content:"☝️"!important;
+  filter:drop-shadow(0 0 22px rgba(255,164,45,.45))!important;
+}
+.logo:after{
+  background:linear-gradient(90deg,#ffb52e,#ff3b75,#35bff2)!important;
+  box-shadow:0 0 26px rgba(255,139,40,.45)!important;
+}
+.btn{
+  background:linear-gradient(90deg,#ff9d27,#ff4b3f 46%,#ff3b75)!important;
+  box-shadow:0 0 24px rgba(255,130,35,.28),0 0 30px rgba(255,59,117,.14),0 14px 34px rgba(0,0,0,.32)!important;
+}
+.mode:nth-child(1):before{background:linear-gradient(#ff3b75,#ff9b28)!important}
+.mode:nth-child(2):before{background:linear-gradient(#35bff2,#3478ff)!important}
+.mode:nth-child(3):before{background:linear-gradient(#ffb72e,#ff6a2f)!important}
+.mode.selected{border-color:rgba(255,155,40,.78)!important;box-shadow:0 0 0 1px rgba(255,155,40,.14) inset,0 0 25px rgba(255,118,40,.20),0 14px 34px rgba(0,0,0,.28)!important}
+.mode.selected:after{background:#fff!important;box-shadow:0 0 0 5px rgba(255,155,40,.24),0 0 22px rgba(255,119,40,.7)!important}
+.active-title{
+  background:linear-gradient(90deg,#fff,#ffd47d,#fff)!important;
+  -webkit-background-clip:text!important;background-clip:text!important;color:transparent!important;
+}
+.active-title:after{background:linear-gradient(90deg,#ffb52e,#ff3b75)!important}
+
+</style>
+</head>
+<body>
+<div class="lang"><button id="nl" class="active">NL 🇳🇱</button><button id="en">EN 🇬🇧</button><button id="fr">FR 🇫🇷</button><button id="de">DE 🇩🇪</button><button id="es">ES 🇪🇸</button></div>
+<main class="app">
+<div class="logo">DON’T TOUCH</div><div class="subtitle">Phone-Free Challenge</div>
+<div id="errorBox"></div>
+
+<section id="home" class="show">
+<h1 id="homeTitle"></h1><button id="newGame" class="btn"></button><div id="homeHelp" class="small"></div>
+</section>
+
+<section id="setupName"><h1 id="creatorTitle"></h1><div class="stack"><input id="creatorName" maxlength="20"><button id="toSetup" class="btn"></button></div></section>
+
+<section id="setup"><h1 id="setupTitle"></h1><div class="stack">
+<label id="modeLabel"></label>
+<div class="cards">
+<button class="mode selected" data-mode="party"><strong>🎉 Party</strong><span id="partyDesc"></span></button>
+<button class="mode" data-mode="classroom"><strong>🎓 Classroom</strong><span id="classDesc"></span></button>
+<button class="mode" data-mode="meeting"><strong>💼 Meeting</strong><span id="meetingDesc"></span></button>
+</div>
+<label id="timeLabel"></label><select id="duration"><option value="1">1 min</option><option value="5">5 min</option><option value="15" selected>15 min</option><option value="30">30 min</option><option value="60">60 min</option></select>
+<label id="penaltyLabel"></label><select id="penaltyType"><option value="random"></option><option value="custom"></option></select>
+<textarea id="customPenalty" class="hidden" maxlength="120"></textarea>
+<button id="create" class="btn"></button></div></section>
+
+<section id="join"><h1 id="joinTitle"></h1><div class="stack"><input id="joinName" maxlength="20"><button id="joinGame" class="btn"></button></div><div id="joinHelp" class="small"></div></section>
+
+<section id="lobby"><h1 id="lobbyTitle"></h1><div id="settingsPanel" class="panel"></div><div id="players" class="players"></div>
+<div id="invite" class="panel hidden"><button id="share" class="btn"></button><div id="shareHelp" class="small"></div></div>
+<button id="start" class="btn hidden"></button><div id="guestWait" class="small"></div></section>
+
+<section id="countdown">3</section>
+<section id="active"><div class="silence">🤫</div><div id="activeTitle" class="active-title"></div><div id="activeSub" class="active-subtitle"></div><div id="gameTimer" class="timer">00:00</div></section>
+<section id="over"><div class="alarm-icon">🚨</div><div id="alarmTitle"></div><div id="loser" class="loser"></div><div id="penalty" style="margin:14px 0 22px"></div><button id="reset" class="btn"></button></section>
+<section id="success"><div class="win-icon">🏆</div><div id="successTitle" class="result-big"></div><div id="successDetail"></div><div class="stack" style="margin-top:20px"><button id="shareResult" class="btn"></button><button id="successReset" class="btn secondary"></button></div></section>
+</main>
+
+<script type="module">
+function isIOS(){
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform==="MacIntel" && navigator.maxTouchPoints>1);
+}
+function likelyInAppBrowser(){
+  const ua=navigator.userAgent||"";
+  return /FBAN|FBAV|Instagram|Line\/|Messenger|WhatsApp/i.test(ua);
+}
+function showMotionGate(messageKey="motionExplain"){
+  const t=T[language];
+  $("motionGateTitle").textContent=t.motionTitle;
+  $("motionGateText").textContent=t[messageKey]||t.motionExplain;
+  $("motionGateAllow").textContent=t.motionAllow;
+  $("motionGateHint").textContent=(isIOS()&&likelyInAppBrowser())?t.motionSafari:"";
+  $("motionGate").style.display="flex";
+}
+function hideMotionGate(){ $("motionGate").style.display="none"; }
+
+async function requestMotionAccess(){
+  audio();
+  if(motionGranted){hideMotionGate();return true;}
+  if(typeof DeviceMotionEvent==="undefined"){
+    showMotionGate("motionUnavailable");
+    return false;
+  }
+  if(typeof DeviceMotionEvent.requestPermission==="function"){
+    try{
+      const permission=await DeviceMotionEvent.requestPermission();
+      if(permission==="granted"){
+        motionGranted=true;
+        hideMotionGate();
+        return true;
+      }
+      showMotionGate("motionDenied");
+      return false;
+    }catch(e){
+      showMotionGate(likelyInAppBrowser()?"motionUnavailable":"motionDenied");
+      return false;
+    }
+  }
+  motionGranted=true;
+  hideMotionGate();
+  return true;
+}
+
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+import { getDatabase, ref, set, update, get, onValue, onDisconnect, remove, runTransaction, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+
+const firebaseConfig={
+  apiKey:"AIzaSyBfN4VjC_Vr0eM4arR2H-7N-cDBBspqEgo",
+  authDomain:"silentdisconet.firebaseapp.com",
+  databaseURL:"https://silentdisconet-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId:"silentdisconet",
+  storageBucket:"silentdisconet.firebasestorage.app",
+  messagingSenderId:"431513667902",
+  appId:"1:431513667902:web:a8131d2285a9715fdbc46f"
+};
+const app=initializeApp(firebaseConfig), db=getDatabase(app), auth=getAuth(app);
+let authReadyPromise=null;
+async function ensureAnonymousAuth(){
+  if(auth.currentUser)return auth.currentUser;
+  if(!authReadyPromise)authReadyPromise=signInAnonymously(auth).then(r=>r.user).catch(e=>{authReadyPromise=null;throw e});
+  return authReadyPromise;
+}
+const APP_URL="https://bizzyjo-design.github.io/silentdisconet/";
+const THRESHOLD=1.8, STORE="silentdisco_v8_state";
+let language="nl",name="",room="",playerId="",creator=false,wakeLock=null,unsubscribeRoom=null,disconnectOp=null;
+let active=false,busy=false,gameEndAt=0,gameInterval=null,countdownInterval=null,currentPenalty={nl:"",en:""},settings={mode:"party",duration:15,penaltyType:"random",customPenalty:""};
+let px=null,py=null,pz=null,lastMove=0,sensorWarmupUntil=0,lastRoundId="",roomData=null,motionGranted=false;
+
+let audioCtx=null;
+function audio(){
+  try{
+    if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==="suspended") audioCtx.resume();
+    return audioCtx;
+  }catch(e){return null}
+}
+function tone(freq,duration=0.12,type="sine",gain=0.10,delay=0){
+  const c=audio(); if(!c)return;
+  const o=c.createOscillator(),g=c.createGain(),t=c.currentTime+delay;
+  o.type=type;o.frequency.setValueAtTime(freq,t);
+  g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(gain,t+0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+duration);
+  o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+duration+.03);
+}
+function startSound(){ tone(92,.22,"sine",.15); }
+function countSound(n){ tone(n===3?440:n===2?560:700,.10,"square",.055); }
+function goSound(){ tone(110,.20,"sine",.13); tone(220,.14,"sine",.06,.04); }
+function alarmSound(){
+  tone(185,.20,"sawtooth",.12); tone(105,.22,"square",.08,.05);
+  tone(185,.20,"sawtooth",.12,.25); tone(105,.22,"square",.08,.30);
+}
+function winSound(){
+  tone(392,.12,"sine",.08);tone(523.25,.14,"sine",.08,.12);tone(659.25,.22,"sine",.09,.26);
+}
+
+
+const T={
+nl:{home:"Klaar om te spelen?",newGame:"NIEUW SPEL",homeHelp:"Eén organisator. Iedereen speelt gratis mee via de uitnodigingslink.",creator:"Wie organiseert?",name:"Jouw naam",next:"GA VERDER",setup:"Kies je spel",mode:"Modus",partyDesc:"Feestje met grappige straffen",classDesc:"Telefoonvrij in de klas",meetingDesc:"Focus tijdens vergadering",time:"Tijd",penalty:"Straf / melding",random:"Willekeurig uit de lijst",custom:"Zelf invullen",customPh:"Typ je eigen straf of melding…",create:"MAAK SPEL",joinTitle:"Je bent uitgenodigd!",join:"SPEEL MEE",joinHelp:"Vul alleen je naam in.",lobby:"Wachten op spelers...",share:"DEEL UITNODIGING",shareHelp:"Stuur de link via WhatsApp, sms, Messenger…",start:"START",guestWait:"Wacht tot de organisator start.",active:"NIET BEWEGEN",activeSub:"Leg je telefoon plat neer. Raak hem niet aan.",you:"🚨 JIJ HEBT BEWOGEN! 🚨",other:"🚨 {name} HEEFT BEWOGEN! 🚨",reset:"NIEUWE RONDE",success:"GEHAALD!",shareResult:"DEEL RESULTAAT",needName:"Vul je naam in.",needPenalty:"Vul je eigen straf of melding in.",motion:"Bewegingstoestemming is nodig om te spelen.",shareText:"Speel DON’T TOUCH met mij! Last phone untouched wins.",copied:"Link gekopieerd!",resultCopied:"Resultaat gekopieerd!",roomMissing:"Deze uitnodiging is niet meer actief.",connection:"Geen verbinding met de spelserver. Probeer opnieuw.",players:"spelers",minutes:"minuten telefoonvrij",motionTitle:"Beweging toestaan",motionExplain:"DON’T TOUCH heeft toegang tot de bewegingssensor nodig om te kunnen zien of je telefoon beweegt.",motionAllow:"STA BEWEGING TOE",motionSafari:"Open deze uitnodiging in Safari en probeer opnieuw.",motionDenied:"Bewegingstoegang is geweigerd. Open deze pagina in Safari en sta beweging toe wanneer iPhone erom vraagt.",motionUnavailable:"Deze browser geeft geen toegang tot de bewegingssensor. Open de uitnodiging in Safari.",modeNames:{party:"Party",classroom:"Classroom",meeting:"Meeting"}},
+en:{home:"Ready to play?",newGame:"NEW GAME",homeHelp:"One host. Everyone else joins free through the invite link.",creator:"Who is hosting?",name:"Your name",next:"CONTINUE",setup:"Choose your game",mode:"Mode",partyDesc:"Party mode with fun penalties",classDesc:"Phone-free classroom challenge",meetingDesc:"Stay focused during meetings",time:"Time",penalty:"Penalty / message",random:"Random from the list",custom:"Write your own",customPh:"Type your own penalty or message…",create:"CREATE GAME",joinTitle:"You're invited!",join:"JOIN GAME",joinHelp:"Just enter your name.",lobby:"Waiting for players...",share:"SHARE INVITE",shareHelp:"Send the link via WhatsApp, text, Messenger…",start:"START",guestWait:"Wait for the host to start.",active:"DO NOT MOVE",activeSub:"Place your phone flat. Do not touch it.",you:"🚨 YOU MOVED! 🚨",other:"🚨 {name} MOVED! 🚨",reset:"NEW ROUND",success:"YOU DID IT!",shareResult:"SHARE RESULT",needName:"Enter your name.",needPenalty:"Enter your own penalty or message.",motion:"Motion permission is required to play.",shareText:"Play DON’T TOUCH with me! Last phone untouched wins.",copied:"Link copied!",resultCopied:"Result copied!",roomMissing:"This invitation is no longer active.",connection:"No connection to the game server. Try again.",players:"players",minutes:"minutes phone-free",motionTitle:"Allow motion",motionExplain:"DON’T TOUCH needs access to your motion sensor to detect whether your phone moves.",motionAllow:"ALLOW MOTION",motionSafari:"Open this invitation in Safari and try again.",motionDenied:"Motion access was denied. Open this page in Safari and allow motion when iPhone asks.",motionUnavailable:"This browser does not provide access to the motion sensor. Open the invitation in Safari.",motionTitle:"Permitir movimiento",motionExplain:"DON’T TOUCH necesita acceso al sensor de movimiento para detectar si tu móvil se mueve.",motionAllow:"PERMITIR MOVIMIENTO",motionSafari:"Abre esta invitación en Safari y vuelve a intentarlo.",motionDenied:"Se ha denegado el acceso al movimiento. Abre esta página en Safari y permite el acceso cuando el iPhone lo solicite.",motionUnavailable:"Este navegador no permite acceder al sensor de movimiento. Abre la invitación en Safari.",modeNames:{party:"Party",classroom:"Classroom",meeting:"Meeting"}},
+fr:{home:"Prêt à jouer ?",newGame:"NOUVELLE PARTIE",homeHelp:"Un organisateur. Tous les autres participent gratuitement via le lien d’invitation.",creator:"Qui organise ?",name:"Votre nom",next:"CONTINUER",setup:"Choisissez votre partie",mode:"Mode",partyDesc:"Mode fête avec des gages amusants",classDesc:"Défi sans téléphone en classe",meetingDesc:"Restez concentré pendant les réunions",time:"Durée",penalty:"Gage / message",random:"Au hasard dans la liste",custom:"Écrire le vôtre",customPh:"Tapez votre propre gage ou message…",create:"CRÉER LA PARTIE",joinTitle:"Vous êtes invité !",join:"REJOINDRE",joinHelp:"Entrez simplement votre nom.",lobby:"En attente des joueurs…",share:"PARTAGER L’INVITATION",shareHelp:"Envoyez le lien via WhatsApp, SMS, Messenger…",start:"START",guestWait:"Attendez que l’organisateur lance la partie.",active:"NE BOUGEZ PAS",activeSub:"Posez votre téléphone à plat. Ne le touchez pas.",you:"🚨 VOUS AVEZ BOUGÉ ! 🚨",other:"🚨 {name} A BOUGÉ ! 🚨",reset:"NOUVELLE MANCHE",success:"RÉUSSI !",shareResult:"PARTAGER LE RÉSULTAT",needName:"Entrez votre nom.",needPenalty:"Entrez votre propre gage ou message.",motion:"L’autorisation de détection des mouvements est nécessaire pour jouer.",shareText:"Joue à DON’T TOUCH avec moi ! Last phone untouched wins.",copied:"Lien copié !",resultCopied:"Résultat copié !",roomMissing:"Cette invitation n’est plus active.",connection:"Impossible de se connecter au serveur de jeu. Réessayez.",players:"joueurs",minutes:"minutes sans téléphone",motionTitle:"Autoriser les mouvements",motionExplain:"DON’T TOUCH a besoin d’accéder au capteur de mouvement pour détecter si votre téléphone bouge.",motionAllow:"AUTORISER LES MOUVEMENTS",motionSafari:"Ouvrez cette invitation dans Safari puis réessayez.",motionDenied:"L’accès aux mouvements a été refusé. Ouvrez cette page dans Safari et autorisez les mouvements lorsque l’iPhone le demande.",motionUnavailable:"Ce navigateur ne donne pas accès au capteur de mouvement. Ouvrez l’invitation dans Safari.",modeNames:{party:"Fête",classroom:"Classe",meeting:"Réunion"}},
+de:{home:"Bereit zu spielen?",newGame:"NEUES SPIEL",homeHelp:"Ein Gastgeber. Alle anderen spielen kostenlos über den Einladungslink mit.",creator:"Wer ist Gastgeber?",name:"Dein Name",next:"WEITER",setup:"Wähle dein Spiel",mode:"Modus",partyDesc:"Partymodus mit lustigen Strafen",classDesc:"Handyfreie Herausforderung im Unterricht",meetingDesc:"Konzentriert im Meeting bleiben",time:"Zeit",penalty:"Strafe / Nachricht",random:"Zufällig aus der Liste",custom:"Selbst eingeben",customPh:"Gib deine eigene Strafe oder Nachricht ein…",create:"SPIEL ERSTELLEN",joinTitle:"Du bist eingeladen!",join:"MITSPIELEN",joinHelp:"Gib einfach deinen Namen ein.",lobby:"Warten auf Spieler…",share:"EINLADUNG TEILEN",shareHelp:"Sende den Link über WhatsApp, SMS, Messenger…",start:"START",guestWait:"Warte, bis der Gastgeber startet.",active:"NICHT BEWEGEN",activeSub:"Lege dein Handy flach hin. Berühre es nicht.",you:"🚨 DU HAST DICH BEWEGT! 🚨",other:"🚨 {name} HAT SICH BEWEGT! 🚨",reset:"NEUE RUNDE",success:"GESCHAFFT!",shareResult:"ERGEBNIS TEILEN",needName:"Gib deinen Namen ein.",needPenalty:"Gib deine eigene Strafe oder Nachricht ein.",motion:"Die Bewegungserlaubnis ist zum Spielen erforderlich.",shareText:"Spiel DON’T TOUCH mit mir! Last phone untouched wins.",copied:"Link kopiert!",resultCopied:"Ergebnis kopiert!",roomMissing:"Diese Einladung ist nicht mehr aktiv.",connection:"Keine Verbindung zum Spielserver. Versuche es erneut.",players:"Spieler",minutes:"Minuten handyfrei",motionTitle:"Bewegung erlauben",motionExplain:"DON’T TOUCH benötigt Zugriff auf den Bewegungssensor, um zu erkennen, ob sich dein Handy bewegt.",motionAllow:"BEWEGUNG ERLAUBEN",motionSafari:"Öffne diese Einladung in Safari und versuche es erneut.",motionDenied:"Der Bewegungszugriff wurde verweigert. Öffne diese Seite in Safari und erlaube Bewegung, wenn das iPhone danach fragt.",motionUnavailable:"Dieser Browser stellt keinen Zugriff auf den Bewegungssensor bereit. Öffne die Einladung in Safari.",modeNames:{party:"Party",classroom:"Unterricht",meeting:"Meeting"}},
+es:{home:"¿Listo para jugar?",newGame:"NUEVA PARTIDA",homeHelp:"Un anfitrión. Todos los demás juegan gratis mediante el enlace de invitación.",creator:"¿Quién organiza?",name:"Tu nombre",next:"CONTINUAR",setup:"Elige tu partida",mode:"Modo",partyDesc:"Modo fiesta con castigos divertidos",classDesc:"Reto sin móvil en clase",meetingDesc:"Mantén la concentración durante las reuniones",time:"Tiempo",penalty:"Castigo / mensaje",random:"Aleatorio de la lista",custom:"Escribe el tuyo",customPh:"Escribe tu propio castigo o mensaje…",create:"CREAR PARTIDA",joinTitle:"¡Estás invitado!",join:"UNIRSE",joinHelp:"Solo tienes que introducir tu nombre.",lobby:"Esperando jugadores…",share:"COMPARTIR INVITACIÓN",shareHelp:"Envía el enlace por WhatsApp, SMS, Messenger…",start:"START",guestWait:"Espera a que el anfitrión inicie la partida.",active:"NO TE MUEVAS",activeSub:"Coloca el móvil en posición horizontal. No lo toques.",you:"🚨 ¡TE HAS MOVIDO! 🚨",other:"🚨 ¡{name} SE HA MOVIDO! 🚨",reset:"NUEVA RONDA",success:"¡CONSEGUIDO!",shareResult:"COMPARTIR RESULTADO",needName:"Introduce tu nombre.",needPenalty:"Introduce tu propio castigo o mensaje.",motion:"Se necesita permiso para detectar movimiento y poder jugar.",shareText:"¡Juega a DON’T TOUCH conmigo! Last phone untouched wins.",copied:"¡Enlace copiado!",resultCopied:"¡Resultado copiado!",roomMissing:"Esta invitación ya no está activa.",connection:"No hay conexión con el servidor del juego. Inténtalo de nuevo.",players:"jugadores",minutes:"minutos sin móvil",modeNames:{party:"Fiesta",classroom:"Clase",meeting:"Reunión"}}
+};
+const PENALTIES={
+party:{nl:["trakteert de volgende ronde! 🍻","moet 30 seconden dansen zonder muziek 💃","moet de groep een compliment geven 😄","doet de volgende opdracht die de groep kiest 🎲"],en:["buys the next round! 🍻","has to dance for 30 seconds with no music 💃","must give the group a compliment 😄","does the next challenge chosen by the group 🎲"],fr:["offre la prochaine tournée ! 🍻","doit danser 30 secondes sans musique 💃","doit faire un compliment au groupe 😄","relève le prochain défi choisi par le groupe 🎲"],de:["gibt die nächste Runde aus! 🍻","muss 30 Sekunden ohne Musik tanzen 💃","muss der Gruppe ein Kompliment machen 😄","macht die nächste Aufgabe, die die Gruppe auswählt 🎲"],es:["¡invita a la próxima ronda! 🍻","tiene que bailar 30 segundos sin música 💃","debe hacer un cumplido al grupo 😄","hace el próximo reto que elija el grupo 🎲"]},
+classroom:{nl:["werd betrapt met de telefoon 📱","heeft de telefoonvrije challenge verloren","moet de telefoon weer neerleggen en opnieuw focussen"],en:["was caught using the phone 📱","lost the phone-free challenge","must put the phone down and refocus"],fr:["a été surpris avec son téléphone 📱","a perdu le défi sans téléphone","doit reposer son téléphone et se reconcentrer"],de:["wurde mit dem Handy erwischt 📱","hat die handyfreie Challenge verloren","muss das Handy wieder hinlegen und sich neu konzentrieren"],es:["ha sido sorprendido usando el móvil 📱","ha perdido el reto sin móvil","debe dejar el móvil y volver a concentrarse"]},
+meeting:{nl:["werd betrapt met de telefoon tijdens de meeting 📱","verbreekt de telefoonvrije focus","mag de volgende koffie halen ☕"],en:["was caught using the phone during the meeting 📱","broke the phone-free focus","gets the next coffee ☕"],fr:["a été surpris avec son téléphone pendant la réunion 📱","a rompu la concentration sans téléphone","va chercher le prochain café ☕"],de:["wurde während des Meetings mit dem Handy erwischt 📱","hat den handyfreien Fokus unterbrochen","holt den nächsten Kaffee ☕"],es:["ha sido sorprendido con el móvil durante la reunión 📱","ha roto la concentración sin móvil","va a por el próximo café ☕"]}
+};
+const $=id=>document.getElementById(id);
+const roomRef=()=>ref(db,`rooms/${room}`);
+const playerRef=()=>ref(db,`rooms/${room}/players/${playerId}`);
+const gameRef=()=>ref(db,`rooms/${room}/game`);
+function show(id){document.querySelectorAll("main section").forEach(s=>s.classList.remove("show"));$(id).classList.add("show")}
+function showError(msg){$("errorBox").textContent=msg;$("errorBox").style.display="block"}
+function clearError(){$("errorBox").style.display="none";$("errorBox").textContent=""}
+function saveState(){localStorage.setItem(STORE,JSON.stringify({room,name,playerId,creator,settings}))}
+function clearState(){localStorage.removeItem(STORE)}
+function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+function uid(){return crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,12)}
+function makeRoom(){const a=new Uint8Array(16);crypto.getRandomValues(a);return Array.from(a,b=>b.toString(16).padStart(2,"0")).join("")}
+function penaltyText(p=currentPenalty){return typeof p==="string"?p:(p?.[language]||p?.nl||p?.en||"")}
+function paint(){
+ const t=T[language];
+ $("nl").classList.toggle("active",language==="nl");$("en").classList.toggle("active",language==="en");$("fr").classList.toggle("active",language==="fr");$("de").classList.toggle("active",language==="de");$("es").classList.toggle("active",language==="es");
+ $("homeTitle").textContent=t.home;$("newGame").textContent=t.newGame;$("homeHelp").textContent=t.homeHelp;
+ $("creatorTitle").textContent=t.creator;$("creatorName").placeholder=t.name;$("toSetup").textContent=t.next;
+ $("setupTitle").textContent=t.setup;$("modeLabel").textContent=t.mode;$("partyDesc").textContent=t.partyDesc;$("classDesc").textContent=t.classDesc;$("meetingDesc").textContent=t.meetingDesc;
+ $("timeLabel").textContent=t.time;$("penaltyLabel").textContent=t.penalty;$("penaltyType").options[0].text=t.random;$("penaltyType").options[1].text=t.custom;$("customPenalty").placeholder=t.customPh;$("create").textContent=t.create;
+ $("joinTitle").textContent=t.joinTitle;$("joinName").placeholder=t.name;$("joinGame").textContent=t.join;$("joinHelp").textContent=t.joinHelp;
+ $("lobbyTitle").textContent=t.lobby;$("share").textContent=t.share;$("shareHelp").textContent=t.shareHelp;$("start").textContent=t.start;$("guestWait").textContent=creator?"":t.guestWait;
+ $("activeTitle").textContent=t.active;$("activeSub").textContent=t.activeSub;$("reset").textContent=t.reset;$("shareResult").textContent=t.shareResult;$("successReset").textContent=t.reset;
+ drawSettings();drawPlayers();
+ if($("over").classList.contains("show")&&roomData?.game?.loserName)renderGameOver(roomData.game);
+}
+$("nl").onclick=()=>{language="nl";paint()};$("en").onclick=()=>{language="en";paint()};$("fr").onclick=()=>{language="fr";paint()};$("de").onclick=()=>{language="de";paint()};$("es").onclick=()=>{language="es";paint()};
+$("newGame").onclick=()=>{audio();show("setupName")};
+$("toSetup").onclick=()=>{audio();name=$("creatorName").value.trim().slice(0,20);if(!name)return alert(T[language].needName);show("setup")};
+document.querySelectorAll(".mode").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll(".mode").forEach(x=>x.classList.remove("selected"));b.classList.add("selected");settings.mode=b.dataset.mode}));
+$("penaltyType").onchange=()=>{$("customPenalty").classList.toggle("hidden",$("penaltyType").value!=="custom")};
+
+async function motionOK(){
+ if(motionGranted)return true;
+ return await requestMotionAccess();
+}
+async function requestWake(){
+ try{
+   if("wakeLock" in navigator){
+     if(wakeLock)try{await wakeLock.release()}catch{}
+     wakeLock=await navigator.wakeLock.request("screen");
+     wakeLock.addEventListener("release",()=>{wakeLock=null});
+   }
+ }catch(e){console.warn("Wake lock unavailable",e)}
+}
+async function attachPresence(){
+ const pRef=playerRef();
+ try{
+   disconnectOp=onDisconnect(pRef); await disconnectOp.remove();
+   await set(pRef,{name,joinedAt:serverTimestamp()});
+ }catch(e){console.error(e);throw e}
+}
+function listenRoom(){
+ if(unsubscribeRoom)unsubscribeRoom();
+ unsubscribeRoom=onValue(roomRef(),snap=>{
+   roomData=snap.val();
+   if(!roomData)return;
+   if(roomData.settings){settings={...settings,...roomData.settings};drawSettings()}
+   drawPlayers();
+   handleGame(roomData.game||null);
+ },err=>{console.error(err);showError(T[language].connection)});
+}
+async function connect(){
+ clearError();
+ try{await ensureAnonymousAuth()}catch(e){console.error(e);showError(T[language].connection);return false}
+ if(!(await motionOK())){alert(T[language].motion);return false}
+ show("lobby");drawSettings();await requestWake();listenRoom();
+ try{await attachPresence();saveState();return true}
+ catch(e){showError(T[language].connection);return false}
+}
+$("create").onclick=async()=>{
+ settings.duration=parseInt($("duration").value,10);settings.penaltyType=$("penaltyType").value;settings.customPenalty=$("customPenalty").value.trim().slice(0,120);
+ if(settings.penaltyType==="custom"&&!settings.customPenalty)return alert(T[language].needPenalty);
+ room=makeRoom();creator=true;playerId=uid();
+ history.replaceState(null,"",location.pathname+"?room="+encodeURIComponent(room));
+ show("lobby");$("invite").classList.remove("hidden");$("start").classList.remove("hidden");drawSettings();
+ try{
+   await ensureAnonymousAuth();
+   await set(roomRef(),{meta:{hostId:playerId,createdAt:serverTimestamp()},settings,game:{status:"lobby",roundId:uid()},players:{}});
+   if(!(await connect()))return;
+ }catch(e){console.error(e);showError(T[language].connection)}
+};
+$("joinGame").onclick=async()=>{audio();
+ if(isIOS()){const ok=await requestMotionAccess();if(!ok)return;}
+
+ name=$("joinName").value.trim().slice(0,20);if(!name)return alert(T[language].needName);
+ playerId=uid();creator=false;clearError();
+ try{
+   await ensureAnonymousAuth();
+   const snap=await get(roomRef());
+   if(!snap.exists()){showError(T[language].roomMissing);return}
+   const data=snap.val(); if(data.settings)settings={...settings,...data.settings};
+   await connect();
+ }catch(e){console.error(e);showError(T[language].connection)}
+};
+function drawSettings(){
+ if(!room){$("settingsPanel").innerHTML="";return}
+ const t=T[language],mode=t.modeNames[settings.mode]||settings.mode,penaltyLabel=settings.penaltyType==="custom"?(settings.customPenalty||"—"):t.random;
+ $("settingsPanel").innerHTML=`<div class="row"><span class="muted">${t.mode}</span><strong>${escapeHtml(mode)}</strong></div><div class="row"><span class="muted">${t.time}</span><strong>${Number(settings.duration)||15} min</strong></div><div class="row"><span class="muted">${t.penalty}</span><strong>${escapeHtml(penaltyLabel)}</strong></div>`;
+}
+function drawPlayers(){
+ const box=$("players");box.innerHTML="";
+ const players=roomData?.players||{};
+ Object.values(players).filter(p=>p?.name).forEach(p=>{const d=document.createElement("div");d.className="player";d.textContent=p.name;box.appendChild(d)});
+}
+$("share").onclick=async()=>{
+ const url=APP_URL+"?room="+encodeURIComponent(room),data={title:"DON’T TOUCH",text:T[language].shareText,url};
+ try{if(navigator.share)await navigator.share(data);else{await navigator.clipboard.writeText(url);alert(T[language].copied)}}catch(e){}
+};
+function choosePenalty(){
+ if(settings.penaltyType==="custom")return {nl:settings.customPenalty,en:settings.customPenalty};
+ const nl=PENALTIES[settings.mode].nl,en=PENALTIES[settings.mode].en,i=Math.floor(Math.random()*nl.length);
+ return {nl:nl[i],en:en[i]||nl[i]};
+}
+$("start").onclick=async()=>{
+ audio();
+ if(isIOS()){const ok=await requestMotionAccess();if(!ok)return;}
+
+ if(busy||!creator)return;
+ startSound();
+ currentPenalty=choosePenalty();const startAt=Date.now()+4000,endAt=startAt+settings.duration*60000,roundId=uid();
+ $("start").disabled=true;
+ try{await set(gameRef(),{status:"countdown",roundId,startAt,endAt,penalty:currentPenalty,startedBy:playerId});}
+ catch(e){$("start").disabled=false;showError(T[language].connection)}
+};
+function handleGame(g){
+ if(!g||!g.roundId)return;
+ currentPenalty=g.penalty||currentPenalty;
+ if(g.status==="lobby"){if(lastRoundId!==g.roundId){lastRoundId=g.roundId;resetLocal(false)}return}
+ if(g.status==="countdown"||g.status==="active"){
+   if(lastRoundId!==g.roundId){lastRoundId=g.roundId;receiveStart(g.startAt,g.endAt)}
+   return;
+ }
+ if(g.status==="over"){lastRoundId=g.roundId;renderGameOver(g);return}
+ if(g.status==="success"){lastRoundId=g.roundId;gameSuccess();return}
+}
+function receiveStart(startAt,endAt){
+ if(!startAt||!endAt)return;
+ let lastCountSound=null;busy=true;active=false;gameEndAt=endAt;show("countdown");
+ clearInterval(countdownInterval);
+ const tick=()=>{const left=startAt-Date.now();if(left<=0){clearInterval(countdownInterval);goSound();startActive();return}const n=Math.max(1,Math.ceil(left/1000));$("countdown").textContent=n;if(n!==lastCountSound&&n<=3){lastCountSound=n;countSound(n)}};
+ tick();countdownInterval=setInterval(tick,50);
+}
+function startActive(){
+ if(Date.now()>=gameEndAt){finishSuccessIfHost();return}
+ active=true;px=py=pz=null;lastMove=0;sensorWarmupUntil=Date.now()+1200;show("active");requestWake();window.removeEventListener("devicemotion",checkMove,true);window.addEventListener("devicemotion",checkMove,true);
+ updateGameTimer();clearInterval(gameInterval);gameInterval=setInterval(updateGameTimer,250);
+}
+function updateGameTimer(){
+ const left=gameEndAt-Date.now();
+ if(left<=0){clearInterval(gameInterval);active=false;window.removeEventListener("devicemotion",checkMove,true);finishSuccessIfHost();return}
+ const total=Math.ceil(left/1000),m=Math.floor(total/60),s=total%60;$("gameTimer").textContent=String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+}
+async function finishSuccessIfHost(){
+ if(!creator)return;
+ try{await runTransaction(gameRef(),g=>g&&["countdown","active"].includes(g.status)?{...g,status:"success",finishedAt:Date.now()}:g)}
+ catch(e){console.error(e)}
+}
+function checkMove(e){
+ if(!active)return;const a=e.accelerationIncludingGravity;if(!a||a.x==null||a.y==null||a.z==null)return;
+ const x=a.x,y=a.y,z=a.z;
+ if(px===null){px=x;py=y;pz=z;return}
+ const now=Date.now();
+ if(now<sensorWarmupUntil){
+   px=px*.75+x*.25;py=py*.75+y*.25;pz=pz*.75+z*.25;
+   return;
+ }
+ const moved=Math.abs(x-px)>THRESHOLD||Math.abs(y-py)>THRESHOLD||Math.abs(z-pz)>THRESHOLD;
+ px=px*.9+x*.1;py=py*.9+y*.1;pz=pz*.9+z*.1;
+ if(!moved)return;if(now-lastMove<500)return;lastMove=now;ownMove();
+}
+async function ownMove(){
+ if(!active)return;active=false;clearInterval(gameInterval);window.removeEventListener("devicemotion",checkMove,true);
+ try{
+   await runTransaction(gameRef(),g=>{
+     if(!g||!["countdown","active"].includes(g.status))return g;
+     return {...g,status:"over",loserId:playerId,loserName:name,penalty:g.penalty||currentPenalty,finishedAt:Date.now()};
+   });
+ }catch(e){console.error(e);showError(T[language].connection)}
+}
+function renderGameOver(g){
+ alarmSound();
+ active=false;busy=false;px=py=pz=null;lastMove=0;sensorWarmupUntil=0;clearInterval(gameInterval);clearInterval(countdownInterval);window.removeEventListener("devicemotion",checkMove,true);show("over");document.body.classList.add("alarm");
+ const loserName=g.loserName||"",t=T[language];$("alarmTitle").textContent=loserName.toLowerCase()===name.toLowerCase()?t.you:t.other.replace("{name}",loserName.toUpperCase());
+ $("loser").textContent=loserName.toUpperCase();$("penalty").textContent=loserName+" "+penaltyText(g.penalty);
+ $("start").disabled=false;
+}
+function gameSuccess(){
+ winSound();
+ active=false;busy=false;clearInterval(gameInterval);clearInterval(countdownInterval);window.removeEventListener("devicemotion",checkMove,true);document.body.classList.remove("alarm");show("success");
+ const t=T[language],count=Object.keys(roomData?.players||{}).length;$("successTitle").textContent=t.success;$("successDetail").textContent=count+" "+t.players+" • "+settings.duration+" "+t.minutes;$("start").disabled=false;
+}
+$("reset").onclick=()=>newRound();
+$("successReset").onclick=()=>newRound();
+async function newRound(){
+ if(creator){
+   try{await set(gameRef(),{status:"lobby",roundId:uid(),resetAt:Date.now()})}catch(e){showError(T[language].connection)}
+ }else resetLocal(false);
+}
+function resetLocal(showLobby=true){
+ active=false;busy=false;clearInterval(gameInterval);clearInterval(countdownInterval);window.removeEventListener("devicemotion",checkMove,true);document.body.classList.remove("alarm");$("start").disabled=false;
+ if(showLobby!==false||room)show("lobby");
+ if(creator){$("invite").classList.remove("hidden");$("start").classList.remove("hidden")}else{$("invite").classList.add("hidden");$("start").classList.add("hidden")}
+}
+$("shareResult").onclick=async()=>{
+ const t=T[language],count=Object.keys(roomData?.players||{}).length,text=`DON’T TOUCH — ${t.success} ${count} ${t.players}, ${settings.duration} ${t.minutes}.`;
+ try{if(navigator.share)await navigator.share({title:"DON’T TOUCH",text});else{await navigator.clipboard.writeText(text);alert(t.resultCopied)}}catch(e){}
+};
+document.addEventListener("visibilitychange",async()=>{
+ if(document.visibilityState==="visible"&&room&&name){await requestWake();try{await attachPresence()}catch(e){}}
+});
+window.addEventListener("beforeunload",()=>{clearInterval(gameInterval);clearInterval(countdownInterval);window.removeEventListener("devicemotion",checkMove,true);if(unsubscribeRoom)unsubscribeRoom()});
+
+(async function init(){
+ paint();
+ const q=new URLSearchParams(location.search),r=(q.get("room")||"").replace(/[^a-zA-Z0-9_-]/g,"").slice(0,80);
+ let saved=null;try{saved=JSON.parse(localStorage.getItem(STORE)||"null")}catch{}
+ if(!r){show("home");return}
+ room=r;
+ if(saved&&saved.room===r&&saved.name){
+   name=saved.name;playerId=saved.playerId||uid();creator=!!saved.creator;settings=saved.settings||settings;
+   if(creator){$("invite").classList.remove("hidden");$("start").classList.remove("hidden")}
+   await connect();drawSettings();
+ }else{creator=false;show("join")}
+})();
+
+$("motionGateAllow").onclick=async()=>{ await requestMotionAccess(); };
+</script>
+
+<div id="motionGate" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.92);align-items:center;justify-content:center;padding:24px">
+  <div style="max-width:420px;width:100%;background:#17100b;border:1px solid rgba(255,170,70,.35);border-radius:22px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.5);text-align:center">
+    <div style="font-size:42px;margin-bottom:8px">📱</div>
+    <h2 id="motionGateTitle" style="margin:0 0 10px"></h2>
+    <p id="motionGateText" style="opacity:.86;line-height:1.45;margin:0 0 18px"></p>
+    <button id="motionGateAllow" class="btn" style="width:100%;margin-bottom:10px"></button>
+    <div id="motionGateHint" style="font-size:14px;opacity:.72;line-height:1.4"></div>
+  </div>
+</div>
+
+</body>
+</html>
