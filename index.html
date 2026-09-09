@@ -325,6 +325,7 @@ async function requestMotionAccess(){
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
 import { getDatabase, ref, set, update, get, onValue, onDisconnect, remove, runTransaction, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
 
 const firebaseConfig={
   apiKey:"AIzaSyB0cYb4an3B0dhF0XGBKWHs08FStmVORKw",
@@ -335,7 +336,18 @@ const firebaseConfig={
   messagingSenderId:"431513667902",
   appId:"1:431513667902:web:a8131d2285a9715fdbc46f"
 };
-const app=initializeApp(firebaseConfig), db=getDatabase(app);
+const app=initializeApp(firebaseConfig), db=getDatabase(app), auth=getAuth(app);
+let authPromise=null;
+async function ensureAnonymousAuth(){
+  if(auth.currentUser)return auth.currentUser;
+  if(!authPromise){
+    authPromise=signInAnonymously(auth).then(result=>result.user).catch(err=>{
+      authPromise=null;
+      throw err;
+    });
+  }
+  return authPromise;
+}
 const APP_URL="https://bizzyjo-design.github.io/silentdisconet/";
 const THRESHOLD=1.8, STORE="silentdisco_v8_state";
 let language="nl",name="",room="",playerId="",creator=false,wakeLock=null,unsubscribeRoom=null,disconnectOp=null;
@@ -448,12 +460,16 @@ function listenRoom(){
 }
 async function connect(){
  clearError();
+ try{await ensureAnonymousAuth()}
+ catch(e){console.error("Anonymous auth failed",e);showError(T[language].connection);return false}
  if(!(await motionOK())){alert(T[language].motion);return false}
  show("lobby");drawSettings();await requestWake();listenRoom();
  try{await attachPresence();saveState();return true}
  catch(e){showError(T[language].connection);return false}
 }
 $("create").onclick=async()=>{
+ try{await ensureAnonymousAuth()}
+ catch(e){console.error("Anonymous auth failed",e);showError(T[language].connection);return}
  settings.duration=parseInt($("duration").value,10);settings.penaltyType=$("penaltyType").value;settings.customPenalty=$("customPenalty").value.trim().slice(0,120);
  if(settings.penaltyType==="custom"&&!settings.customPenalty)return alert(T[language].needPenalty);
  room=makeRoom();creator=true;playerId=uid();
@@ -468,6 +484,8 @@ $("joinGame").onclick=async()=>{audio();
  if(isIOS()){const ok=await requestMotionAccess();if(!ok)return;}
 
  name=$("joinName").value.trim().slice(0,20);if(!name)return alert(T[language].needName);
+ try{await ensureAnonymousAuth()}
+ catch(e){console.error("Anonymous auth failed",e);showError(T[language].connection);return}
  playerId=uid();creator=false;clearError();
  try{
    const snap=await get(roomRef());
