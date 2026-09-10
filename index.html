@@ -498,7 +498,7 @@ function listenRoom(){
  },err=>{console.error(err);showError(T[language].connection)});
 }
 async function restoreConnection(){
- if(!room||document.visibilityState!=="visible")return;
+ if(!room||!name||!playerId||document.visibilityState!=="visible")return;
  try{
    await ensureAnonymousAuth();
    listenRoom();
@@ -572,7 +572,7 @@ $("start").onclick=async()=>{
  catch(e){$("start").disabled=false;showError(T[language].connection)}
 };
 function handleGame(g){
- if(!g||!g.roundId)return;
+ if(!g||!g.roundId||!name||!playerId)return;
  currentPenalty=g.penalty||currentPenalty;
  if(g.status==="lobby"){if(lastRoundId!==g.roundId){lastRoundId=g.roundId;resetLocal(false)}return}
  if(g.status==="countdown"||g.status==="active"){
