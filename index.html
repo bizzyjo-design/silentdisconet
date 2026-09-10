@@ -377,9 +377,9 @@ async function ensureAnonymousAuth(){
 }
 const APP_URL="https://bizzyjo-design.github.io/silentdisconet/";
 const THRESHOLD=1.8, STORE="silentdisco_v8_state";
-let language="nl",name="",room="",playerId="",creator=false,wakeLock=null,unsubscribeRoom=null,disconnectOp=null;
+let language="nl",name="",room="",playerId="",creator=false,wakeLock=null,unsubscribeRoom=null,disconnectOp=null,roomPollInterval=null,roomPollBusy=false;
 let active=false,busy=false,gameEndAt=0,gameInterval=null,countdownInterval=null,currentPenalty={nl:"",en:""},settings={mode:"party",duration:15,penaltyType:"random",customPenalty:""};
-let px=null,py=null,pz=null,lastMove=0,sensorWarmupUntil=0,lastRoundId="",roomData=null,motionGranted=false,lastVibratedRoundId="";
+let px=null,py=null,pz=null,lastMove=0,sensorWarmupUntil=0,lastRoundId="",roomData=null,motionGranted=false,lastVibratedRoundId="",lastGameKey="";
 
 let audioCtx=null;
 function audio(){
@@ -488,15 +488,23 @@ async function attachPresence(){
    await set(pRef,{name,joinedAt:serverTimestamp()});
  }catch(e){console.error(e);throw e}
 }
+function applyRoomSnapshot(snap){
+ roomData=snap.val();
+ if(!roomData)return;
+ if(roomData.settings){settings={...settings,...roomData.settings};drawSettings()}
+ drawPlayers();
+ handleGame(roomData.game||null);
+}
 function listenRoom(){
  if(unsubscribeRoom)unsubscribeRoom();
- unsubscribeRoom=onValue(roomRef(),snap=>{
-   roomData=snap.val();
-   if(!roomData)return;
-   if(roomData.settings){settings={...settings,...roomData.settings};drawSettings()}
-   drawPlayers();
-   handleGame(roomData.game||null);
- },err=>{console.error(err);showError(T[language].connection)});
+ if(roomPollInterval)clearInterval(roomPollInterval);
+ unsubscribeRoom=onValue(roomRef(),applyRoomSnapshot,err=>{console.error(err);showError(T[language].connection)});
+ roomPollInterval=setInterval(async()=>{
+   if(roomPollBusy||!room||!name||!playerId||document.visibilityState!=="visible")return;
+   roomPollBusy=true;
+   try{const snap=await get(roomRef());if(snap.exists()){applyRoomSnapshot(snap);clearError()}}
+   catch(e){console.error(e)}finally{roomPollBusy=false}
+ },1000);
 }
 async function restoreConnection(){
  if(!room||!name||!playerId||document.visibilityState!=="visible")return;
@@ -574,6 +582,9 @@ $("start").onclick=async()=>{
 };
 function handleGame(g){
  if(!g||!g.roundId||!name||!playerId)return;
+ const gameKey=g.roundId+":"+g.status;
+ if(gameKey===lastGameKey)return;
+ lastGameKey=gameKey;
  currentPenalty=g.penalty||currentPenalty;
  if(g.status==="lobby"){if(lastRoundId!==g.roundId){lastRoundId=g.roundId;resetLocal(false)}return}
  if(g.status==="countdown"||g.status==="active"){
@@ -666,6 +677,7 @@ function handleStopped(){
  const wasCreator=creator;
  active=false;busy=false;clearInterval(gameInterval);clearInterval(countdownInterval);window.removeEventListener("devicemotion",checkMove,true);document.body.classList.remove("alarm");
  if(unsubscribeRoom){unsubscribeRoom();unsubscribeRoom=null}
+ if(roomPollInterval){clearInterval(roomPollInterval);roomPollInterval=null}
  if(disconnectOp)try{disconnectOp.cancel()}catch(e){}
  clearState();room="";playerId="";roomData=null;lastRoundId="";history.replaceState(null,"",location.pathname);
  if(wasCreator){creator=true;show("setup")}else{creator=false;show("stopped")}
@@ -679,7 +691,7 @@ $("shareResult").onclick=async()=>{
 document.addEventListener("visibilitychange",async()=>{
  if(document.visibilityState==="visible"&&room&&name){await requestWake();try{await attachPresence()}catch(e){}}
 });
-window.addEventListener("beforeunload",()=>{clearInterval(gameInterval);clearInterval(countdownInterval);window.removeEventListener("devicemotion",checkMove,true);if(unsubscribeRoom)unsubscribeRoom()});
+window.addEventListener("beforeunload",()=>{clearInterval(gameInterval);clearInterval(countdownInterval);if(roomPollInterval)clearInterval(roomPollInterval);window.removeEventListener("devicemotion",checkMove,true);if(unsubscribeRoom)unsubscribeRoom()});
 
 (async function init(){
  paint();
