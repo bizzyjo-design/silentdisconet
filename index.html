@@ -687,12 +687,14 @@ window.addEventListener("beforeunload",()=>{clearInterval(gameInterval);clearInt
  let saved=null;try{saved=JSON.parse(localStorage.getItem(STORE)||"null")}catch{}
  if(!r){show("home");return}
  room=r;
- if(!forcedJoin&&saved&&saved.room===r&&saved.name){
+ if(!forcedJoin&&saved&&saved.room===r&&saved.name&&saved.creator){
    name=saved.name;playerId=saved.playerId||uid();settings=saved.settings||settings;
-   try{await ensureAnonymousAuth();const snap=await get(roomRef());creator=!!saved.creator&&snap.exists()&&snap.val()?.meta?.hostId===playerId}catch(e){creator=false}
-   if(creator)$("invite").classList.remove("hidden");drawRoleControls();
-   await connect();drawSettings();
- }else{creator=false;show("join")}
+   try{await ensureAnonymousAuth();const snap=await get(roomRef());creator=snap.exists()&&snap.val()?.meta?.hostId===playerId}catch(e){creator=false}
+   if(creator){$("invite").classList.remove("hidden");drawRoleControls();await connect();drawSettings();return}
+ }
+ creator=false;name="";playerId="";
+ if(saved?.name)$("joinName").value=saved.name;
+ show("join");
 })();
 
 $("motionGateAllow").onclick=async()=>{ await requestMotionAccess(); };
