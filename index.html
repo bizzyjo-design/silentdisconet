@@ -551,7 +551,7 @@ function drawPlayers(){
  Object.values(players).filter(p=>p?.name).forEach(p=>{const d=document.createElement("div");d.className="player";d.textContent=p.name;box.appendChild(d)});
 }
 $("share").onclick=async()=>{
- const url=APP_URL+"?room="+encodeURIComponent(room)+"&join=1",data={title:"DON’T TOUCH",text:T[language].shareText,url};
+ const url=APP_URL+"?join="+encodeURIComponent(room),data={title:"DON’T TOUCH",text:T[language].shareText,url};
  try{if(navigator.share)await navigator.share(data);else{await navigator.clipboard.writeText(url);alert(T[language].copied)}}catch(e){}
 };
 function choosePenalty(){
@@ -682,7 +682,7 @@ window.addEventListener("beforeunload",()=>{clearInterval(gameInterval);clearInt
 
 (async function init(){
  paint();
- const q=new URLSearchParams(location.search),r=(q.get("room")||"").replace(/[^a-zA-Z0-9_-]/g,"").slice(0,80),forcedJoin=q.get("join")==="1";
+ const q=new URLSearchParams(location.search),joinRoom=q.get("join")||"",r=(joinRoom||q.get("room")||"").replace(/[^a-zA-Z0-9_-]/g,"").slice(0,80),forcedJoin=!!joinRoom;
  let saved=null;try{saved=JSON.parse(localStorage.getItem(STORE)||"null")}catch{}
  if(!r){show("home");return}
  room=r;
