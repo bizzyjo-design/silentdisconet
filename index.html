@@ -378,7 +378,7 @@ const APP_URL="https://bizzyjo-design.github.io/silentdisconet/";
 const THRESHOLD=1.8, STORE="silentdisco_v8_state";
 let language="nl",name="",room="",playerId="",creator=false,wakeLock=null,unsubscribeRoom=null,disconnectOp=null;
 let active=false,busy=false,gameEndAt=0,gameInterval=null,countdownInterval=null,currentPenalty={nl:"",en:""},settings={mode:"party",duration:15,penaltyType:"random",customPenalty:""};
-let px=null,py=null,pz=null,lastMove=0,sensorWarmupUntil=0,lastRoundId="",roomData=null,motionGranted=false;
+let px=null,py=null,pz=null,lastMove=0,sensorWarmupUntil=0,lastRoundId="",roomData=null,motionGranted=false,lastVibratedRoundId="";
 
 let audioCtx=null;
 function audio(){
@@ -601,9 +601,14 @@ async function ownMove(){
  }catch(e){console.error(e);showError(T[language].connection)}
 }
 function renderGameOver(g){
+ const loserName=g.loserName||"",t=T[language],ownLoss=loserName.toLowerCase()===name.toLowerCase();
+ if(g.roundId!==lastVibratedRoundId&&typeof navigator.vibrate==="function"){
+   navigator.vibrate(ownLoss?[250,120,250,120,700]:[180,100,320]);
+   lastVibratedRoundId=g.roundId;
+ }
  alarmSound();
  active=false;busy=false;px=py=pz=null;lastMove=0;sensorWarmupUntil=0;clearInterval(gameInterval);clearInterval(countdownInterval);window.removeEventListener("devicemotion",checkMove,true);show("over");document.body.classList.add("alarm");
- const loserName=g.loserName||"",t=T[language];$("alarmTitle").textContent=loserName.toLowerCase()===name.toLowerCase()?t.you:t.other.replace("{name}",loserName.toUpperCase());
+ $("alarmTitle").textContent=ownLoss?t.you:t.other.replace("{name}",loserName.toUpperCase());
  $("loser").textContent=loserName.toUpperCase();$("penalty").textContent=loserName+" "+penaltyText(g.penalty);
  $("start").disabled=false;
 }
