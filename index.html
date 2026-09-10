@@ -304,9 +304,9 @@ body:after{
 
 <section id="countdown">3</section>
 <section id="active"><div class="silence">🤫</div><div id="activeTitle" class="active-title"></div><div id="activeSub" class="active-subtitle"></div><div id="gameTimer" class="timer">00:00</div><button id="stopActive" class="btn secondary hidden" style="margin-top:20px"></button></section>
-<section id="over"><div class="alarm-icon">🚨</div><div id="alarmTitle"></div><div id="loser" class="loser"></div><div id="penalty" style="margin:14px 0 22px"></div><div class="stack"><button id="reset" class="btn"></button><button id="stopOver" class="btn secondary hidden"></button></div></section>
-<section id="success"><div class="win-icon">🏆</div><div id="successTitle" class="result-big"></div><div id="successDetail"></div><div class="stack" style="margin-top:20px"><button id="shareResult" class="btn"></button><button id="successReset" class="btn secondary"></button><button id="stopSuccess" class="btn secondary hidden"></button></div></section>
-<section id="stopped"><h1 id="stoppedTitle"></h1><button id="stoppedHome" class="btn"></button></section>
+<section id="over"><div class="alarm-icon">🚨</div><div id="alarmTitle"></div><div id="loser" class="loser"></div><div id="penalty" style="margin:14px 0 22px"></div><div class="stack"><button id="reset" class="btn hidden"></button><button id="stopOver" class="btn secondary hidden"></button><div id="overWait" class="small hidden"></div></div></section>
+<section id="success"><div class="win-icon">🏆</div><div id="successTitle" class="result-big"></div><div id="successDetail"></div><div class="stack" style="margin-top:20px"><button id="shareResult" class="btn"></button><button id="successReset" class="btn secondary hidden"></button><button id="stopSuccess" class="btn secondary hidden"></button><div id="successWait" class="small hidden"></div></div></section>
+<section id="stopped"><h1 id="stoppedTitle"></h1></section>
 </main>
 
 <script type="module">
@@ -417,11 +417,11 @@ de:{home:"Bereit zu spielen?",newGame:"NEUES SPIEL",homeHelp:"Ein Gastgeber. All
 es:{home:"¿Listo para jugar?",newGame:"NUEVA PARTIDA",homeHelp:"Un anfitrión. Todos los demás juegan gratis mediante el enlace de invitación.",creator:"¿Quién organiza?",name:"Tu nombre",next:"CONTINUAR",setup:"Elige tu partida",mode:"Modo",partyDesc:"Modo fiesta con castigos divertidos",classDesc:"Reto sin móvil en clase",meetingDesc:"Mantén la concentración durante las reuniones",time:"Tiempo",penalty:"Castigo / mensaje",random:"Aleatorio de la lista",custom:"Escribe el tuyo",customPh:"Escribe tu propio castigo o mensaje…",create:"CREAR PARTIDA",joinTitle:"¡Estás invitado!",join:"UNIRSE",joinHelp:"Solo tienes que introducir tu nombre.",lobby:"Esperando jugadores…",share:"COMPARTIR INVITACIÓN",shareHelp:"Envía el enlace por WhatsApp, SMS, Messenger…",start:"START",guestWait:"Espera a que el anfitrión inicie la partida.",active:"NO TE MUEVAS",activeSub:"Coloca el móvil en posición horizontal. No lo toques.",you:"🚨 ¡TE HAS MOVIDO! 🚨",other:"🚨 ¡{name} SE HA MOVIDO! 🚨",reset:"NUEVA RONDA",success:"¡CONSEGUIDO!",shareResult:"COMPARTIR RESULTADO",needName:"Introduce tu nombre.",needPenalty:"Introduce tu propio castigo o mensaje.",motion:"Se necesita permiso para detectar movimiento y poder jugar.",shareText:"¡Juega a DON’T TOUCH conmigo! Last phone untouched wins.",copied:"¡Enlace copiado!",resultCopied:"¡Resultado copiado!",roomMissing:"Esta invitación ya no está activa.",connection:"No hay conexión con el servidor del juego. Inténtalo de nuevo.",players:"jugadores",minutes:"minutos sin móvil",modeNames:{party:"Fiesta",classroom:"Clase",meeting:"Reunión"}}
 };
 const EXTRA={
- nl:{stop:"STOP SPEL",stopped:"Het spel is gestopt door de organisator.",backHome:"TERUG",guestLobby:"Je bent verbonden",guestReady:"Wacht tot de organisator het spel start."},
- en:{stop:"STOP GAME",stopped:"The host stopped the game.",backHome:"BACK",guestLobby:"You are connected",guestReady:"Wait for the host to start the game."},
- fr:{stop:"ARRÊTER LA PARTIE",stopped:"L’organisateur a arrêté la partie.",backHome:"RETOUR",guestLobby:"Vous êtes connecté",guestReady:"Attendez que l’organisateur lance la partie."},
- de:{stop:"SPIEL BEENDEN",stopped:"Der Gastgeber hat das Spiel beendet.",backHome:"ZURÜCK",guestLobby:"Du bist verbunden",guestReady:"Warte, bis der Gastgeber das Spiel startet."},
- es:{stop:"DETENER PARTIDA",stopped:"El anfitrión ha detenido la partida.",backHome:"VOLVER",guestLobby:"Estás conectado",guestReady:"Espera a que el anfitrión inicie la partida."}
+ nl:{stop:"STOP SPEL",stopped:"Het spel is gestopt door de organisator.",guestLobby:"Je bent verbonden",guestReady:"Wacht tot de organisator het spel start.",roundWait:"Wacht tot de organisator een nieuwe ronde start."},
+ en:{stop:"STOP GAME",stopped:"The host stopped the game.",guestLobby:"You are connected",guestReady:"Wait for the host to start the game.",roundWait:"Wait for the host to start a new round."},
+ fr:{stop:"ARRÊTER LA PARTIE",stopped:"L’organisateur a arrêté la partie.",guestLobby:"Vous êtes connecté",guestReady:"Attendez que l’organisateur lance la partie.",roundWait:"Attendez que l’organisateur lance une nouvelle manche."},
+ de:{stop:"SPIEL BEENDEN",stopped:"Der Gastgeber hat das Spiel beendet.",guestLobby:"Du bist verbunden",guestReady:"Warte, bis der Gastgeber das Spiel startet.",roundWait:"Warte, bis der Gastgeber eine neue Runde startet."},
+ es:{stop:"DETENER PARTIDA",stopped:"El anfitrión ha detenido la partida.",guestLobby:"Estás conectado",guestReady:"Espera a que el anfitrión inicie la partida.",roundWait:"Espera a que el anfitrión inicie una nueva ronda."}
 };
 const PENALTIES={
 party:{nl:["trakteert de volgende ronde! 🍻","moet 30 seconden dansen zonder muziek 💃","moet de groep een compliment geven 😄","doet de volgende opdracht die de groep kiest 🎲"],en:["buys the next round! 🍻","has to dance for 30 seconds with no music 💃","must give the group a compliment 😄","does the next challenge chosen by the group 🎲"],fr:["offre la prochaine tournée ! 🍻","doit danser 30 secondes sans musique 💃","doit faire un compliment au groupe 😄","relève le prochain défi choisi par le groupe 🎲"],de:["gibt die nächste Runde aus! 🍻","muss 30 Sekunden ohne Musik tanzen 💃","muss der Gruppe ein Kompliment machen 😄","macht die nächste Aufgabe, die die Gruppe auswählt 🎲"],es:["¡invita a la próxima ronda! 🍻","tiene que bailar 30 segundos sin música 💃","debe hacer un cumplido al grupo 😄","hace el próximo reto que elija el grupo 🎲"]},
@@ -437,11 +437,12 @@ function showError(msg){$("errorBox").textContent=msg;$("errorBox").style.displa
 function clearError(){$("errorBox").style.display="none";$("errorBox").textContent=""}
 function saveState(){localStorage.setItem(STORE,JSON.stringify({room,name,playerId,creator,settings}))}
 function clearState(){localStorage.removeItem(STORE)}
-const hostButtonIds=["start","stopLobby","stopActive","stopOver","stopSuccess"];
+const hostButtonIds=["start","stopLobby","stopActive","stopOver","stopSuccess","reset","successReset"];
 function drawRoleControls(){
  hostButtonIds.forEach(id=>$(id).classList.toggle("hidden",!creator));
  $("lobbyTitle").textContent=creator?T[language].lobby:EXTRA[language].guestLobby;
  $("guestWait").textContent=creator?"":EXTRA[language].guestReady;
+ ["overWait","successWait"].forEach(id=>{$(id).textContent=EXTRA[language].roundWait;$(id).classList.toggle("hidden",creator)});
 }
 function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
 function uid(){return crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,12)}
@@ -457,7 +458,7 @@ function paint(){
  $("joinTitle").textContent=t.joinTitle;$("joinName").placeholder=t.name;$("joinGame").textContent=t.join;$("joinHelp").textContent=t.joinHelp;
  $("lobbyTitle").textContent=t.lobby;$("share").textContent=t.share;$("shareHelp").textContent=t.shareHelp;$("start").textContent=t.start;$("guestWait").textContent=creator?"":t.guestWait;
  $("activeTitle").textContent=t.active;$("activeSub").textContent=t.activeSub;$("reset").textContent=t.reset;$("shareResult").textContent=t.shareResult;$("successReset").textContent=t.reset;
- const x=EXTRA[language];["stopLobby","stopActive","stopOver","stopSuccess"].forEach(id=>$(id).textContent=x.stop);$("stoppedTitle").textContent=x.stopped;$("stoppedHome").textContent=x.backHome;drawRoleControls();
+ const x=EXTRA[language];["stopLobby","stopActive","stopOver","stopSuccess"].forEach(id=>$(id).textContent=x.stop);$("stoppedTitle").textContent=x.stopped;drawRoleControls();
  drawSettings();drawPlayers();
  if($("over").classList.contains("show")&&roomData?.game?.loserName)renderGameOver(roomData.game);
 }
@@ -671,7 +672,6 @@ function handleStopped(){
  drawRoleControls();
 }
 [$("stopLobby"),$("stopActive"),$("stopOver"),$("stopSuccess")].forEach(button=>button.onclick=stopGame);
-$("stoppedHome").onclick=()=>{clearState();room="";creator=false;show("home")};
 $("shareResult").onclick=async()=>{
  const t=T[language],count=Object.keys(roomData?.players||{}).length,text=`DON’T TOUCH — ${t.success} ${count} ${t.players}, ${settings.duration} ${t.minutes}.`;
  try{if(navigator.share)await navigator.share({title:"DON’T TOUCH",text});else{await navigator.clipboard.writeText(text);alert(t.resultCopied)}}catch(e){}
