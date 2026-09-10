@@ -417,11 +417,11 @@ de:{home:"Bereit zu spielen?",newGame:"NEUES SPIEL",homeHelp:"Ein Gastgeber. All
 es:{home:"¿Listo para jugar?",newGame:"NUEVA PARTIDA",homeHelp:"Un anfitrión. Todos los demás juegan gratis mediante el enlace de invitación.",creator:"¿Quién organiza?",name:"Tu nombre",next:"CONTINUAR",setup:"Elige tu partida",mode:"Modo",partyDesc:"Modo fiesta con castigos divertidos",classDesc:"Reto sin móvil en clase",meetingDesc:"Mantén la concentración durante las reuniones",time:"Tiempo",penalty:"Castigo / mensaje",random:"Aleatorio de la lista",custom:"Escribe el tuyo",customPh:"Escribe tu propio castigo o mensaje…",create:"CREAR PARTIDA",joinTitle:"¡Estás invitado!",join:"UNIRSE",joinHelp:"Solo tienes que introducir tu nombre.",lobby:"Esperando jugadores…",share:"COMPARTIR INVITACIÓN",shareHelp:"Envía el enlace por WhatsApp, SMS, Messenger…",start:"START",guestWait:"Espera a que el anfitrión inicie la partida.",active:"NO TE MUEVAS",activeSub:"Coloca el móvil en posición horizontal. No lo toques.",you:"🚨 ¡TE HAS MOVIDO! 🚨",other:"🚨 ¡{name} SE HA MOVIDO! 🚨",reset:"NUEVA RONDA",success:"¡CONSEGUIDO!",shareResult:"COMPARTIR RESULTADO",needName:"Introduce tu nombre.",needPenalty:"Introduce tu propio castigo o mensaje.",motion:"Se necesita permiso para detectar movimiento y poder jugar.",shareText:"¡Juega a DON’T TOUCH conmigo! Last phone untouched wins.",copied:"¡Enlace copiado!",resultCopied:"¡Resultado copiado!",roomMissing:"Esta invitación ya no está activa.",connection:"No hay conexión con el servidor del juego. Inténtalo de nuevo.",players:"jugadores",minutes:"minutos sin móvil",modeNames:{party:"Fiesta",classroom:"Clase",meeting:"Reunión"}}
 };
 const EXTRA={
- nl:{stop:"STOP SPEL",stopped:"Het spel is gestopt door de organisator.",backHome:"TERUG"},
- en:{stop:"STOP GAME",stopped:"The host stopped the game.",backHome:"BACK"},
- fr:{stop:"ARRÊTER LA PARTIE",stopped:"L’organisateur a arrêté la partie.",backHome:"RETOUR"},
- de:{stop:"SPIEL BEENDEN",stopped:"Der Gastgeber hat das Spiel beendet.",backHome:"ZURÜCK"},
- es:{stop:"DETENER PARTIDA",stopped:"El anfitrión ha detenido la partida.",backHome:"VOLVER"}
+ nl:{stop:"STOP SPEL",stopped:"Het spel is gestopt door de organisator.",backHome:"TERUG",guestLobby:"Je bent verbonden",guestReady:"Wacht tot de organisator het spel start."},
+ en:{stop:"STOP GAME",stopped:"The host stopped the game.",backHome:"BACK",guestLobby:"You are connected",guestReady:"Wait for the host to start the game."},
+ fr:{stop:"ARRÊTER LA PARTIE",stopped:"L’organisateur a arrêté la partie.",backHome:"RETOUR",guestLobby:"Vous êtes connecté",guestReady:"Attendez que l’organisateur lance la partie."},
+ de:{stop:"SPIEL BEENDEN",stopped:"Der Gastgeber hat das Spiel beendet.",backHome:"ZURÜCK",guestLobby:"Du bist verbunden",guestReady:"Warte, bis der Gastgeber das Spiel startet."},
+ es:{stop:"DETENER PARTIDA",stopped:"El anfitrión ha detenido la partida.",backHome:"VOLVER",guestLobby:"Estás conectado",guestReady:"Espera a que el anfitrión inicie la partida."}
 };
 const PENALTIES={
 party:{nl:["trakteert de volgende ronde! 🍻","moet 30 seconden dansen zonder muziek 💃","moet de groep een compliment geven 😄","doet de volgende opdracht die de groep kiest 🎲"],en:["buys the next round! 🍻","has to dance for 30 seconds with no music 💃","must give the group a compliment 😄","does the next challenge chosen by the group 🎲"],fr:["offre la prochaine tournée ! 🍻","doit danser 30 secondes sans musique 💃","doit faire un compliment au groupe 😄","relève le prochain défi choisi par le groupe 🎲"],de:["gibt die nächste Runde aus! 🍻","muss 30 Sekunden ohne Musik tanzen 💃","muss der Gruppe ein Kompliment machen 😄","macht die nächste Aufgabe, die die Gruppe auswählt 🎲"],es:["¡invita a la próxima ronda! 🍻","tiene que bailar 30 segundos sin música 💃","debe hacer un cumplido al grupo 😄","hace el próximo reto que elija el grupo 🎲"]},
@@ -440,7 +440,8 @@ function clearState(){localStorage.removeItem(STORE)}
 const hostButtonIds=["start","stopLobby","stopActive","stopOver","stopSuccess"];
 function drawRoleControls(){
  hostButtonIds.forEach(id=>$(id).classList.toggle("hidden",!creator));
- $("guestWait").textContent=creator?"":T[language].guestWait;
+ $("lobbyTitle").textContent=creator?T[language].lobby:EXTRA[language].guestLobby;
+ $("guestWait").textContent=creator?"":EXTRA[language].guestReady;
 }
 function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
 function uid(){return crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,12)}
