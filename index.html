@@ -693,7 +693,7 @@ window.addEventListener("beforeunload",()=>{clearInterval(gameInterval);clearInt
    if(creator){$("invite").classList.remove("hidden");drawRoleControls();await connect();drawSettings();return}
  }
  creator=false;name="";playerId="";
- if(saved?.name)$("joinName").value=saved.name;
+ $("joinName").value="";
  show("join");
 })();
 
