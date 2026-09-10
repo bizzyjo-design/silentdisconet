@@ -482,6 +482,17 @@ function listenRoom(){
    handleGame(roomData.game||null);
  },err=>{console.error(err);showError(T[language].connection)});
 }
+async function restoreConnection(){
+ if(!room||document.visibilityState!=="visible")return;
+ try{
+   await ensureAnonymousAuth();
+   listenRoom();
+   await attachPresence();
+   clearError();
+ }catch(e){console.error(e);showError(T[language].connection)}
+}
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")restoreConnection()});
+window.addEventListener("pageshow",()=>restoreConnection());
 async function connect(){
  clearError();
  try{await ensureAnonymousAuth()}catch(e){console.error(e);showError(T[language].connection);return false}
