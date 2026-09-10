@@ -493,7 +493,7 @@ async function connect(){
 $("create").onclick=async()=>{
  settings.duration=parseInt($("duration").value,10);settings.penaltyType=$("penaltyType").value;settings.customPenalty=$("customPenalty").value.trim().slice(0,120);
  if(settings.penaltyType==="custom"&&!settings.customPenalty)return alert(T[language].needPenalty);
- room=makeRoom();creator=true;playerId=uid();
+ room=makeRoom();creator=true;playerId=uid();$("guestWait").textContent="";
  history.replaceState(null,"",location.pathname+"?room="+encodeURIComponent(room));
  show("lobby");$("invite").classList.remove("hidden");$("start").classList.remove("hidden");drawSettings();
  try{
