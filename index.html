@@ -376,7 +376,7 @@ async function ensureAnonymousAuth(){
   return authReadyPromise;
 }
 const APP_URL="https://bizzyjo-design.github.io/silentdisconet/";
-const THRESHOLD=1.8, STORE="silentdisco_v8_state";
+const THRESHOLD=1.8, STORE="silentdisco_v8_state", GUEST_LOCK="donttouch_guest_device";
 let language="nl",name="",room="",playerId="",creator=false,wakeLock=null,unsubscribeRoom=null,disconnectOp=null,roomPollInterval=null,roomPollBusy=false;
 let active=false,busy=false,gameEndAt=0,gameInterval=null,countdownInterval=null,currentPenalty={nl:"",en:""},settings={mode:"party",duration:15,penaltyType:"random",customPenalty:""};
 let px=null,py=null,pz=null,lastMove=0,sensorWarmupUntil=0,lastRoundId="",roomData=null,motionGranted=false,lastVibratedRoundId="",lastGameKey="";
@@ -417,11 +417,11 @@ de:{home:"Bereit zu spielen?",newGame:"NEUES SPIEL",homeHelp:"Ein Gastgeber. All
 es:{home:"¿Listo para jugar?",newGame:"NUEVA PARTIDA",homeHelp:"Un anfitrión. Todos los demás juegan gratis mediante el enlace de invitación.",creator:"¿Quién organiza?",name:"Tu nombre",next:"CONTINUAR",setup:"Elige tu partida",mode:"Modo",partyDesc:"Modo fiesta con castigos divertidos",classDesc:"Reto sin móvil en clase",meetingDesc:"Mantén la concentración durante las reuniones",time:"Tiempo",penalty:"Castigo / mensaje",random:"Aleatorio de la lista",custom:"Escribe el tuyo",customPh:"Escribe tu propio castigo o mensaje…",create:"CREAR PARTIDA",joinTitle:"¡Estás invitado!",join:"UNIRSE",joinHelp:"Solo tienes que introducir tu nombre.",lobby:"Esperando jugadores…",share:"COMPARTIR INVITACIÓN",shareHelp:"Envía el enlace por WhatsApp, SMS, Messenger…",start:"START",guestWait:"Espera a que el anfitrión inicie la partida.",active:"NO TE MUEVAS",activeSub:"Coloca el móvil en posición horizontal. No lo toques.",you:"🚨 ¡TE HAS MOVIDO! 🚨",other:"🚨 ¡{name} SE HA MOVIDO! 🚨",reset:"NUEVA RONDA",success:"¡CONSEGUIDO!",shareResult:"COMPARTIR RESULTADO",needName:"Introduce tu nombre.",needPenalty:"Introduce tu propio castigo o mensaje.",motion:"Se necesita permiso para detectar movimiento y poder jugar.",shareText:"¡Juega a DON’T TOUCH conmigo! Last phone untouched wins.",copied:"¡Enlace copiado!",resultCopied:"¡Resultado copiado!",roomMissing:"Esta invitación ya no está activa.",connection:"No hay conexión con el servidor del juego. Inténtalo de nuevo.",players:"jugadores",minutes:"minutos sin móvil",modeNames:{party:"Fiesta",classroom:"Clase",meeting:"Reunión"}}
 };
 const EXTRA={
- nl:{stop:"STOP SPEL",stopped:"Het spel is gestopt door de organisator.",guestLobby:"Je bent verbonden",guestReady:"Wacht tot de organisator het spel start.",roundWait:"Wacht tot de organisator een nieuwe ronde start."},
- en:{stop:"STOP GAME",stopped:"The host stopped the game.",guestLobby:"You are connected",guestReady:"Wait for the host to start the game.",roundWait:"Wait for the host to start a new round."},
- fr:{stop:"ARRÊTER LA PARTIE",stopped:"L’organisateur a arrêté la partie.",guestLobby:"Vous êtes connecté",guestReady:"Attendez que l’organisateur lance la partie.",roundWait:"Attendez que l’organisateur lance une nouvelle manche."},
- de:{stop:"SPIEL BEENDEN",stopped:"Der Gastgeber hat das Spiel beendet.",guestLobby:"Du bist verbunden",guestReady:"Warte, bis der Gastgeber das Spiel startet.",roundWait:"Warte, bis der Gastgeber eine neue Runde startet."},
- es:{stop:"DETENER PARTIDA",stopped:"El anfitrión ha detenido la partida.",guestLobby:"Estás conectado",guestReady:"Espera a que el anfitrión inicie la partida.",roundWait:"Espera a que el anfitrión inicie una nueva ronda."}
+ nl:{stop:"STOP SPEL",stopped:"Het spel is gestopt door de organisator.",guestLobby:"Je bent verbonden",guestReady:"Wacht tot de organisator het spel start.",roundWait:"Wacht tot de organisator een nieuwe ronde start.",guestNoHost:"Dit toestel speelt mee als deelnemer. Alleen de organisator kan een spel maken of starten."},
+ en:{stop:"STOP GAME",stopped:"The host stopped the game.",guestLobby:"You are connected",guestReady:"Wait for the host to start the game.",roundWait:"Wait for the host to start a new round.",guestNoHost:"This device joined as a participant. Only the host can create or start a game."},
+ fr:{stop:"ARRÊTER LA PARTIE",stopped:"L’organisateur a arrêté la partie.",guestLobby:"Vous êtes connecté",guestReady:"Attendez que l’organisateur lance la partie.",roundWait:"Attendez que l’organisateur lance une nouvelle manche.",guestNoHost:"Cet appareil participe comme joueur. Seul l’organisateur peut créer ou lancer une partie."},
+ de:{stop:"SPIEL BEENDEN",stopped:"Der Gastgeber hat das Spiel beendet.",guestLobby:"Du bist verbunden",guestReady:"Warte, bis der Gastgeber das Spiel startet.",roundWait:"Warte, bis der Gastgeber eine neue Runde startet.",guestNoHost:"Dieses Gerät nimmt als Spieler teil. Nur der Gastgeber kann ein Spiel erstellen oder starten."},
+ es:{stop:"DETENER PARTIDA",stopped:"El anfitrión ha detenido la partida.",guestLobby:"Estás conectado",guestReady:"Espera a que el anfitrión inicie la partida.",roundWait:"Espera a que el anfitrión inicie una nueva ronda.",guestNoHost:"Este dispositivo participa como jugador. Solo el anfitrión puede crear o iniciar una partida."}
 };
 const PENALTIES={
 party:{nl:["trakteert de volgende ronde! 🍻","moet 30 seconden dansen zonder muziek 💃","moet de groep een compliment geven 😄","doet de volgende opdracht die de groep kiest 🎲"],en:["buys the next round! 🍻","has to dance for 30 seconds with no music 💃","must give the group a compliment 😄","does the next challenge chosen by the group 🎲"],fr:["offre la prochaine tournée ! 🍻","doit danser 30 secondes sans musique 💃","doit faire un compliment au groupe 😄","relève le prochain défi choisi par le groupe 🎲"],de:["gibt die nächste Runde aus! 🍻","muss 30 Sekunden ohne Musik tanzen 💃","muss der Gruppe ein Kompliment machen 😄","macht die nächste Aufgabe, die die Gruppe auswählt 🎲"],es:["¡invita a la próxima ronda! 🍻","tiene que bailar 30 segundos sin música 💃","debe hacer un cumplido al grupo 😄","hace el próximo reto que elija el grupo 🎲"]},
@@ -438,11 +438,18 @@ function clearError(){$("errorBox").style.display="none";$("errorBox").textConte
 function saveState(){localStorage.setItem(STORE,JSON.stringify({room,name,playerId,creator,settings}))}
 function clearState(){localStorage.removeItem(STORE)}
 const hostButtonIds=["start","stopLobby","stopActive","stopOver","stopSuccess","reset","successReset"];
+function locallyVerifiedHost(){return !!(creator&&playerId&&(!roomData||roomData?.meta?.hostId===playerId))}
+async function serverVerifiedHost(){
+ if(!creator||!room||!playerId)return false;
+ try{const snap=await get(ref(db,`rooms/${room}/meta/hostId`));return snap.exists()&&snap.val()===playerId}catch(e){return false}
+}
 function drawRoleControls(){
- hostButtonIds.forEach(id=>$(id).classList.toggle("hidden",!creator));
- $("lobbyTitle").textContent=creator?T[language].lobby:EXTRA[language].guestLobby;
- $("guestWait").textContent=creator?"":EXTRA[language].guestReady;
- ["overWait","successWait"].forEach(id=>{$(id).textContent=EXTRA[language].roundWait;$(id).classList.toggle("hidden",creator)});
+ const host=locallyVerifiedHost();
+ hostButtonIds.forEach(id=>$(id).classList.toggle("hidden",!host));
+ $("invite").classList.toggle("hidden",!host);
+ $("lobbyTitle").textContent=host?T[language].lobby:EXTRA[language].guestLobby;
+ $("guestWait").textContent=host?"":EXTRA[language].guestReady;
+ ["overWait","successWait"].forEach(id=>{$(id).textContent=EXTRA[language].roundWait;$(id).classList.toggle("hidden",host)});
 }
 function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
 function uid(){return crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,12)}
@@ -463,7 +470,7 @@ function paint(){
  if($("over").classList.contains("show")&&roomData?.game?.loserName)renderGameOver(roomData.game);
 }
 $("nl").onclick=()=>{language="nl";paint()};$("en").onclick=()=>{language="en";paint()};$("fr").onclick=()=>{language="fr";paint()};$("de").onclick=()=>{language="de";paint()};$("es").onclick=()=>{language="es";paint()};
-$("newGame").onclick=()=>{audio();show("setupName")};
+$("newGame").onclick=()=>{audio();if(localStorage.getItem(GUEST_LOCK)==="1"){$("stoppedTitle").textContent=EXTRA[language].guestNoHost;show("stopped");return}show("setupName")};
 $("toSetup").onclick=()=>{audio();name=$("creatorName").value.trim().slice(0,20);if(!name)return alert(T[language].needName);show("setup")};
 document.querySelectorAll(".mode").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll(".mode").forEach(x=>x.classList.remove("selected"));b.classList.add("selected");settings.mode=b.dataset.mode}));
 $("penaltyType").onchange=()=>{$("customPenalty").classList.toggle("hidden",$("penaltyType").value!=="custom")};
@@ -526,6 +533,7 @@ async function connect(){
  catch(e){showError(T[language].connection);return false}
 }
 $("create").onclick=async()=>{
+ if(localStorage.getItem(GUEST_LOCK)==="1"){$("stoppedTitle").textContent=EXTRA[language].guestNoHost;show("stopped");return}
  settings.duration=parseInt($("duration").value,10);settings.penaltyType=$("penaltyType").value;settings.customPenalty=$("customPenalty").value.trim().slice(0,120);
  if(settings.penaltyType==="custom"&&!settings.customPenalty)return alert(T[language].needPenalty);
  room=makeRoom();creator=true;playerId=uid();$("guestWait").textContent="";
@@ -547,7 +555,7 @@ $("joinGame").onclick=async()=>{audio();
    const snap=await get(roomRef());
    if(!snap.exists()){showError(T[language].roomMissing);return}
    const data=snap.val(); if(data.settings)settings={...settings,...data.settings};
-   if(await connect())history.replaceState(null,"",location.pathname+"?room="+encodeURIComponent(room));
+   if(await connect()){localStorage.setItem(GUEST_LOCK,"1");history.replaceState(null,"",location.pathname+"?room="+encodeURIComponent(room))}
  }catch(e){console.error(e);showError(T[language].connection)}
 };
 function drawSettings(){
@@ -561,6 +569,7 @@ function drawPlayers(){
  Object.values(players).filter(p=>p?.name).forEach(p=>{const d=document.createElement("div");d.className="player";d.textContent=p.name;box.appendChild(d)});
 }
 $("share").onclick=async()=>{
+ if(!(await serverVerifiedHost())){creator=false;drawRoleControls();return}
  const url=APP_URL+"?join="+encodeURIComponent(room),data={title:"DON’T TOUCH",text:T[language].shareText,url};
  try{if(navigator.share)await navigator.share(data);else{await navigator.clipboard.writeText(url);alert(T[language].copied)}}catch(e){}
 };
@@ -573,7 +582,7 @@ $("start").onclick=async()=>{
  audio();
  if(isIOS()){const ok=await requestMotionAccess();if(!ok)return;}
 
- if(busy||!creator)return;
+ if(busy||!(await serverVerifiedHost())){creator=false;drawRoleControls();return}
  startSound();
  currentPenalty=choosePenalty();const startAt=Date.now()+4000,endAt=startAt+settings.duration*60000,roundId=uid();
  $("start").disabled=true;
@@ -613,7 +622,7 @@ function updateGameTimer(){
  const total=Math.ceil(left/1000),m=Math.floor(total/60),s=total%60;$("gameTimer").textContent=String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
 }
 async function finishSuccessIfHost(){
- if(!creator)return;
+ if(!(await serverVerifiedHost()))return;
  try{await runTransaction(gameRef(),g=>g&&["countdown","active"].includes(g.status)?{...g,status:"success",finishedAt:Date.now()}:g)}
  catch(e){console.error(e)}
 }
@@ -659,9 +668,9 @@ function gameSuccess(){
 $("reset").onclick=()=>newRound();
 $("successReset").onclick=()=>newRound();
 async function newRound(){
- if(creator){
+ if(await serverVerifiedHost()){
    try{await set(gameRef(),{status:"lobby",roundId:uid(),resetAt:Date.now()})}catch(e){showError(T[language].connection)}
- }else resetLocal(false);
+ }
 }
 function resetLocal(showLobby=true){
  active=false;busy=false;clearInterval(gameInterval);clearInterval(countdownInterval);window.removeEventListener("devicemotion",checkMove,true);document.body.classList.remove("alarm");$("start").disabled=false;
@@ -669,7 +678,7 @@ function resetLocal(showLobby=true){
  if(creator)$("invite").classList.remove("hidden");else $("invite").classList.add("hidden");drawRoleControls();
 }
 async function stopGame(){
- if(!creator||!room)return;
+ if(!(await serverVerifiedHost())){creator=false;drawRoleControls();return}
  try{await set(gameRef(),{status:"stopped",roundId:uid(),stoppedAt:Date.now(),stoppedBy:playerId})}
  catch(e){showError(T[language].connection)}
 }
@@ -697,7 +706,7 @@ window.addEventListener("beforeunload",()=>{clearInterval(gameInterval);clearInt
  paint();
  const q=new URLSearchParams(location.search),joinRoom=q.get("join")||"",r=(joinRoom||q.get("room")||"").replace(/[^a-zA-Z0-9_-]/g,"").slice(0,80),forcedJoin=!!joinRoom;
  let saved=null;try{saved=JSON.parse(localStorage.getItem(STORE)||"null")}catch{}
- if(!r){show("home");return}
+ if(!r){if(localStorage.getItem(GUEST_LOCK)==="1"){$("stoppedTitle").textContent=EXTRA[language].guestNoHost;show("stopped")}else show("home");return}
  room=r;
  if(!forcedJoin&&saved&&saved.room===r&&saved.name&&saved.creator){
    name=saved.name;playerId=saved.playerId||uid();settings=saved.settings||settings;
