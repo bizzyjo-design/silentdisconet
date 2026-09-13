@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#050505">
-<title>DON'T TOUCH V11.5</title>
+<title>DON'T TOUCH</title>
 <style>
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -441,7 +441,11 @@ const hostButtonIds=["start","stopLobby","stopActive","stopOver","stopSuccess","
 function locallyVerifiedHost(){return !!(creator&&playerId&&(!roomData||roomData?.meta?.hostId===playerId))}
 async function serverVerifiedHost(){
  if(!creator||!room||!playerId)return false;
- try{const snap=await get(ref(db,`rooms/${room}/meta/hostId`));return snap.exists()&&snap.val()===playerId}catch(e){return false}
+ // The room listener already supplies the authoritative host id. Avoid a
+ // second network request on every button tap: in an iOS WebView that request
+ // can remain pending and make Share/Start appear completely unresponsive.
+ if(roomData?.meta?.hostId)return roomData.meta.hostId===playerId;
+ return locallyVerifiedHost();
 }
 function drawRoleControls(){
  const host=locallyVerifiedHost();
@@ -495,9 +499,19 @@ async function attachPresence(){
    await set(pRef,{name,joinedAt:serverTimestamp()});
  }catch(e){console.error(e);throw e}
 }
+async function keepHostRoomAlive(){
+ if(!creator||!room||!playerId)return;
+ await update(roomRef(),{
+   meta:{hostId:playerId,createdAt:roomData?.meta?.createdAt||serverTimestamp()},
+   settings
+ });
+}
 function applyRoomSnapshot(snap){
  roomData=snap.val();
- if(!roomData)return;
+ if(!roomData){
+   if(!creator)showError(T[language].roomMissing);
+   return;
+ }
  if(roomData.settings){settings={...settings,...roomData.settings};drawSettings()}
  drawPlayers();
  handleGame(roomData.game||null);
@@ -517,8 +531,10 @@ async function restoreConnection(){
  if(!room||!name||!playerId||document.visibilityState!=="visible")return;
  try{
    await ensureAnonymousAuth();
+   if(creator)await keepHostRoomAlive();
    listenRoom();
    await attachPresence();
+   await requestWake();
    clearError();
  }catch(e){console.error(e);showError(T[language].connection)}
 }
@@ -552,7 +568,12 @@ $("joinGame").onclick=async()=>{audio();
  playerId=uid();creator=false;clearError();
  try{
    await ensureAnonymousAuth();
-   const snap=await get(roomRef());
+   let snap=null;
+   for(let attempt=0;attempt<3;attempt++){
+     snap=await get(roomRef());
+     if(snap.exists())break;
+     if(attempt<2)await new Promise(resolve=>setTimeout(resolve,500));
+   }
    if(!snap.exists()){showError(T[language].roomMissing);return}
    const data=snap.val(); if(data.settings)settings={...settings,...data.settings};
    if(await connect()){localStorage.setItem(GUEST_LOCK,"1");history.replaceState(null,"",location.pathname+"?room="+encodeURIComponent(room))}
@@ -570,6 +591,8 @@ function drawPlayers(){
 }
 $("share").onclick=async()=>{
  if(!(await serverVerifiedHost())){creator=false;drawRoleControls();return}
+ try{await keepHostRoomAlive();await attachPresence();clearError()}
+ catch(e){console.error(e);showError(T[language].connection);return}
  const url=APP_URL+"?join="+encodeURIComponent(room),data={title:"DON’T TOUCH",text:T[language].shareText,url};
  try{if(navigator.share)await navigator.share(data);else{await navigator.clipboard.writeText(url);alert(T[language].copied)}}catch(e){}
 };
@@ -697,9 +720,6 @@ $("shareResult").onclick=async()=>{
  const t=T[language],count=Object.keys(roomData?.players||{}).length,text=`DON’T TOUCH — ${t.success} ${count} ${t.players}, ${settings.duration} ${t.minutes}.`;
  try{if(navigator.share)await navigator.share({title:"DON’T TOUCH",text});else{await navigator.clipboard.writeText(text);alert(t.resultCopied)}}catch(e){}
 };
-document.addEventListener("visibilitychange",async()=>{
- if(document.visibilityState==="visible"&&room&&name){await requestWake();try{await attachPresence()}catch(e){}}
-});
 window.addEventListener("beforeunload",()=>{clearInterval(gameInterval);clearInterval(countdownInterval);if(roomPollInterval)clearInterval(roomPollInterval);window.removeEventListener("devicemotion",checkMove,true);if(unsubscribeRoom)unsubscribeRoom()});
 
 (async function init(){
