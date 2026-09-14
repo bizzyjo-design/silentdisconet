@@ -309,6 +309,20 @@ body:after{
 <section id="stopped"><h1 id="stoppedTitle"></h1></section>
 </main>
 
+<div id="inviteGate" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.92);align-items:center;justify-content:center;padding:24px">
+  <div style="max-width:440px;width:100%;background:#17100b;border:1px solid rgba(255,170,70,.35);border-radius:22px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.5);text-align:center">
+    <h2 id="inviteGateTitle" style="margin:0 0 10px">Uitnodiging</h2>
+    <p id="inviteGateText" style="opacity:.86;line-height:1.45;margin:0 0 14px">Stuur deze link naar de spelers:</p>
+    <textarea id="inviteUrl" readonly style="min-height:88px;user-select:text;-webkit-user-select:text"></textarea>
+    <div class="stack" style="margin-top:14px">
+      <button id="nativeShare" class="btn">DEEL VIA TELEFOON</button>
+      <button id="copyInvite" class="btn secondary">KOPIEER LINK</button>
+      <button id="closeInvite" class="btn secondary">SLUITEN</button>
+    </div>
+    <div id="copyStatus" class="small"></div>
+  </div>
+</div>
+
 <script type="module">
 function isIOS(){
   return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform==="MacIntel" && navigator.maxTouchPoints>1);
@@ -357,7 +371,7 @@ async function requestMotionAccess(){
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
 import { getDatabase, ref, set, update, get, onValue, onDisconnect, remove, runTransaction, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
-import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+import { initializeAuth, inMemoryPersistence, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
 
 const firebaseConfig={
   apiKey:"AIzaSyB0cYb4an3BOdhF0XGBKWHsO8FStmVORKw",
@@ -368,11 +382,18 @@ const firebaseConfig={
   messagingSenderId:"431513667902",
   appId:"1:431513667902:web:a8131d2285a9715fdbc46f"
 };
-const app=initializeApp(firebaseConfig), db=getDatabase(app), auth=getAuth(app);
+const app=initializeApp(firebaseConfig), db=getDatabase(app), auth=initializeAuth(app,{persistence:inMemoryPersistence});
 let authReadyPromise=null;
+function withTimeout(promise,ms=12000){
+  let timer;
+  return Promise.race([
+    promise,
+    new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error("Firebase timeout")),ms)})
+  ]).finally(()=>clearTimeout(timer));
+}
 async function ensureAnonymousAuth(){
   if(auth.currentUser)return auth.currentUser;
-  if(!authReadyPromise)authReadyPromise=signInAnonymously(auth).then(r=>r.user).catch(e=>{authReadyPromise=null;throw e});
+  if(!authReadyPromise)authReadyPromise=withTimeout(signInAnonymously(auth)).then(r=>r.user).catch(e=>{authReadyPromise=null;throw e});
   return authReadyPromise;
 }
 const APP_URL="https://bizzyjo-design.github.io/silentdisconet/";
@@ -495,16 +516,16 @@ async function requestWake(){
 async function attachPresence(){
  const pRef=playerRef();
  try{
-   disconnectOp=onDisconnect(pRef); await disconnectOp.remove();
-   await set(pRef,{name,joinedAt:serverTimestamp()});
+   disconnectOp=onDisconnect(pRef); await withTimeout(disconnectOp.remove());
+   await withTimeout(set(pRef,{name,joinedAt:serverTimestamp()}));
  }catch(e){console.error(e);throw e}
 }
 async function keepHostRoomAlive(){
  if(!creator||!room||!playerId)return;
- await update(roomRef(),{
+ await withTimeout(update(roomRef(),{
    meta:{hostId:playerId,createdAt:roomData?.meta?.createdAt||serverTimestamp()},
    settings
- });
+ }));
 }
 function applyRoomSnapshot(snap){
  roomData=snap.val();
@@ -554,15 +575,20 @@ $("create").onclick=async()=>{
  if(settings.penaltyType==="custom"&&!settings.customPenalty)return alert(T[language].needPenalty);
  room=makeRoom();creator=true;playerId=uid();$("guestWait").textContent="";
  history.replaceState(null,"",location.pathname+"?room="+encodeURIComponent(room));
- show("lobby");$("invite").classList.remove("hidden");drawRoleControls();drawSettings();
  try{
    await ensureAnonymousAuth();
-   await set(roomRef(),{meta:{hostId:playerId,createdAt:serverTimestamp()},settings,game:{status:"lobby",roundId:uid()},players:{}});
+   const initialRoom={meta:{hostId:playerId,createdAt:serverTimestamp()},settings,game:{status:"lobby",roundId:uid()},players:{}};
+   await withTimeout(set(roomRef(),initialRoom));
+   roomData={meta:{hostId:playerId},settings,game:initialRoom.game,players:{}};
    if(!(await connect()))return;
+   $("invite").classList.remove("hidden");drawRoleControls();drawSettings();
  }catch(e){console.error(e);showError(T[language].connection)}
 };
 $("joinGame").onclick=async()=>{audio();
- if(isIOS()){const ok=await requestMotionAccess();if(!ok)return;}
+ if(isIOS()){
+   const ok=await withTimeout(requestMotionAccess(),10000).catch(()=>false);
+   if(!ok){showError(T[language].motion);return}
+ }
 
  name=$("joinName").value.trim().slice(0,20);if(!name)return alert(T[language].needName);
  playerId=uid();creator=false;clearError();
@@ -589,13 +615,40 @@ function drawPlayers(){
  const players=roomData?.players||{};
  Object.values(players).filter(p=>p?.name).forEach(p=>{const d=document.createElement("div");d.className="player";d.textContent=p.name;box.appendChild(d)});
 }
-$("share").onclick=async()=>{
- if(!(await serverVerifiedHost())){creator=false;drawRoleControls();return}
- try{await keepHostRoomAlive();await attachPresence();clearError()}
- catch(e){console.error(e);showError(T[language].connection);return}
- const url=APP_URL+"?join="+encodeURIComponent(room),data={title:"DON’T TOUCH",text:T[language].shareText,url};
- try{if(navigator.share)await navigator.share(data);else{await navigator.clipboard.writeText(url);alert(T[language].copied)}}catch(e){}
+function invitationData(){
+ const url=APP_URL+"?join="+encodeURIComponent(room);
+ return {url,data:{title:"DON’T TOUCH",text:T[language].shareText,url}};
+}
+function openInviteGate(){
+ const {url}=invitationData();
+ $("inviteUrl").value=url;$("copyStatus").textContent="";
+ $("inviteGateTitle").textContent=language==="nl"?"Uitnodiging":"Invitation";
+ $("inviteGateText").textContent=language==="nl"?"Stuur deze link naar de spelers:":"Send this link to the players:";
+ $("nativeShare").textContent=language==="nl"?"DEEL VIA TELEFOON":"SHARE VIA PHONE";
+ $("copyInvite").textContent=language==="nl"?"KOPIEER LINK":"COPY LINK";
+ $("closeInvite").textContent=language==="nl"?"SLUITEN":"CLOSE";
+ $("inviteGate").style.display="flex";
+}
+$("share").onclick=()=>{
+ if(!locallyVerifiedHost()){creator=false;drawRoleControls();return}
+ // Always show a usable link immediately. This works even when a native iOS
+ // WebView does not expose navigator.share or clipboard permissions.
+ openInviteGate();
+ keepHostRoomAlive().then(()=>attachPresence()).then(clearError).catch(e=>{console.error(e);showError(T[language].connection)});
 };
+$("nativeShare").onclick=()=>{
+ const {url,data}=invitationData(),native=window.Capacitor?.Plugins?.Share;
+ if(native?.share){native.share(data).catch(()=>{});return}
+ if(navigator.share){navigator.share(data).catch(()=>{});return}
+ $("inviteUrl").focus();$("inviteUrl").select();$("copyStatus").textContent=url;
+};
+$("copyInvite").onclick=async()=>{
+ const {url}=invitationData();let copied=false;
+ try{await navigator.clipboard.writeText(url);copied=true}catch{}
+ if(!copied){$("inviteUrl").focus();$("inviteUrl").select();try{copied=document.execCommand("copy")}catch{}}
+ $("copyStatus").textContent=copied?T[language].copied:(language==="nl"?"Houd de link hierboven ingedrukt en kies Kopieer.":"Press and hold the link above and choose Copy.");
+};
+$("closeInvite").onclick=()=>{$("inviteGate").style.display="none"};
 function choosePenalty(){
  if(settings.penaltyType==="custom")return {nl:settings.customPenalty,en:settings.customPenalty};
  const nl=PENALTIES[settings.mode].nl,en=PENALTIES[settings.mode].en,i=Math.floor(Math.random()*nl.length);
@@ -603,14 +656,18 @@ function choosePenalty(){
 }
 $("start").onclick=async()=>{
  audio();
- if(isIOS()){const ok=await requestMotionAccess();if(!ok)return;}
+ const originalLabel=T[language].start;
+ $("start").disabled=true;$("start").textContent=language==="nl"?"STARTEN…":"STARTING…";
+ if(isIOS()){
+   const ok=await withTimeout(requestMotionAccess(),10000).catch(()=>false);
+   if(!ok){$("start").disabled=false;$("start").textContent=originalLabel;showError(T[language].motion);return}
+ }
 
- if(busy||!(await serverVerifiedHost())){creator=false;drawRoleControls();return}
+ if(busy||!(await serverVerifiedHost())){creator=false;$("start").disabled=false;$("start").textContent=originalLabel;drawRoleControls();return}
  startSound();
  currentPenalty=choosePenalty();const startAt=Date.now()+4000,endAt=startAt+settings.duration*60000,roundId=uid();
- $("start").disabled=true;
- try{await set(gameRef(),{status:"countdown",roundId,startAt,endAt,penalty:currentPenalty,startedBy:playerId});}
- catch(e){$("start").disabled=false;showError(T[language].connection)}
+ try{await withTimeout(set(gameRef(),{status:"countdown",roundId,startAt,endAt,penalty:currentPenalty,startedBy:playerId}));}
+ catch(e){$("start").disabled=false;$("start").textContent=originalLabel;showError(T[language].connection)}
 };
 function handleGame(g){
  if(!g||!g.roundId||!name||!playerId)return;
@@ -702,8 +759,11 @@ function resetLocal(showLobby=true){
 }
 async function stopGame(){
  if(!(await serverVerifiedHost())){creator=false;drawRoleControls();return}
- try{await set(gameRef(),{status:"stopped",roundId:uid(),stoppedAt:Date.now(),stoppedBy:playerId})}
+ const buttons=[$("stopLobby"),$("stopActive"),$("stopOver"),$("stopSuccess")];
+ buttons.forEach(button=>button.disabled=true);
+ try{await withTimeout(set(gameRef(),{status:"stopped",roundId:uid(),stoppedAt:Date.now(),stoppedBy:playerId}))}
  catch(e){showError(T[language].connection)}
+ finally{buttons.forEach(button=>button.disabled=false)}
 }
 function handleStopped(){
  const wasCreator=creator;
