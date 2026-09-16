@@ -306,7 +306,7 @@ body:after{
 <section id="active"><div class="silence">🤫</div><div id="activeTitle" class="active-title"></div><div id="activeSub" class="active-subtitle"></div><div id="gameTimer" class="timer">00:00</div><button id="stopActive" class="btn secondary hidden" style="margin-top:20px"></button></section>
 <section id="over"><div class="alarm-icon">🚨</div><div id="alarmTitle"></div><div id="loser" class="loser"></div><div id="penalty" style="margin:14px 0 22px"></div><div class="stack"><button id="reset" class="btn hidden"></button><button id="stopOver" class="btn secondary hidden"></button><div id="overWait" class="small hidden"></div></div></section>
 <section id="success"><div class="win-icon">🏆</div><div id="successTitle" class="result-big"></div><div id="successDetail"></div><div class="stack" style="margin-top:20px"><button id="shareResult" class="btn"></button><button id="successReset" class="btn secondary hidden"></button><button id="stopSuccess" class="btn secondary hidden"></button><div id="successWait" class="small hidden"></div></div></section>
-<section id="stopped"><h1 id="stoppedTitle"></h1></section>
+<section id="stopped"><h1 id="stoppedTitle"></h1><button id="newFromStopped" class="btn" style="margin-top:20px"></button></section>
 </main>
 
 <div id="inviteGate" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.92);align-items:center;justify-content:center;padding:24px">
@@ -489,13 +489,20 @@ function paint(){
  $("timeLabel").textContent=t.time;$("penaltyLabel").textContent=t.penalty;$("penaltyType").options[0].text=t.random;$("penaltyType").options[1].text=t.custom;$("customPenalty").placeholder=t.customPh;$("create").textContent=t.create;
  $("joinTitle").textContent=t.joinTitle;$("joinName").placeholder=t.name;$("joinGame").textContent=t.join;$("joinHelp").textContent=t.joinHelp;
  $("lobbyTitle").textContent=t.lobby;$("share").textContent=t.share;$("shareHelp").textContent=t.shareHelp;$("start").textContent=t.start;$("guestWait").textContent=creator?"":t.guestWait;
- $("activeTitle").textContent=t.active;$("activeSub").textContent=t.activeSub;$("reset").textContent=t.reset;$("shareResult").textContent=t.shareResult;$("successReset").textContent=t.reset;
+ $("activeTitle").textContent=t.active;$("activeSub").textContent=t.activeSub;$("reset").textContent=t.reset;$("shareResult").textContent=t.shareResult;$("successReset").textContent=t.reset;$("newFromStopped").textContent=t.newGame;
  const x=EXTRA[language];["stopLobby","stopActive","stopOver","stopSuccess"].forEach(id=>$(id).textContent=x.stop);$("stoppedTitle").textContent=x.stopped;drawRoleControls();
  drawSettings();drawPlayers();
  if($("over").classList.contains("show")&&roomData?.game?.loserName)renderGameOver(roomData.game);
 }
 $("nl").onclick=()=>{language="nl";paint()};$("en").onclick=()=>{language="en";paint()};$("fr").onclick=()=>{language="fr";paint()};$("de").onclick=()=>{language="de";paint()};$("es").onclick=()=>{language="es";paint()};
-$("newGame").onclick=()=>{audio();if(localStorage.getItem(GUEST_LOCK)==="1"){$("stoppedTitle").textContent=EXTRA[language].guestNoHost;show("stopped");return}show("setupName")};
+function startFreshAsHost(){
+ localStorage.removeItem(GUEST_LOCK);clearState();
+ room="";name="";playerId="";creator=false;roomData=null;lastRoundId="";lastGameKey="";
+ history.replaceState(null,"",location.pathname+"?v=build7");
+ clearError();show("setupName");
+}
+$("newGame").onclick=()=>{audio();startFreshAsHost()};
+$("newFromStopped").onclick=()=>{audio();startFreshAsHost()};
 $("toSetup").onclick=()=>{audio();name=$("creatorName").value.trim().slice(0,20);if(!name)return alert(T[language].needName);show("setup")};
 document.querySelectorAll(".mode").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll(".mode").forEach(x=>x.classList.remove("selected"));b.classList.add("selected");settings.mode=b.dataset.mode}));
 $("penaltyType").onchange=()=>{$("customPenalty").classList.toggle("hidden",$("penaltyType").value!=="custom")};
@@ -570,7 +577,6 @@ async function connect(){
  catch(e){showError(T[language].connection);return false}
 }
 $("create").onclick=async()=>{
- if(localStorage.getItem(GUEST_LOCK)==="1"){$("stoppedTitle").textContent=EXTRA[language].guestNoHost;show("stopped");return}
  settings.duration=parseInt($("duration").value,10);settings.penaltyType=$("penaltyType").value;settings.customPenalty=$("customPenalty").value.trim().slice(0,120);
  if(settings.penaltyType==="custom"&&!settings.customPenalty)return alert(T[language].needPenalty);
  room=makeRoom();creator=true;playerId=uid();$("guestWait").textContent="";
@@ -786,7 +792,11 @@ window.addEventListener("beforeunload",()=>{clearInterval(gameInterval);clearInt
  paint();
  const q=new URLSearchParams(location.search),joinRoom=q.get("join")||"",r=(joinRoom||q.get("room")||"").replace(/[^a-zA-Z0-9_-]/g,"").slice(0,80),forcedJoin=!!joinRoom;
  let saved=null;try{saved=JSON.parse(localStorage.getItem(STORE)||"null")}catch{}
- if(!r){if(localStorage.getItem(GUEST_LOCK)==="1"){$("stoppedTitle").textContent=EXTRA[language].guestNoHost;show("stopped")}else show("home");return}
+ if(!r){
+   // A plain app/start URL is always an organizer entry point. A participant
+   // lock only belongs to invitation/room URLs and must never block a new game.
+   localStorage.removeItem(GUEST_LOCK);clearState();show("home");return;
+ }
  room=r;
  if(!forcedJoin&&saved&&saved.room===r&&saved.name&&saved.creator){
    name=saved.name;playerId=saved.playerId||uid();settings=saved.settings||settings;
