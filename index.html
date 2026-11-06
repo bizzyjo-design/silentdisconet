@@ -306,7 +306,17 @@ body:after{
 <section id="active"><div class="silence">🤫</div><div id="activeTitle" class="active-title"></div><div id="activeSub" class="active-subtitle"></div><div id="gameTimer" class="timer">00:00</div><button id="stopActive" class="btn secondary hidden" style="margin-top:20px"></button></section>
 <section id="over"><div class="alarm-icon">🚨</div><div id="alarmTitle"></div><div id="loser" class="loser"></div><div id="penalty" style="margin:14px 0 22px"></div><div class="stack"><button id="reset" class="btn hidden"></button><button id="stopOver" class="btn secondary hidden"></button><div id="overWait" class="small hidden"></div></div></section>
 <section id="success"><div class="win-icon">🏆</div><div id="successTitle" class="result-big"></div><div id="successDetail"></div><div class="stack" style="margin-top:20px"><button id="shareResult" class="btn"></button><button id="successReset" class="btn secondary hidden"></button><button id="stopSuccess" class="btn secondary hidden"></button><div id="successWait" class="small hidden"></div></div></section>
-<section id="stopped"><h1 id="stoppedTitle"></h1></section>
+<section id="stopped">
+  <h1 id="stoppedTitle"></h1>
+  <div class="panel" style="margin-top:20px">
+    <p id="hostOfferTitle"></p>
+    <p id="hostOfferNote" class="small"></p>
+    <div class="stack">
+      <a class="btn secondary" style="display:block;text-decoration:none;text-align:center" href="https://apps.apple.com/app/id6811052344" rel="noreferrer">App Store</a>
+      <a class="btn secondary" style="display:block;text-decoration:none;text-align:center" href="https://play.google.com/store/apps/details?id=com.bizzyjo.donttouch&amp;utm_source=guest_web&amp;utm_campaign=dt_host_after_game" rel="noreferrer">Google Play</a>
+    </div>
+  </div>
+</section>
 </main>
 
 <div id="inviteGate" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.92);align-items:center;justify-content:center;padding:24px">
@@ -480,7 +490,17 @@ function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;",
 function uid(){return crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,12)}
 function makeRoom(){const a=new Uint8Array(16);crypto.getRandomValues(a);return Array.from(a,b=>b.toString(16).padStart(2,"0")).join("")}
 function penaltyText(p=currentPenalty){return typeof p==="string"?p:(p?.[language]||p?.nl||p?.en||"")}
+const HOST_OFFER={
+ nl:["Zelf een spel organiseren?","Alleen de host koopt de app. Vrienden spelen gratis mee."],
+ en:["Want to host your own game?","Only the host buys the app. Friends join for free."],
+ fr:["Envie d’organiser votre partie ?","Seul l’hôte achète l’app. Les amis jouent gratuitement."],
+ de:["Ein eigenes Spiel starten?","Nur der Gastgeber kauft die App. Freunde spielen kostenlos mit."],
+ es:["¿Quieres organizar tu partida?","Solo el anfitrión compra la app. Los amigos juegan gratis."]
+};
 function paint(){
+ const [hostOfferTitle,hostOfferNote]=HOST_OFFER[language];
+ $("hostOfferTitle").textContent=hostOfferTitle;
+ $("hostOfferNote").textContent=hostOfferNote;
  const t=T[language];
  $("nl").classList.toggle("active",language==="nl");$("en").classList.toggle("active",language==="en");$("fr").classList.toggle("active",language==="fr");$("de").classList.toggle("active",language==="de");$("es").classList.toggle("active",language==="es");
  $("homeTitle").textContent=t.home;$("newGame").textContent=t.newGame;$("homeHelp").textContent=t.homeHelp;
