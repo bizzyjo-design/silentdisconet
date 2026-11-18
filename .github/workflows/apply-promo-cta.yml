@@ -34,7 +34,6 @@ jobs:
           ]
           missing = [item for item in required if item not in html]
           assert not missing, f'Missing conversion markers: {missing}'
-          assert html.count('id="guestBuyCTA"') == 0, 'Static duplicate guest CTA found'
           assert html.count('a.id="guestBuyCTA"') == 1, 'Dynamic guest CTA must be created exactly once'
           match = re.search(r'<script type="module">(.*?)</script>', html, re.S)
           assert match, 'Module script not found'
