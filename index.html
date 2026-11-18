@@ -397,6 +397,7 @@ async function ensureAnonymousAuth(){
   return authReadyPromise;
 }
 const APP_URL="https://bizzyjo-design.github.io/silentdisconet/";
+const BUY_URL="https://bizzyjo-design.github.io/silentdisconet/buy/donttouch/";
 const THRESHOLD=1.8, STORE="silentdisco_v8_state", GUEST_LOCK="donttouch_guest_device";
 let language="nl",name="",room="",playerId="",creator=false,wakeLock=null,unsubscribeRoom=null,disconnectOp=null,roomPollInterval=null,roomPollBusy=false;
 let active=false,busy=false,gameEndAt=0,gameInterval=null,countdownInterval=null,currentPenalty={nl:"",en:""},settings={mode:"party",duration:15,penaltyType:"random",customPenalty:""};
@@ -728,6 +729,20 @@ async function ownMove(){
    });
  }catch(e){console.error(e);showError(T[language].connection)}
 }
+function guestBuyLabel(){
+ const labels={nl:"ORGANISEER ZELF EEN RONDE",en:"HOST YOUR OWN ROUND",fr:"ORGANISEZ VOTRE PROPRE PARTIE",de:"STARTE DEINE EIGENE RUNDE",es:"ORGANIZA TU PROPIA RONDA"};
+ return labels[language]||labels.en;
+}
+function addGuestBuyCTA(sectionId){
+ const existing=document.getElementById("guestBuyCTA");if(existing)existing.remove();
+ if(creator)return;
+ const section=$(sectionId);if(!section)return;
+ const target=section.querySelector(".stack")||section;
+ const a=document.createElement("a");
+ a.id="guestBuyCTA";a.className="btn";a.href=BUY_URL;a.rel="noopener";a.textContent=guestBuyLabel();
+ a.style.display="block";a.style.textDecoration="none";a.style.marginTop="12px";
+ target.appendChild(a);
+}
 function renderGameOver(g){
  const loserName=g.loserName||"",t=T[language],ownLoss=loserName.toLowerCase()===name.toLowerCase();
  if(g.roundId!==lastVibratedRoundId&&typeof navigator.vibrate==="function"){
@@ -735,14 +750,14 @@ function renderGameOver(g){
    lastVibratedRoundId=g.roundId;
  }
  alarmSound();
- active=false;busy=false;px=py=pz=null;lastMove=0;sensorWarmupUntil=0;clearInterval(gameInterval);clearInterval(countdownInterval);window.removeEventListener("devicemotion",checkMove,true);show("over");document.body.classList.add("alarm");
+ active=false;busy=false;px=py=pz=null;lastMove=0;sensorWarmupUntil=0;clearInterval(gameInterval);clearInterval(countdownInterval);window.removeEventListener("devicemotion",checkMove,true);show("over");document.body.classList.add("alarm");addGuestBuyCTA("over");
  $("alarmTitle").textContent=ownLoss?t.you:t.other.replace("{name}",loserName.toUpperCase());
  $("loser").textContent=loserName.toUpperCase();$("penalty").textContent=loserName+" "+penaltyText(g.penalty);
  $("start").disabled=false;
 }
 function gameSuccess(){
  winSound();
- active=false;busy=false;clearInterval(gameInterval);clearInterval(countdownInterval);window.removeEventListener("devicemotion",checkMove,true);document.body.classList.remove("alarm");show("success");
+ active=false;busy=false;clearInterval(gameInterval);clearInterval(countdownInterval);window.removeEventListener("devicemotion",checkMove,true);document.body.classList.remove("alarm");show("success");addGuestBuyCTA("success");
  const t=T[language],count=Object.keys(roomData?.players||{}).length;$("successTitle").textContent=t.success;$("successDetail").textContent=count+" "+t.players+" • "+settings.duration+" "+t.minutes;$("start").disabled=false;
 }
 $("reset").onclick=()=>newRound();
@@ -773,11 +788,12 @@ function handleStopped(){
  if(disconnectOp)try{disconnectOp.cancel()}catch(e){}
  clearState();room="";playerId="";roomData=null;lastRoundId="";history.replaceState(null,"",location.pathname);
  if(wasCreator){creator=true;show("setup")}else{creator=false;show("stopped")}
+ if(!wasCreator)addGuestBuyCTA("stopped");
  drawRoleControls();
 }
 [$("stopLobby"),$("stopActive"),$("stopOver"),$("stopSuccess")].forEach(button=>button.onclick=stopGame);
 $("shareResult").onclick=async()=>{
- const t=T[language],count=Object.keys(roomData?.players||{}).length,text=`DON’T TOUCH — ${t.success} ${count} ${t.players}, ${settings.duration} ${t.minutes}.`;
+ const t=T[language],count=Object.keys(roomData?.players||{}).length,text=`DON’T TOUCH — ${t.success} ${count} ${t.players}, ${settings.duration} ${t.minutes}.\n${BUY_URL}`;
  try{if(navigator.share)await navigator.share({title:"DON’T TOUCH",text});else{await navigator.clipboard.writeText(text);alert(t.resultCopied)}}catch(e){}
 };
 window.addEventListener("beforeunload",()=>{clearInterval(gameInterval);clearInterval(countdownInterval);if(roomPollInterval)clearInterval(roomPollInterval);window.removeEventListener("devicemotion",checkMove,true);if(unsubscribeRoom)unsubscribeRoom()});
