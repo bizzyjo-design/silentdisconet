@@ -16,7 +16,34 @@ jobs:
       - uses: actions/checkout@v4
       - name: Patch live game
         run: python scripts/patch_donttouch_cta.py
+      - name: Validate guest conversion and JavaScript
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          html = Path('index.html').read_text(encoding='utf-8')
+          required = [
+              'const BUY_URL="https://bizzyjo-design.github.io/silentdisconet/buy/donttouch/";',
+              'function addGuestBuyCTA(sectionId)',
+              'addGuestBuyCTA("over")',
+              'addGuestBuyCTA("success")',
+              'addGuestBuyCTA("stopped")',
+              '${BUY_URL}`;',
+          ]
+          missing = [item for item in required if item not in html]
+          assert not missing, f'Missing conversion markers: {missing}'
+          assert html.count('id="guestBuyCTA"') == 0, 'Static duplicate guest CTA found'
+          assert html.count('a.id="guestBuyCTA"') == 1, 'Dynamic guest CTA must be created exactly once'
+          match = re.search(r'<script type="module">(.*?)</script>', html, re.S)
+          assert match, 'Module script not found'
+          Path('/tmp/donttouch.mjs').write_text(match.group(1), encoding='utf-8')
+          print('Required guest conversion markers found.')
+          PY
+          node --check /tmp/donttouch.mjs
       - name: Commit patch
+        shell: bash
         run: |
           if git diff --quiet -- index.html; then
             echo "No diff to commit."
