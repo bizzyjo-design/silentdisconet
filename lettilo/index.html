@@ -14,20 +14,199 @@
 .hint{display:block;width:100%;margin:0 0 14px;padding:11px 16px;border-radius:14px;background:rgba(17,111,93,.10);border:1px solid rgba(17,111,93,.35);color:#0e6151;font-weight:850;cursor:pointer}
 .hint:disabled{opacity:.55;cursor:default}
 .hint:focus-visible{outline:3px solid #125f51;outline-offset:2px}
+
+.languages{display:flex;justify-content:center;gap:4px;margin:0 auto 14px}.languages button{min-width:44px;min-height:36px;padding:6px 12px;border:1px solid rgba(21,60,51,.25);border-radius:999px;background:transparent;color:var(--ink);font:inherit;font-size:.78rem;font-weight:850;cursor:pointer}.languages button[aria-pressed=true]{background:var(--green);color:#fff}.languages button:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
 </style>
 </head>
 <body>
 <main>
-<header><div class="eyebrow">Gratis kennismakingspuzzel</div><div class="logo">LETTILO</div><div class="tag">Eén losse letter. Iedere ruil bepaalt je volgende zet.</div><div class="challenge">G + KOUD = ?</div><div class="subchallenge">Kun jij de volledige ketting rond krijgen?</div></header>
+<header><div class="languages" role="group" aria-label="Puzzle language / Puzzeltaal"><button type="button" data-lang="nl" aria-label="Nederlandse puzzel" aria-pressed="true">NL</button><button type="button" data-lang="en" aria-label="English puzzle" aria-pressed="false">EN</button></div><div class="eyebrow" data-copy="eyebrow">Gratis kennismakingspuzzel</div><div class="logo">LETTILO</div><div class="tag" data-copy="tagline">Eén losse letter. Iedere ruil bepaalt je volgende zet.</div><div class="challenge" data-copy="challenge">G + KOUD = ?</div><div class="subchallenge" data-copy="subchallenge">Kun jij de volledige ketting rond krijgen?</div></header>
 <section class="puzzle" aria-labelledby="puzzle-title">
-<div class="rule"><div><strong id="puzzle-title">Wissel precies één letter</strong><span>Tik op een letter in het actieve woord. De verwijderde letter wordt meteen je volgende losse letter.</span></div><div class="spare-wrap"><div class="spare-label">Losse letter</div><div id="spare" class="spare" aria-live="polite">G</div></div></div>
+<div class="rule"><div><strong id="puzzle-title" data-copy="ruleTitle">Wissel precies één letter</strong><span data-copy="ruleBody">Tik op een letter in het actieve woord. De verwijderde letter wordt meteen je volgende losse letter.</span></div><div class="spare-wrap"><div class="spare-label" data-copy="spareLabel">Losse letter</div><div id="spare" class="spare" aria-live="polite">G</div></div></div>
 <div id="status" class="status" aria-live="polite">Lees de eerste aanwijzing en wissel één letter.</div><button id="hint" class="hint" type="button" aria-controls="status">VRAAG EEN HINT</button><div id="rows"></div>
 <div class="progress"><span id="stepText">0 van 3 woorden opgelost</span><div class="dots"><span class="dot on"></span><span class="dot"></span><span class="dot"></span></div></div>
-<div id="complete" class="complete"><h2>De ketting is rond.</h2><p><strong>Klaar voor de volledige uitdaging?</strong><br>In LETTILO wachten 300 puzzels per taal.</p><div class="value"><span>10 talen</span><span>Offline</span><span>Geen advertenties</span><span>Geen account</span></div><div class="actions"><a id="iosStore" class="store" href="https://apps.apple.com/be/app/lettilo/id6823662830?ct=lettilo_trial&amp;mt=8" rel="noopener">KOOP VOOR IPHONE</a><a id="androidStore" class="store" href="https://play.google.com/store/apps/details?id=com.bizzyjo.lettilo&amp;hl=nl&amp;gl=BE&amp;utm_source=lettilo_trial&amp;utm_medium=web&amp;utm_campaign=free_trial" rel="noopener">KOOP VOOR ANDROID</a></div></div><button id="reset" class="reset" type="button">Speel de proef opnieuw</button>
-</section><div class="foot">LETTILO is een woordpuzzel van Bizzyjo Projects. Dit is een begeleide kennismaking: je lost de drie woorden in volgorde op. Hulp is optioneel; de volledige app heeft meer puzzels en oplossingen.</div>
+<div id="complete" class="complete"><h2 data-copy="completeTitle">De ketting is rond.</h2><p><strong data-copy="completeQuestion">Klaar voor de volledige uitdaging?</strong><br><span data-copy="completeBody">In LETTILO wachten 300 puzzels per taal.</span></p><div class="value"><span data-copy="valueLanguages">10 talen</span><span data-copy="valueOffline">Offline</span><span data-copy="valueNoAds">Geen advertenties</span><span data-copy="valueNoAccount">Geen account</span></div><div class="actions"><a id="iosStore" class="store" data-copy="buyIphone" href="https://apps.apple.com/be/app/lettilo/id6823662830?ct=lettilo_trial&amp;mt=8" rel="noopener">KOOP VOOR IPHONE</a><a id="androidStore" class="store" data-copy="buyAndroid" href="https://play.google.com/store/apps/details?id=com.bizzyjo.lettilo&amp;hl=nl&amp;gl=BE&amp;utm_source=lettilo_trial&amp;utm_medium=web&amp;utm_campaign=free_trial" rel="noopener">KOOP VOOR ANDROID</a></div></div><button id="reset" class="reset" type="button" data-copy="reset">Speel de proef opnieuw</button>
+</section><div class="foot" data-copy="footer">LETTILO is een woordpuzzel van Bizzyjo Projects. Dit is een begeleide kennismaking: je lost de drie woorden in volgorde op. Hulp is optioneel; de volledige app heeft meer puzzels en oplossingen.</div>
 </main>
 <script>
-(()=>{const puzzle={start:["KOUD","BAAS","DOEK"],targets:["GOUD","KAAS","BOEK"],held:"G",clues:["Geel edelmetaal voor sieraden","Zuivelproduct dat je in plakken op brood legt","Hierin lees je een verhaal met pagina’s"]};let words=[],held="G",step=0,hintStage=0;const rowsEl=document.getElementById("rows"),spareEl=document.getElementById("spare"),statusEl=document.getElementById("status"),hintBtn=document.getElementById("hint"),completeEl=document.getElementById("complete"),stepText=document.getElementById("stepText"),iosStore=document.getElementById("iosStore"),androidStore=document.getElementById("androidStore");const statuses=["Lees aanwijzing 1 en probeer één letterruil.","Goed! De K is je nieuwe losse letter. Lees aanwijzing 2.","Mooi! De B is je nieuwe losse letter. Nog één aanwijzing.","Je hebt alle drie de woorden gevonden!"];const isiOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);(isiOS?iosStore:androidStore).classList.add("primary");function render(){rowsEl.innerHTML="";words.forEach((word,rowIndex)=>{const row=document.createElement("div");row.className="row"+(rowIndex<step?" done":"");const clue=document.createElement("div");clue.className="clue";clue.textContent=`0${rowIndex+1}  ${puzzle.clues[rowIndex]}`;row.appendChild(clue);const wordEl=document.createElement("div");wordEl.className="word";[...word].forEach((letter,index)=>{const button=document.createElement("button");button.className="letter";button.type="button";button.textContent=letter;button.setAttribute("aria-label",`${letter}, positie ${index+1}`);button.disabled=rowIndex<step;button.addEventListener("click",()=>swap(rowIndex,index,row));wordEl.appendChild(button)});row.appendChild(wordEl);rowsEl.appendChild(row)});spareEl.textContent=held;statusEl.textContent=statuses[step];hintBtn.disabled=step===3;hintBtn.textContent="VRAAG EEN HINT";stepText.textContent=`${step} van 3 woorden opgelost`;document.querySelectorAll(".dot").forEach((dot,i)=>{dot.className="dot"+(i<step?" done":i===step?" on":"")});completeEl.classList.toggle("show",step===3);if(step===3)setTimeout(()=>completeEl.scrollIntoView({behavior:"smooth",block:"center"}),180)}function swap(rowIndex,index,rowEl){if(rowIndex!==step){statusEl.textContent=`Los eerst woord ${step+1} op.`;rowEl.classList.add("shake");setTimeout(()=>rowEl.classList.remove("shake"),340);return}const chars=[...words[rowIndex]],outgoing=chars[index];chars[index]=held;const candidate=chars.join("");if(candidate!==puzzle.targets[rowIndex]){statusEl.textContent="Dat woord past nog niet. Probeer een andere letter.";rowEl.classList.add("shake");setTimeout(()=>rowEl.classList.remove("shake"),340);return}words[rowIndex]=candidate;held=outgoing;step++;hintStage=0;spareEl.classList.add("flash");setTimeout(()=>spareEl.classList.remove("flash"),520);render()}function reset(){words=[...puzzle.start];held=puzzle.held;step=0;hintStage=0;completeEl.classList.remove("show");render();window.scrollTo({top:0,behavior:"smooth"})}function showHint(){if(step>=3)return;hintStage=Math.min(2,hintStage+1);if(hintStage===1){const current=words[step],target=puzzle.targets[step],index=[...current].findIndex((letter,i)=>letter!==target[i]);statusEl.textContent=`Hint 1: kijk naar letter ${index+1} van woord ${step+1}.`;hintBtn.textContent="NOG EEN HINT";}else{statusEl.textContent=`Hint 2: het gezochte woord is ${puzzle.targets[step]}.`;hintBtn.textContent="HINT GEZIEN";hintBtn.disabled=true;}}hintBtn.addEventListener("click",showHint);document.getElementById("reset").addEventListener("click",reset);reset()})();
+(() => {
+  const puzzles = {
+    nl: { start: ['KOUD', 'BAAS', 'DOEK'], targets: ['GOUD', 'KAAS', 'BOEK'], held: 'G', clues: ['Geel edelmetaal voor sieraden', 'Zuivelproduct dat je in plakken op brood legt', 'Hierin lees je een verhaal met pagina’s'] },
+    en: { start: ['COLD', 'BOAT', 'LOOK'], targets: ['GOLD', 'COAT', 'BOOK'], held: 'G', clues: ['A precious yellow metal used for jewellery', 'An outer garment that keeps you warm', 'Something with pages that you can read'] }
+  };
+  const copyNodes = [...document.querySelectorAll('[data-copy]')];
+  const dutch = Object.fromEntries(copyNodes.map(node => [node.dataset.copy, node.textContent]));
+  const english = {
+    eyebrow: 'Free introductory puzzle',
+    tagline: 'One spare letter. Every swap shapes your next move.',
+    challenge: 'G + COLD = ?',
+    subchallenge: 'Can you complete the whole word chain?',
+    ruleTitle: 'Swap exactly one letter',
+    ruleBody: 'Tap a letter in the active word. The letter you remove becomes your next spare letter.',
+    spareLabel: 'Spare letter',
+    completeTitle: 'The chain is complete.',
+    completeQuestion: 'Ready for the full challenge?',
+    completeBody: 'LETTILO has 300 puzzles per language.',
+    valueLanguages: '10 languages',
+    valueOffline: 'Offline',
+    valueNoAds: 'No ads',
+    valueNoAccount: 'No account',
+    buyIphone: 'BUY FOR IPHONE',
+    buyAndroid: 'BUY FOR ANDROID',
+    reset: 'Play the trial again',
+    footer: 'LETTILO is a word puzzle by Bizzyjo Projects. This is a guided introduction: solve the three words in order. Hints are optional; the full app includes more puzzles and solutions.'
+  };
+  const messages = {
+    nl: {
+      title: 'Speel LETTILO gratis — één letter zet alles in beweging',
+      description: 'Los gratis een volledige LETTILO-woordketting op. Eén losse letter. Iedere ruil bepaalt je volgende zet.',
+      status: ['Lees aanwijzing 1 en probeer één letterruil.', 'Goed! De K is je nieuwe losse letter. Lees aanwijzing 2.', 'Mooi! De B is je nieuwe losse letter. Nog één aanwijzing.', 'Je hebt alle drie de woorden gevonden!'],
+      position: 'positie', hint: 'VRAAG EEN HINT', anotherHint: 'NOG EEN HINT', seenHint: 'HINT GEZIEN',
+      progress: step => `${step} van 3 woorden opgelost`,
+      firstWord: step => `Los eerst woord ${step + 1} op.`,
+      wrongWord: 'Dat woord past nog niet. Probeer een andere letter.',
+      firstHint: (index, step) => `Hint 1: kijk naar letter ${index + 1} van woord ${step + 1}.`,
+      secondHint: word => `Hint 2: het gezochte woord is ${word}.`
+    },
+    en: {
+      title: 'Play LETTILO for free — one letter sets everything in motion',
+      description: 'Solve a complete LETTILO word chain for free. One spare letter. Every swap shapes your next move.',
+      status: ['Read clue 1 and try swapping one letter.', 'Great! C is your new spare letter. Read clue 2.', 'Well done! B is your new spare letter. One clue to go.', 'You found all three words!'],
+      position: 'position', hint: 'ASK FOR A HINT', anotherHint: 'ANOTHER HINT', seenHint: 'HINT SHOWN',
+      progress: step => `${step} of 3 words solved`,
+      firstWord: step => `Solve word ${step + 1} first.`,
+      wrongWord: 'That word does not fit yet. Try another letter.',
+      firstHint: (index, step) => `Hint 1: look at letter ${index + 1} of word ${step + 1}.`,
+      secondHint: word => `Hint 2: the word you need is ${word}.`
+    }
+  };
+  let language = 'nl', puzzle = puzzles.nl, words = [], held = 'G', step = 0, hintStage = 0;
+  let completionTimer;
+  const rowsEl = document.getElementById('rows');
+  const spareEl = document.getElementById('spare');
+  const statusEl = document.getElementById('status');
+  const hintBtn = document.getElementById('hint');
+  const completeEl = document.getElementById('complete');
+  const stepText = document.getElementById('stepText');
+  const iosStore = document.getElementById('iosStore');
+  const androidStore = document.getElementById('androidStore');
+  const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  (isiOS ? iosStore : androidStore).classList.add('primary');
+
+  function render() {
+    const text = messages[language];
+    rowsEl.innerHTML = '';
+    words.forEach((word, rowIndex) => {
+      const row = document.createElement('div');
+      row.className = 'row' + (rowIndex < step ? ' done' : '');
+      const clue = document.createElement('div');
+      clue.className = 'clue';
+      clue.textContent = `0${rowIndex + 1}  ${puzzle.clues[rowIndex]}`;
+      row.appendChild(clue);
+      const wordEl = document.createElement('div');
+      wordEl.className = 'word';
+      [...word].forEach((letter, index) => {
+        const button = document.createElement('button');
+        button.className = 'letter';
+        button.type = 'button';
+        button.textContent = letter;
+        button.setAttribute('aria-label', `${letter}, ${text.position} ${index + 1}`);
+        button.disabled = rowIndex < step;
+        button.addEventListener('click', () => swap(rowIndex, index, row));
+        wordEl.appendChild(button);
+      });
+      row.appendChild(wordEl);
+      rowsEl.appendChild(row);
+    });
+    spareEl.textContent = held;
+    statusEl.textContent = text.status[step];
+    hintBtn.disabled = step === 3;
+    hintBtn.textContent = text.hint;
+    stepText.textContent = text.progress(step);
+    document.querySelectorAll('.dot').forEach((dot, i) => {
+      dot.className = 'dot' + (i < step ? ' done' : i === step ? ' on' : '');
+    });
+    completeEl.classList.toggle('show', step === 3);
+    clearTimeout(completionTimer);
+    if (step === 3) completionTimer = setTimeout(() => completeEl.scrollIntoView({ behavior: 'smooth', block: 'center' }), 180);
+  }
+  function swap(rowIndex, index, rowEl) {
+    const text = messages[language];
+    if (rowIndex !== step) {
+      statusEl.textContent = text.firstWord(step);
+      rowEl.classList.add('shake');
+      setTimeout(() => rowEl.classList.remove('shake'), 340);
+      return;
+    }
+    const chars = [...words[rowIndex]], outgoing = chars[index];
+    chars[index] = held;
+    const candidate = chars.join('');
+    if (candidate !== puzzle.targets[rowIndex]) {
+      statusEl.textContent = text.wrongWord;
+      rowEl.classList.add('shake');
+      setTimeout(() => rowEl.classList.remove('shake'), 340);
+      return;
+    }
+    words[rowIndex] = candidate;
+    held = outgoing;
+    step++;
+    hintStage = 0;
+    spareEl.classList.add('flash');
+    setTimeout(() => spareEl.classList.remove('flash'), 520);
+    render();
+  }
+  function reset() {
+    clearTimeout(completionTimer);
+    words = [...puzzle.start];
+    held = puzzle.held;
+    step = 0;
+    hintStage = 0;
+    completeEl.classList.remove('show');
+    render();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  function showHint() {
+    if (step >= 3) return;
+    const text = messages[language];
+    hintStage = Math.min(2, hintStage + 1);
+    if (hintStage === 1) {
+      const current = words[step], target = puzzle.targets[step];
+      const index = [...current].findIndex((letter, i) => letter !== target[i]);
+      statusEl.textContent = text.firstHint(index, step);
+      hintBtn.textContent = text.anotherHint;
+    } else {
+      statusEl.textContent = text.secondHint(puzzle.targets[step]);
+      hintBtn.textContent = text.seenHint;
+      hintBtn.disabled = true;
+    }
+  }
+  function setLanguage(nextLanguage, updateUrl = false) {
+    language = nextLanguage === 'nl' ? 'nl' : 'en';
+    puzzle = puzzles[language];
+    const text = language === 'nl' ? dutch : english;
+    document.documentElement.lang = language;
+    document.title = messages[language].title;
+    document.querySelector('meta[name=description]').setAttribute('content', messages[language].description);
+    copyNodes.forEach(node => { node.textContent = text[node.dataset.copy]; });
+    document.querySelectorAll('[data-lang]').forEach(button => {
+      button.setAttribute('aria-pressed', String(button.dataset.lang === language));
+    });
+    if (updateUrl) {
+      const url = new URL(location.href);
+      url.searchParams.set('lang', language);
+      history.replaceState(null, '', url);
+    }
+    reset();
+  }
+  hintBtn.addEventListener('click', showHint);
+  document.getElementById('reset').addEventListener('click', reset);
+  document.querySelectorAll('[data-lang]').forEach(button => {
+    button.addEventListener('click', () => setLanguage(button.dataset.lang, true));
+  });
+  const requestedLanguage = new URLSearchParams(location.search).get('lang');
+  const browserLanguage = (navigator.language || 'en').toLowerCase().startsWith('nl') ? 'nl' : 'en';
+  setLanguage(requestedLanguage === 'nl' || requestedLanguage === 'en' ? requestedLanguage : browserLanguage);
+})();
 </script>
 </body>
 </html>
