@@ -22,9 +22,9 @@
     button,summary,a { -webkit-tap-highlight-color: transparent; }
     a:focus-visible,button:focus-visible,summary:focus-visible { outline: 3px solid #fff; outline-offset: 5px; }
     .wrap { max-width: 960px; margin: 0 auto; }
-    .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
     .brand { font-size: .9rem; font-weight: 800; letter-spacing: .04em; }
-    .languages { display: flex; padding: 3px; border: 1px solid #ffffff26; border-radius: 999px; }
+    .languages { display: flex; flex-shrink: 0; padding: 3px; border: 1px solid #ffffff26; border-radius: 999px; }
     .languages button { min-width: 40px; min-height: 36px; padding: 6px 10px; border: 0; border-radius: 999px; background: transparent; color: #c9c6d2; font: inherit; font-size: .78rem; font-weight: 800; cursor: pointer; }
     .languages button[aria-pressed="true"] { background: #f6f3ed; color: #17121d; }
     .hero { max-width: 700px; margin: 42px 0 28px; }
@@ -71,6 +71,9 @@
       <div class="languages" role="group" aria-label="Language / Taal">
         <button type="button" data-lang="nl" aria-label="Nederlands" aria-pressed="true">NL</button>
         <button type="button" data-lang="en" aria-label="English" aria-pressed="false">EN</button>
+        <button type="button" data-lang="de" aria-label="Deutsch" aria-pressed="false">DE</button>
+        <button type="button" data-lang="fr" aria-label="Français" aria-pressed="false">FR</button>
+        <button type="button" data-lang="es" aria-label="Español" aria-pressed="false">ES</button>
       </div>
     </div>
     <header class="hero">
@@ -173,8 +176,8 @@
         unlatchBody: 'Turn the jewel, slide the latches and discover the right sequence. Each mechanism holds a new challenge.',
         unlatchBenefit1: '160 puzzles: 40 jewel puzzles and 120 Master Puzzles.',
         unlatchBenefit2: 'Play offline, without ads.', unlatchBenefit3: 'One purchase. No subscription or in-app purchases.',
-        unlatchBuy: 'Buy UNLATCH', unlatchWatch: 'Watch the promo', unlatchVideoLabel: 'UNLATCH promo in Dutch',
-        unlatchCaption: 'Discover the jewels and their mechanical puzzles. This promo is in Dutch.',
+        unlatchBuy: 'Buy UNLATCH', unlatchWatch: 'Watch the promo', unlatchVideoLabel: 'UNLATCH promo in English',
+        unlatchCaption: 'Discover the jewels and their mechanical puzzles. This promo is in English.',
         donttouchFor: 'For your group of friends', donttouchHook: 'Who will move their phone first?',
         donttouchBody: 'Put your phones down and challenge each other. Move your phone and you lose the round — with a funny challenge to complete.',
         donttouchBenefit1: 'Only the host buys the app.',
@@ -187,19 +190,198 @@
         trust: 'Buy through the official Apple App Store or Google Play, where you can see the current price for your country. Choose your app; on your phone we open the matching store.',
         support: 'Need help?', privacy: 'Privacy'
       };
+      const additionalLanguages = {
+  "de": {
+    "platforms": "Für iPhone und Android",
+    "headline1": "Rätsel für dich.",
+    "headline2": "Spielspaß mit Freunden.",
+    "intro": "Drei Spiele, drei verschiedene Herausforderungen. Finde deinen Favoriten, sieh dir die Videos an und wähle deine App.",
+    "navLabel": "Wähle dein Spiel",
+    "appsLabel": "Unsere Apps",
+    "jumpLettilo": "Ich mag Worträtsel",
+    "jumpUnlatch": "Ich will ein Geheimnis lösen",
+    "jumpDonttouch": "Ich spiele mit Freunden",
+    "lettiloFor": "Für alle, die Wörter lieben",
+    "lettiloHook": "Ein Buchstabe setzt alles in Bewegung.",
+    "lettiloBody": "Tausche einen Buchstaben in einem Wort. Der entfernte Buchstabe wird dein nächster Zug. Kannst du die ganze Wortkette lösen?",
+    "lettiloBenefit1": "300 Rätsel pro Sprache, in zehn Sprachen.",
+    "lettiloBenefit2": "Spiele offline, wann es dir passt.",
+    "lettiloBenefit3": "Keine Werbung. Kein Konto nötig.",
+    "lettiloBuy": "LETTILO kaufen",
+    "lettiloTry": "Kostenloses Rätsel spielen (auf Englisch)",
+    "lettiloWatch": "Promo ansehen · 10 Sek.",
+    "lettiloVideoLabel": "LETTILO-Promo auf Niederländisch",
+    "lettiloCaption": "Sieh den Buchstabentausch in Aktion. Dieses Video ist auf Niederländisch.",
+    "unlatchFor": "Für neugierige Rätselfans",
+    "unlatchHook": "Wie befreist du den Edelstein?",
+    "unlatchBody": "Drehe das Juwel, verschiebe die Riegel und finde die richtige Reihenfolge. Jeder Mechanismus birgt eine neue Herausforderung.",
+    "unlatchBenefit1": "160 Rätsel: 40 Juwelenrätsel und 120 Master-Rätsel.",
+    "unlatchBenefit2": "Offline spielen, ohne Werbung.",
+    "unlatchBenefit3": "Einmal kaufen. Kein Abo und keine In-App-Käufe.",
+    "unlatchBuy": "UNLATCH kaufen",
+    "unlatchWatch": "Promo ansehen",
+    "unlatchVideoLabel": "UNLATCH-Promo auf Deutsch",
+    "unlatchCaption": "Entdecke die Juwelen und ihre mechanischen Rätsel. Dieses Video ist auf Deutsch.",
+    "donttouchFor": "Für deine Freundesgruppe",
+    "donttouchHook": "Wer bewegt sein Handy zuerst?",
+    "donttouchBody": "Legt eure Handys hin und fordert euch heraus. Wer sein Handy bewegt, verliert die Runde und bekommt eine lustige Aufgabe.",
+    "donttouchBenefit1": "Nur der Gastgeber kauft die App.",
+    "donttouchBenefit2": "Freunde spielen über einen Einladungslink kostenlos mit.",
+    "donttouchBenefit3": "Gäste brauchen weder eine App-Installation noch ein Konto.",
+    "donttouchBuy": "DON’T TOUCH kaufen",
+    "donttouchInternet": "Alle Spieler benötigen eine Internetverbindung.",
+    "donttouchWatch": "Promo ansehen · 22 Sek.",
+    "donttouchVideoLabel": "DON’T TOUCH-Promo auf Niederländisch",
+    "donttouchCaption": "Vier Freunde am Tisch. Promo mit einer KI-generierten Szene und echten App-Aufnahmen.",
+    "filmOpen": "Video separat öffnen",
+    "trust": "Du kaufst im offiziellen Apple App Store oder bei Google Play. Dort siehst du den aktuellen Preis für dein Land. Wähle deine App; auf deinem Handy öffnen wir den passenden Store.",
+    "support": "Brauchst du Hilfe?",
+    "privacy": "Datenschutz"
+  },
+  "fr": {
+    "platforms": "Pour iPhone et Android",
+    "headline1": "Des énigmes pour soi.",
+    "headline2": "Des défis entre amis.",
+    "intro": "Trois jeux, trois défis différents. Trouvez celui qui vous plaît, regardez les vidéos et choisissez votre application.",
+    "navLabel": "Choisissez votre jeu",
+    "appsLabel": "Nos applications",
+    "jumpLettilo": "J’aime les jeux de mots",
+    "jumpUnlatch": "Je veux résoudre un mystère",
+    "jumpDonttouch": "Je joue avec mes amis",
+    "lettiloFor": "Pour les amateurs de mots",
+    "lettiloHook": "Une lettre met tout en mouvement.",
+    "lettiloBody": "Remplacez une lettre dans un mot. La lettre retirée devient votre prochain coup. Saurez-vous résoudre toute la chaîne de mots ?",
+    "lettiloBenefit1": "300 énigmes par langue, dans dix langues.",
+    "lettiloBenefit2": "Jouez hors ligne, quand vous le souhaitez.",
+    "lettiloBenefit3": "Sans publicité. Sans compte.",
+    "lettiloBuy": "Acheter LETTILO",
+    "lettiloTry": "Essayer une énigme gratuite (en anglais)",
+    "lettiloWatch": "Voir la vidéo · 10 s",
+    "lettiloVideoLabel": "Vidéo promotionnelle de LETTILO en néerlandais",
+    "lettiloCaption": "Découvrez les échanges de lettres en action. Cette vidéo est en néerlandais.",
+    "unlatchFor": "Pour les esprits curieux",
+    "unlatchHook": "Comment libérerez-vous la pierre ?",
+    "unlatchBody": "Faites pivoter le joyau, déplacez les loquets et trouvez le bon ordre. Chaque mécanisme réserve un nouveau défi.",
+    "unlatchBenefit1": "160 énigmes : 40 énigmes de joyaux et 120 énigmes Master.",
+    "unlatchBenefit2": "Jouez hors ligne, sans publicité.",
+    "unlatchBenefit3": "Un seul achat. Sans abonnement ni achats intégrés.",
+    "unlatchBuy": "Acheter UNLATCH",
+    "unlatchWatch": "Voir la vidéo",
+    "unlatchVideoLabel": "Vidéo promotionnelle d’UNLATCH en français",
+    "unlatchCaption": "Découvrez les joyaux et leurs mécanismes. Cette vidéo est en français.",
+    "donttouchFor": "Pour votre groupe d’amis",
+    "donttouchHook": "Qui bougera son téléphone en premier ?",
+    "donttouchBody": "Posez vos téléphones et défiez-vous. Celui qui bouge son téléphone perd la manche et reçoit un défi amusant.",
+    "donttouchBenefit1": "Seul l’hôte achète l’application.",
+    "donttouchBenefit2": "Les amis jouent gratuitement grâce à un lien d’invitation.",
+    "donttouchBenefit3": "Les invités n’ont besoin ni d’installer l’application ni de créer un compte.",
+    "donttouchBuy": "Acheter DON’T TOUCH",
+    "donttouchInternet": "Tous les joueurs ont besoin d’une connexion Internet.",
+    "donttouchWatch": "Voir la vidéo · 22 s",
+    "donttouchVideoLabel": "Vidéo promotionnelle de DON’T TOUCH en néerlandais",
+    "donttouchCaption": "Quatre amis autour d’une table. Vidéo avec une scène générée par IA et de vraies images de l’application.",
+    "filmOpen": "Ouvrir la vidéo séparément",
+    "trust": "Achetez sur l’App Store d’Apple ou sur Google Play. Le prix actuel pour votre pays y est affiché. Choisissez votre application ; sur votre téléphone, nous ouvrons la boutique correspondante.",
+    "support": "Besoin d’aide ?",
+    "privacy": "Confidentialité"
+  },
+  "es": {
+    "platforms": "Para iPhone y Android",
+    "headline1": "Puzles para ti.",
+    "headline2": "Retos entre amigos.",
+    "intro": "Tres juegos, tres retos diferentes. Encuentra tu favorito, mira los vídeos y elige tu aplicación.",
+    "navLabel": "Elige tu juego",
+    "appsLabel": "Nuestras aplicaciones",
+    "jumpLettilo": "Me gustan los juegos de palabras",
+    "jumpUnlatch": "Quiero resolver un misterio",
+    "jumpDonttouch": "Juego con amigos",
+    "lettiloFor": "Para amantes de las palabras",
+    "lettiloHook": "Una letra lo pone todo en marcha.",
+    "lettiloBody": "Cambia una letra de una palabra. La letra que quitas se convierte en tu siguiente jugada. ¿Puedes resolver toda la cadena de palabras?",
+    "lettiloBenefit1": "300 puzles por idioma, en diez idiomas.",
+    "lettiloBenefit2": "Juega sin conexión, cuando quieras.",
+    "lettiloBenefit3": "Sin anuncios. Sin cuenta.",
+    "lettiloBuy": "Comprar LETTILO",
+    "lettiloTry": "Prueba gratis un puzle (en inglés)",
+    "lettiloWatch": "Ver el vídeo · 10 s",
+    "lettiloVideoLabel": "Vídeo promocional de LETTILO en neerlandés",
+    "lettiloCaption": "Mira cómo se intercambian las letras. Este vídeo está en neerlandés.",
+    "unlatchFor": "Para mentes curiosas",
+    "unlatchHook": "¿Cómo liberarás la gema?",
+    "unlatchBody": "Gira la joya, desliza los cierres y descubre el orden correcto. Cada mecanismo plantea un nuevo reto.",
+    "unlatchBenefit1": "160 puzles: 40 puzles de joyas y 120 puzles Master.",
+    "unlatchBenefit2": "Juega sin conexión y sin anuncios.",
+    "unlatchBenefit3": "Un solo pago. Sin suscripciones ni compras dentro de la aplicación.",
+    "unlatchBuy": "Comprar UNLATCH",
+    "unlatchWatch": "Ver el vídeo",
+    "unlatchVideoLabel": "Vídeo promocional de UNLATCH en español",
+    "unlatchCaption": "Descubre las joyas y sus mecanismos. Este vídeo está en español.",
+    "donttouchFor": "Para tu grupo de amigos",
+    "donttouchHook": "¿Quién moverá su teléfono primero?",
+    "donttouchBody": "Dejen sus teléfonos sobre la mesa y compitan. Quien mueva su teléfono pierde la ronda y recibe un reto divertido.",
+    "donttouchBenefit1": "Solo el anfitrión compra la aplicación.",
+    "donttouchBenefit2": "Los amigos juegan gratis mediante un enlace de invitación.",
+    "donttouchBenefit3": "Los invitados no necesitan instalar la aplicación ni crear una cuenta.",
+    "donttouchBuy": "Comprar DON’T TOUCH",
+    "donttouchInternet": "Todos los jugadores necesitan conexión a Internet.",
+    "donttouchWatch": "Ver el vídeo · 22 s",
+    "donttouchVideoLabel": "Vídeo promocional de DON’T TOUCH en neerlandés",
+    "donttouchCaption": "Cuatro amigos alrededor de una mesa. Vídeo con una escena generada por IA e imágenes reales de la aplicación.",
+    "filmOpen": "Abrir el vídeo por separado",
+    "trust": "Compra en la App Store de Apple o en Google Play. Allí verás el precio actual para tu país. Elige tu aplicación; en tu teléfono abriremos la tienda correspondiente.",
+    "support": "¿Necesitas ayuda?",
+    "privacy": "Privacidad"
+  }
+};
       const copyNodes = [...document.querySelectorAll('[data-copy]')];
       const labelNodes = [...document.querySelectorAll('[data-label]')];
       const dutch = Object.fromEntries(copyNodes.map(node => [node.dataset.copy, node.textContent]));
       labelNodes.forEach(node => { dutch[node.dataset.label] = node.getAttribute('aria-label'); });
-      function setLanguage(language) {
-        const translations = language === 'en' ? english : dutch;
+      const dictionaries = { nl: dutch, en: english, ...additionalLanguages };
+      const supportedLanguages = ['nl', 'en', 'de', 'fr', 'es'];
+      const unlatchVideos = {
+        nl: 'https://static.metricool.com/video/6046543/202611/f42467ddc7414e06.mp4',
+        en: 'https://static.metricool.com/planner/202611/7737402-file-15265261129579411366.mp4',
+        de: 'https://static.metricool.com/video/6046543/202611/7e9af88e563749c6.mp4',
+        fr: 'https://static.metricool.com/video/6046543/202611/6475b486bb334d38.mp4',
+        es: 'https://static.metricool.com/video/6046543/202611/45a28362682248ee.mp4'
+      };
+      function updateUnlatchVideo(language) {
+        const video = document.querySelector('#unlatch video');
+        const source = unlatchVideos[language];
+        document.querySelector('#unlatch .film-link').href = source;
+        if (video.dataset.src === source) return;
+        video.pause();
+        video.dataset.src = source;
+        if (video.closest('details').open) {
+          video.src = source;
+          video.preload = 'metadata';
+          video.load();
+        } else if (video.getAttribute('src')) {
+          video.removeAttribute('src');
+          video.preload = 'none';
+          video.load();
+        }
+      }
+      function setLanguage(language, updateUrl = false) {
+        if (!supportedLanguages.includes(language)) language = 'en';
+        const translations = dictionaries[language];
         document.documentElement.lang = language;
         copyNodes.forEach(node => { node.textContent = translations[node.dataset.copy] || dutch[node.dataset.copy]; });
         labelNodes.forEach(node => { node.setAttribute('aria-label', translations[node.dataset.label] || dutch[node.dataset.label]); });
         document.querySelectorAll('[data-lang]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.lang === language)));
+        document.querySelector('[data-copy=lettiloTry]').href = '../lettilo/?lang=' + (language === 'nl' ? 'nl' : 'en');
+        updateUnlatchVideo(language);
+        if (updateUrl) {
+          const url = new URL(location.href);
+          url.searchParams.set('lang', language);
+          history.replaceState(null, '', url);
+        }
       }
-      document.querySelectorAll('[data-lang]').forEach(button => button.addEventListener('click', () => setLanguage(button.dataset.lang)));
-      setLanguage((navigator.language || 'nl').toLowerCase().startsWith('nl') ? 'nl' : 'en');
+      document.querySelectorAll('[data-lang]').forEach(button => button.addEventListener('click', () => setLanguage(button.dataset.lang, true)));
+      const requestedLanguage = new URLSearchParams(location.search).get('lang');
+      const browserLanguage = (navigator.language || 'en').toLowerCase().split('-')[0];
+      setLanguage(supportedLanguages.includes(requestedLanguage) ? requestedLanguage : (supportedLanguages.includes(browserLanguage) ? browserLanguage : 'en'));
       document.querySelectorAll('details').forEach(details => {
         details.addEventListener('toggle', () => {
           const video = details.querySelector('video');
@@ -216,3 +398,4 @@
   </script>
 </body>
 </html>
+
